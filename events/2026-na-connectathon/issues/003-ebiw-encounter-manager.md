@@ -65,8 +65,22 @@ One VNA vendor's scenario now; any EBIW Acquisition Modality that needs a RAD-13
 - **VNA:** 10.242.1.11, AE `SYNVNA`, port 4000. Reachable from this Mac (TCP open); a C-ECHO
   with calling AE `ENC_MGR` was rejected at association, which is normal for a VNA that only
   accepts known calling AEs. Not needed for the Encounter Manager role.
-- **Gazelle test:** https://connectathon.ihe-catalyst.net/tm/testing/testsDefinition/viewTestPage.seam?id=13478
-  (login required; text not yet captured). The vendor's VNA is registered as **Lightweight
+- **Gazelle test:** EBIW_35_Full_Workflow-RESTful, id 13478, peer-to-peer, version EU2020
+  (https://connectathon.ihe-catalyst.net/tm/test.seam?id=13478; PDF in `docs/tests/`). Roles:
+  ENCOUNTER_MGR-EBIW, IM-EBIW, MOD-EBIW, RESULT_AGGREGATOR-EBIW, one each. **the monitor's Gazelle
+  system (DDX) is registered as Encounter Manager and Result Aggregator**; the VNA vendor is
+  MOD-EBIW (Lightweight Modality) and IM-EBIW. Steps: 20 RAD-130 UPS-RS GET workitems →
+  EM; 40 RAD-131 STOW-RS → IM; 50 RAD-132 ORU^R01 → Result Aggregator; 55 ACK (original
+  mode, MSA-1 AA, MSA-2 = MSH-10); 60/65 optional ORU → EM + ACK. All partners must go
+  through the Gazelle Proxy or attach captures. EM prerequisite: EBIW_10_Read_This_First
+  (patients and encounters). IM prerequisite: EBIW_90_RAD-132-Scrutiny.
+  **Monitor checklist (from the test):** watch the modality query and store (nothing to
+  verify), then at the Result Aggregator confirm the ORU carries, from the worklist: Patient
+  ID + assigning authority (PID-3), Patient Name (PID-5), Accession + assigning authority
+  (OBR-18/19), Study Instance UID (OBX-5), Procedure Code (OBR-4); and that the Aggregator
+  "does something more than ACK" (our stand-in writes the raw ORU and a key-field summary
+  line to `logs/`). Step 20 says the EM "should tell the Modality what query parameters will
+  result in a match": see the query line in Next action. The vendor's VNA is registered as **Lightweight
   Modality**, which means RAD-130 **UPS-RS semantics**, not MWL (47.1.1.2). They do not have
   UPS-RS yet and are coding it. Supplement open issue Q1 (p.7): committee published UPS-RS for
   the RESTful path, FHIR still being worked; POCUS community prefers MWL. So the stand-in now
@@ -103,8 +117,12 @@ to `logs/encounter-manager/<session>/`.
 ## Next action
 1. Build and loopback-test `tools/mwl_scp.py`. **Done.** Add UPS-RS (`tools/ups_rs.py`),
    loopback-tested incl. shared accession with the MWL side. **Done.**
-2. Get the Gazelle test name and the code set; edit `samples/encounters.json` to match the
-   test's patient/encounter data (Gazelle usually prescribes the patient).
+2. Export EBIW_10_Read_This_First from Gazelle (same "print test as pdf" route) and load its
+   patients/encounters/codes into `samples/encounters.json`.
+2b. Query line to hand the modality vendor (matches DOE^JANE / VISIT0001 today):
+    `GET http://10.242.1.184:8042/workitems?PatientID=MRN12345&ScheduledStationNameCodeSequence.CodeValue=<their station id>&ScheduledStationClassCodeSequence.CodeValue=XC`
+    or by wristband: `AdmissionID=VISIT0001`. Through the proxy, replace host:port with the
+    proxy channel Gazelle assigns.
 3. Give the modality vendor: AE title `ENC_MGR`, this Mac's floor IP, port 11112.
 4. After the first real query: read the dumped identifier against the matching-key table and
    the response against the return-key table; confirm the stored images at the VNA carry the

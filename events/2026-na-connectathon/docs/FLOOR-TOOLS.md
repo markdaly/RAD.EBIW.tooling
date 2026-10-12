@@ -15,7 +15,8 @@ Re-check Zulip for changes; this snapshot is from Mon Oct 12 ~noon ET.
 | GSS legacy CA (id 643, RSA-1024, **not** the floor CA) and its CRL | https://connectathon.ihe-catalyst.net/pki/crl/643/cacrl.crl (ignore) |
 | GSS TLS server simulators (list, with ports) | https://connectathon.ihe-catalyst.net/gss/server/listServers.seam |
 | GSS simulator host (the only SAN name that resolves) | `gazelle-tools.ihe-europe.net` = 151.80.220.161 |
-| Gazelle Proxy | proxy.ihe-europe.net / 192.168.2.5 (enabled for Connectathon and Plugathon sessions) |
+| Gazelle Proxy | proxy.ihe-europe.net / 192.168.2.5 (enabled for Connectathon and Plugathon sessions); reachable from the 10.242.1.0/24 floor subnet |
+| Gazelle Message Capture (proxy messages) | https://connectathon.ihe-catalyst.net/gazelle/message-capture/messages |
 | NIST DEV/PCD tool (devices) | https://ihe-pcd.ihe-catalyst.net/pcdtool/#/home ("Context-free" tab: /#/cf) |
 
 **Note:** the old `gazelle.ihe.net` host is deprecated (the Gazelle maintainers confirmed). It still resolves

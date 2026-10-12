@@ -106,7 +106,7 @@ def summarize(msg: bytes) -> str:
         i = n - 1 if seg == "MSH" else n  # MSH-1 is the separator, so MSH indexes shift by one
         return s[i] if i < len(s) else "-"
     return (f"MSH-9={g('MSH',9)} MSH-10={g('MSH',10)} MSH-12={g('MSH',12)} "
-            f"PID-3={g('PID',3)} PV1-19={g('PV1',19)} OBR-4={g('OBR',4)} "
+            f"PID-3={g('PID',3)} PID-5={g('PID',5)} PV1-19={g('PV1',19)} OBR-4={g('OBR',4)} "
             f"OBR-18={g('OBR',18)} OBR-19={g('OBR',19)} OBR-25={g('OBR',25)} OBX-5(1st)={g('OBX',5)}")
 
 

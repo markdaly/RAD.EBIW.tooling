@@ -41,6 +41,13 @@
   - No RAD-132 for training studies (4.132.4.1.1.1). One notification per study when the
     completeness criteria are met; addenda may trigger another.
 
+## Gazelle test context (added 16:20 ET)
+EBIW_35_Full_Workflow-RESTful (id 13478, `docs/tests/`) step 50/55: IM-EBIW → RESULT_AGGREGATOR-EBIW
+ORU^R01, ACK AA with MSA-2 = MSH-10. Monitor checks at the Aggregator: PID-3 with assigning
+authority, PID-5, OBR-18 with assigning authority, OBX-5 Study UID, OBR-4, all matching the
+worklist the EM served. the monitor's Gazelle system (DDX) is the registered Result Aggregator, so
+the proxy channel for port 2575 comes from that system's configuration.
+
 ## Scope
 One POCUS Manager vendor now; any EBIW Image Manager or POCUS Manager that needs a RAD-132
 partner this week.
