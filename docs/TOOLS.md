@@ -40,6 +40,12 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
    Test SCU: `tools/mwl_find.py <host> <port> <AE> [PatientID] [AdmissionID]`.
    Codes in the sample are PLACEHOLDERS until `EBIW_10_Read_This_First` is pulled from Gazelle.
    Ticket: `tickets/003-ebiw-encounter-manager.md`.
+   **ups_rs.py** — **BUILT 2026-10-12** (`tools/ups_rs.py`): the same Encounter Manager over
+   UPS-RS (RAD-130 UPS-RS semantics for Lightweight Modalities, mapping Table 4.130.4.1.2.2-1).
+   FastAPI `GET /workitems?...` → `application/dicom+json`, 204 on no match; dotted keys for
+   sequences; shares encounters and `state.json` with `mwl_scp.py` so DIMSE and REST hand out the
+   same accession per (Admission ID, station). Run:
+   `uv run --with pynetdicom --with pydicom --with fastapi --with uvicorn python tools/ups_rs.py` (port 8042).
 4. **store_scp.py**: pynetdicom C-STORE SCP (+ optional Storage Commitment N-ACTION /
    N-EVENT-REPORT). Writes files + `dcmdump`-style header log. Minimal Image Manager receive side.
 5. **qr_scp.py**: C-FIND/C-MOVE over a folder of files written by store_scp (Image Manager

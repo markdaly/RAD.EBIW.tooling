@@ -3,6 +3,23 @@
 One entry per working session, newest first. Each ends with where the next session starts.
 Tickets live in `tickets/`; this is the cross-ticket record.
 
+## 2026-10-12 (Mon, day 1), fifth session: UPS-RS for the Encounter Manager
+
+- Gazelle test 13478 (login needed, text not captured): the VNA vendor is a **Lightweight
+  Modality**, so RAD-130 must be UPS-RS; they have no UPS-RS client yet. Built
+  `tools/ups_rs.py` (FastAPI, `GET /workitems`, dicom+json, 204 on no match, dotted sequence
+  keys, Table 4.130.4.1.2.2-1 mapping), sharing encounters and `state.json` with
+  `mwl_scp.py`. Loopback: shape, dotted accession match, per-station accession, 204,
+  wildcard + datetime range, tag-form keys, and the MWL side returning the same accession
+  for the same (admission, station). All pass.
+- Both Encounter Manager halves run in terminal tabs: MWL 11112 `ENC_MGR`, UPS-RS 8042.
+- Tickets renumbered to `NNN-slug` at the monitor's request (autocomplete); convention updated in
+  CLAUDE.md, README, TROUBLESHOOTING-PROTOCOL.
+- Result Aggregator still live on 2575; Gazelle proxy access still being chased.
+
+**Next session starts:** capture the 13478 test text and the code set; watch for the first
+the VNA vendor query on either port; proxy in front of the Result Aggregator when access arrives.
+
 ## 2026-10-12 (Mon, day 1), fourth session: live Result Aggregator, Encounter Manager stand-in
 
 - Result Aggregator went live on this Mac (10.242.1.184:2575). Vendor probe 15:05, first

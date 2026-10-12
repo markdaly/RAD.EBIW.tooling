@@ -65,6 +65,8 @@ def log(line):
 def context_for(admission_id, calling_ae):
     """One accession + Study UID per (admission, device), forever (RAD TF-1 47.1.1.1)."""
     key = f"{admission_id}|{calling_ae}"
+    if STATE_FILE.exists():  # ups_rs.py shares this file; re-read so both hand out the same pair
+        state.update(json.loads(STATE_FILE.read_text()))
     if key not in state:
         n = len(state) + 1
         state[key] = {"accession": f"{PREFIX}{datetime.now().strftime('%y%m%d')}{n:04d}",

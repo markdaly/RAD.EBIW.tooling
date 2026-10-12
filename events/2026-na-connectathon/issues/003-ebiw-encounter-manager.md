@@ -3,7 +3,7 @@
 - **Source:** floor request via the monitor, Oct 12 afternoon. A VNA vendor's EBIW test scenario needs
   an Encounter Manager partner. No Zulip thread yet.
 - **Opened:** 2026-10-12 ~15:30 ET
-- **Status:** open (stand-in running on 10.242.1.184:11112 AE `ENC_MGR` since 15:41 ET; waiting for the first query)
+- **Status:** open (MWL on 10.242.1.184:11112 `ENC_MGR` since 15:41 ET; UPS-RS on http://10.242.1.184:8042/workitems since 16:05 ET; waiting for the first query)
 - **Domain / profile / actor / transaction:** RAD EBIW (TI rev 3.1, 2025-06-19) / Encounter
   Manager, POCUS Option / RAD-130 Get Encounter Imaging Context (MWL semantics); RAD-132
   Notify of Imaging Results as optional Responder
@@ -65,7 +65,18 @@ One VNA vendor's scenario now; any EBIW Acquisition Modality that needs a RAD-13
 - **VNA:** 10.242.1.11, AE `SYNVNA`, port 4000. Reachable from this Mac (TCP open); a C-ECHO
   with calling AE `ENC_MGR` was rejected at association, which is normal for a VNA that only
   accepts known calling AEs. Not needed for the Encounter Manager role.
-- Gazelle test name still to be read off the vendor's handwritten note.
+- **Gazelle test:** https://connectathon.ihe-catalyst.net/tm/testing/testsDefinition/viewTestPage.seam?id=13478
+  (login required; text not yet captured). The vendor's VNA is registered as **Lightweight
+  Modality**, which means RAD-130 **UPS-RS semantics**, not MWL (47.1.1.2). They do not have
+  UPS-RS yet and are coding it. Supplement open issue Q1 (p.7): committee published UPS-RS for
+  the RESTful path, FHIR still being worked; POCUS community prefers MWL. So the stand-in now
+  serves both: `tools/mwl_scp.py` (DIMSE) for whatever they can test today, `tools/ups_rs.py`
+  (REST) for when their client exists.
+- UPS-RS endpoint for the vendor: `GET http://10.242.1.184:8042/workitems?<keys>`; station
+  identity via `ScheduledStationNameCodeSequence.CodeValue=<their id>`, modality via
+  `ScheduledStationClassCodeSequence.CodeValue=XC|US`; response is a JSON array of UPS
+  instances with Accession / Issuer / Requested Procedure inside Referenced Request Sequence
+  (0040,A370) and Study Instance UID both there and at top level.
 
 ## Evidence so far
 - Supplement text (rev 3.1) sections quoted above.
@@ -78,7 +89,8 @@ restart does not hand out new accessions). Every C-FIND identifier and every res
 to `logs/encounter-manager/<session>/`.
 
 ## Missing evidence
-- [ ] Which Gazelle test instance: name/number and which actor the VNA is registered as.
+- [x] Gazelle test id 13478; VNA registered as Lightweight Modality (+ Image Manager). Test text
+      still to capture (the monitor logs into Gazelle in the browser pane, or pastes it).
 - [x] Querying system 10.242.1.17 (POCUS Manager box); VNA 10.242.1.11 `SYNVNA` 4000. Calling AE
       title and modality code will show up in the first query dump.
 - [ ] `EBIW_10_Read_This_First` code set from Gazelle (department type code, procedure code,
@@ -89,7 +101,8 @@ to `logs/encounter-manager/<session>/`.
       came in by a different route).
 
 ## Next action
-1. Build and loopback-test `tools/mwl_scp.py`. **Done, see Resolution.**
+1. Build and loopback-test `tools/mwl_scp.py`. **Done.** Add UPS-RS (`tools/ups_rs.py`),
+   loopback-tested incl. shared accession with the MWL side. **Done.**
 2. Get the Gazelle test name and the code set; edit `samples/encounters.json` to match the
    test's patient/encounter data (Gazelle usually prescribes the patient).
 3. Give the modality vendor: AE title `ENC_MGR`, this Mac's floor IP, port 11112.
@@ -98,4 +111,4 @@ to `logs/encounter-manager/<session>/`.
    accession, Issuer of Accession, Study UID and Admission ID that were returned.
 
 ## Resolution
-_Open._ Tool built 2026-10-12; waiting on test name, code set, and the modality's AE.
+_Open._ MWL and UPS-RS stand-ins running since 2026-10-12 afternoon; waiting on the vendor's first query (DIMSE now, REST once their client exists), the test text, and the code set.
