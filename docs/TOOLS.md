@@ -62,6 +62,10 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
    (C-STORE a test set, MPPS N-CREATE/N-SET).
 9. **tlscheck.sh**: wraps the openssl commands in TLS-CERTS.md for a host:port + root bundle.
 
+**Log watching:** `tools/logwatch.sh <actor>` tails every `logs/<actor>/*/summary.log` and
+picks up new session folders; `tools/newfiles.sh` lists the newest raw captures. Both live in
+the tmux session `ihe-logs` (see CONNECTIONS.md).
+
 ## Libraries
 - pydicom / pynetdicom: https://pydicom.github.io/pynetdicom/
 - python-hl7 (parsing + MLLP client): https://python-hl7.readthedocs.io/

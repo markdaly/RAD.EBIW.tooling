@@ -54,3 +54,12 @@ Message Capture (https://connectathon.ihe-catalyst.net/gazelle/message-capture/m
 
 ## Not reachable from here (off-floor paths checked Oct 12)
 GSS syslog collector 3102/3202 timed out from this Mac; GSS TLS simulators at 151.80.220.161 are reachable.
+
+## Watching it all: tmux session `ihe-logs`
+`tmux attach -t ihe-logs` (or `tmux switch-client -t ihe-logs` from inside tmux). Three panes:
+Result Aggregator summary, Encounter Manager summary (MWL + ADT + UPS-RS write to the same
+folder), newest raw captures + state counts. Scripts: `tools/logwatch.sh <actor>` (follows new
+session folders after a restart), `tools/newfiles.sh`. Recreate with:
+```bash
+tmux new-session -d -s ihe-logs -n logs "tools/logwatch.sh result-aggregator"; tmux split-window -t ihe-logs -v "tools/logwatch.sh encounter-manager"; tmux split-window -t ihe-logs -h "tools/newfiles.sh"; tmux select-layout -t ihe-logs main-horizontal
+```
