@@ -19,7 +19,7 @@ Config (env vars):
   ACTOR         log folder name, default result-aggregator
   LOG_DIR       default ./logs
   ACK_APP       MSH-3 of the ACK, default RESULT_AGGREGATOR
-  ACK_FACILITY  MSH-4 of the ACK, default IHE_NA2026
+  ACK_FACILITY  MSH-4 of the ACK, default SIMULATOR (Gazelle convention for monitor-run senders)
   TLS_CERT / TLS_KEY   PEM server identity; both set => MLLPS (TLS 1.2+)
   TLS_CA        PEM CA bundle; if set, client certificate is REQUIRED (ATNA mutual TLS)
                 Note: a client that fails the TLS handshake never reaches this code, so it
@@ -39,7 +39,7 @@ HOST = os.environ.get("LISTEN_HOST", "0.0.0.0")
 PORT = int(os.environ.get("LISTEN_PORT", "2575"))
 ACTOR = os.environ.get("ACTOR", "result-aggregator")
 ACK_APP = os.environ.get("ACK_APP", "RESULT_AGGREGATOR")
-ACK_FAC = os.environ.get("ACK_FACILITY", "IHE_NA2026")
+ACK_FAC = os.environ.get("ACK_FACILITY", "SIMULATOR")
 SESSION_DIR = Path(os.environ.get("LOG_DIR", "logs")) / ACTOR / datetime.now().strftime("%Y%m%d-%H%M%S")
 SESSION_DIR.mkdir(parents=True, exist_ok=True)
 SUMMARY = SESSION_DIR / "summary.log"
