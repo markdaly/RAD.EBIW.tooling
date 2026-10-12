@@ -9,6 +9,8 @@ so a device gets the same accession whether it asks over DIMSE or REST (key = Ad
 station name / AE title). Run both, or just this one.
 
   GET {BASE_PATH}/workitems?<attribute>=<value>&...  -> 200 application/dicom+json [ {...}, ... ]
+  (also served at every path in ROUTES, default "/workitems,/studies": some clients are
+   configured with a DICOMweb-style root and append /studies; same UPS body either way)
                                                       -> 204 when nothing matches
   Query keys: any DICOM keyword or 8-hex tag, dotted for sequences
   (e.g. PatientID=MRN1, AdmissionID=V1, ReferencedRequestSequence.AccessionNumber=EM...,
@@ -17,7 +19,7 @@ station name / AE title). Run both, or just this one.
   includefield / fuzzymatching / offset / limit are accepted; the full workitem is always returned.
   Every request (URL + headers) and response body is written to logs/encounter-manager/<session>/.
 
-Config (env): LISTEN_PORT default 8042, BASE_PATH default "" (so /workitems), plus everything
+Config (env): LISTEN_PORT default 8042, BASE_PATH default "", ROUTES default "/workitems,/studies", plus everything
 mwl_scp.py reads (ENCOUNTERS, ACCESSION_ISSUER, ACCESSION_PREFIX, UID_ROOT, LOG_DIR).
 TLS_CERT + TLS_KEY turn on HTTPS.
 
@@ -40,6 +42,7 @@ import mwl_scp as em  # encounters, context_for(), worklist_item(), log(), SESSI
 
 PORT = int(os.environ.get("LISTEN_PORT", "8042"))
 BASE = os.environ.get("BASE_PATH", "").rstrip("/")
+ROUTES = [r.strip() for r in os.environ.get("ROUTES", "/workitems,/studies").split(",") if r.strip()]
 CID29 = {"US": "Ultrasound", "XC": "External-camera Photography", "OT": "Other", "SC": "Secondary Capture"}  # PS3.16 CID 29 subset
 app = FastAPI(title="EBIW Encounter Manager (UPS-RS)")
 counter = 0
@@ -130,7 +133,6 @@ def matches(u, params):
     return True
 
 
-@app.get(BASE + "/workitems")
 def search(request: Request):
     global counter
     counter += 1
@@ -159,8 +161,11 @@ def search(request: Request):
     return Response(content=body, media_type="application/dicom+json")
 
 
+for _route in ROUTES:
+    app.add_api_route(BASE + _route, search, methods=["GET"])
+
 if __name__ == "__main__":
-    em.log(f"Encounter Manager UPS-RS on port {PORT}, path {BASE}/workitems; "
+    em.log(f"Encounter Manager UPS-RS on port {PORT}, paths {', '.join(BASE + r for r in ROUTES)}; "
            f"{len(em.encounters())} encounters; issuer={em.ISSUER} prefix={em.PREFIX}")
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="warning",
                 ssl_certfile=os.environ.get("TLS_CERT"), ssl_keyfile=os.environ.get("TLS_KEY"))
