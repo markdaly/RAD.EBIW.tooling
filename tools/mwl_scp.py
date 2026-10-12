@@ -302,7 +302,7 @@ class ADTHandler(socketserver.StreamRequestHandler):
                     code = "AR"
                     log(f"ITI-31 from {peer}: no PID/PV1-19, rejected (AR) file={stem}.in.hl7")
                 trig = msh[8].split("^")[1] if "^" in msh[8] else ""
-                ack = (f"MSH|^~\\&|{AE_TITLE}|SIMULATOR|{msh[2]}|{msh[3]}|{datetime.now().strftime('%Y%m%d%H%M%S')}||"
+                ack = (f"MSH|^~\\&|SIMULATOR|SIMULATOR|{msh[2]}|{msh[3]}|{datetime.now().strftime('%Y%m%d%H%M%S')}||"
                        f"ACK^{trig}^ACK|ACK{datetime.now().strftime('%H%M%S%f')}|{msh[10] or 'P'}|{msh[11] or '2.5'}\r"
                        f"MSA|{code}|{msh[9]}\r").encode("latin-1")
                 (SESSION_DIR / f"{stem}.ack.hl7").write_bytes(ack)

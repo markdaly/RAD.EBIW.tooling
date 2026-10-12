@@ -1,9 +1,26 @@
 # Floor connections (NA 2026, EBIW), as of Oct 12 16:20 ET
 
-the monitor's Mac = **10.242.1.184** (Gazelle SUT "DDX": Encounter Manager + Result Aggregator).
+the monitor's Mac = **10.242.1.184**, Gazelle hostname **ddx0** (`ddx0.na2026.net`), organization DDx, system
+**TOOL_DDx** (Encounter Manager + Result Aggregator). Gazelle configurations approved and proxy
+ports assigned 16:40 ET (Gazelle TM → Configurations, org DDx).
 Tests: 13478 EBIW_35_Full_Workflow-RESTful (ticket 003), 13884 EBIW_POCUS_Simple_Workflow (ticket 004).
-Proxy: `proxy.ihe-europe.net` = 192.168.2.5; proxy ports assigned per configuration in Gazelle TM
-(not yet created). Until then vendors hit the Mac directly.
+Proxy: `proxy.ihe-europe.net` = 192.168.2.5. **Vendors target the proxy port below, not the Mac.**
+
+## Gazelle configurations for TOOL_DDx (what vendors see) and proxy ports
+
+| Gazelle type | Actor | Host / IP | Real port | **Proxy port** | Details (as registered) |
+|---|---|---|---|---|---|
+| HL7 V2 Responder | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 2576 | **11064** | receiving app/facility `SIMULATOR / SIMULATOR` (ITI-31 in) |
+| Dicom SCP | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 11112 | **11065** | AE `ENC_MGR`, MWL |
+| Webservice | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 8042 | **11066** | RAD-130 (UPS-RS), URL `http://ddx0:8042/studies`, HTTP rewrite disabled |
+| HL7 V2 Responder | RESULT_AGGREGATOR | ddx0 / 10.242.1.184 | 2575 | **11067** | receiving app/facility `SIMULATOR / SIMULATOR` (RAD-132 in) |
+
+All four approved, none secured (plain MLLP / DICOM / HTTP). Vendor-side targets therefore:
+- RAD-132 ORU → `proxy.ihe-europe.net:11067`, MSH-5/6 = `SIMULATOR`/`SIMULATOR`
+- ITI-31 ADT → `proxy.ihe-europe.net:11064` (our own step-10 send goes there too, so it is captured)
+- RAD-130 MWL → `proxy.ihe-europe.net:11065`, called AE `ENC_MGR`
+- RAD-130 UPS-RS → `http://proxy.ihe-europe.net:11066/studies?...`
+Our ACKs and the ITI-31 sample carry MSH-3/4 = `SIMULATOR`/`SIMULATOR` to match the registration.
 
 ## Listeners on the Mac (stand-ins)
 
@@ -18,7 +35,7 @@ Proxy: `proxy.ihe-europe.net` = 192.168.2.5; proxy ports assigned per configurat
 
 | Target | Proto | Transaction | Test step | Command |
 |---|---|---|---|---|
-| Encounter Manager stand-in 10.242.1.184:2576 (and the vendor POCUS Manager if it accepts ADT) | MLLP | ITI-31 ADT^A04 | 13884 step 10 | `uv run python tools/mllp_send.py samples/ADT_A04_ITI-31.hl7 10.242.1.184 2576` |
+| Encounter Manager stand-in via proxy `proxy.ihe-europe.net:11064` (and the vendor POCUS Manager if it accepts ADT) | MLLP | ITI-31 ADT^A04 | 13884 step 10 | `uv run python tools/mllp_send.py samples/ADT_A04_ITI-31.hl7 proxy.ihe-europe.net 11064` |
 | Any vendor Encounter Manager | DICOM C-FIND | RAD-130 check | ad hoc | `uv run --with pynetdicom --with pydicom python tools/mwl_find.py <host> <port> <AE> [PatientID] [AdmissionID]` |
 
 ## Vendor endpoints (one VNA vendor, two systems)
@@ -29,18 +46,11 @@ Proxy: `proxy.ihe-europe.net` = 192.168.2.5; proxy ports assigned per configurat
 | VNA | 10.242.1.11 | `SYNVNA` : 4000 | Lightweight Modality (MOD-EBIW in 13478), IM-EBIW | RAD-130 UPS-RS → 8042 (13478 step 20); RAD-132 → 2575 (13478 step 50). C-ECHO from `ENC_MGR` rejected (calling AE not whitelisted), which is fine |
 | Other POCUS Manager (ORU at 15:07) | 10.242.1.9 | n/a | POCUS_MGR-EBIW, ENCOUNTER_MGR (declines to act as EM) | RAD-132 → 2575 only |
 
-## Proxy channels to create in Gazelle TM (system configurations → proxy)
-
-| Config type | Host | Port | For |
-|---|---|---|---|
-| HL7 v2 responder | 10.242.1.184 | 2575 | RAD-132 to Result Aggregator |
-| HL7 v2 responder | 10.242.1.184 | 2576 | ITI-31 to Encounter Manager |
-| HTTP / DICOMweb responder | 10.242.1.184 | 8042 | RAD-130 UPS-RS |
-| DICOM SCP, AE `ENC_MGR` | 10.242.1.184 | 11112 | RAD-130 MWL |
-
-Once channels exist: vendors target `proxy host:assigned port`; the Mac then sees connections
-from 192.168.2.5, and Message Capture (https://connectathon.ihe-catalyst.net/gazelle/message-capture/messages)
-holds the evidence. Local `logs/` stays the backup.
+## Through the proxy
+The Mac sees connections from 192.168.2.5, so the UPS-RS station identity must come from the
+query parameter (it does) and the MLLP peer in `summary.log` will be the proxy. Evidence lives in
+Message Capture (https://connectathon.ihe-catalyst.net/gazelle/message-capture/messages); local
+`logs/` is the backup copy.
 
 ## Not reachable from here (off-floor paths checked Oct 12)
 GSS syslog collector 3102/3202 timed out from this Mac; GSS TLS simulators at 151.80.220.161 are reachable.

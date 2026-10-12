@@ -18,7 +18,7 @@ Config (env vars):
   LISTEN_PORT   default 2575
   ACTOR         log folder name, default result-aggregator
   LOG_DIR       default ./logs
-  ACK_APP       MSH-3 of the ACK, default RESULT_AGGREGATOR
+  ACK_APP       MSH-3 of the ACK, default SIMULATOR (matches the Gazelle HL7 config "SIMULATOR / SIMULATOR")
   ACK_FACILITY  MSH-4 of the ACK, default SIMULATOR (Gazelle convention for monitor-run senders)
   TLS_CERT / TLS_KEY   PEM server identity; both set => MLLPS (TLS 1.2+)
   TLS_CA        PEM CA bundle; if set, client certificate is REQUIRED (ATNA mutual TLS)
@@ -38,7 +38,7 @@ VT, FS, CR = b"\x0b", b"\x1c", b"\x0d"
 HOST = os.environ.get("LISTEN_HOST", "0.0.0.0")
 PORT = int(os.environ.get("LISTEN_PORT", "2575"))
 ACTOR = os.environ.get("ACTOR", "result-aggregator")
-ACK_APP = os.environ.get("ACK_APP", "RESULT_AGGREGATOR")
+ACK_APP = os.environ.get("ACK_APP", "SIMULATOR")
 ACK_FAC = os.environ.get("ACK_FACILITY", "SIMULATOR")
 SESSION_DIR = Path(os.environ.get("LOG_DIR", "logs")) / ACTOR / datetime.now().strftime("%Y%m%d-%H%M%S")
 SESSION_DIR.mkdir(parents=True, exist_ok=True)
