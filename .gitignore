@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Raw message logs written by stand-in actors (logs/<actor>/<ts>/). They hold
+# vendor traffic and are handed to the vendor directly, not committed.
+/logs/
+
+# Working trees that agents create for parallel work.
+/.claude/worktrees/
+/.claude/settings.local.json
+
+# artifacts/ IS tracked, keys included: the floor network is private, the CA is
+# ours, and everything is wiped when the event ends.
