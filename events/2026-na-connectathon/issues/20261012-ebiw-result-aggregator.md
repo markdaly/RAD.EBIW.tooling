@@ -1,8 +1,8 @@
 # EBIW POCUS: no Result Aggregator on the floor; stand-in needed for RAD-132
 
-- **Source:** floor request via the monitor (RAD TPM / POCUS Manager vendor). No Zulip thread yet.
+- **Source:** RAD TPM asked the monitor to build the Result Aggregator stand-in (floor, Oct 12). No Zulip thread yet.
 - **Opened:** 2026-10-12 ~13:30 ET
-- **Status:** open (tool built, not yet pointed at a vendor)
+- **Status:** open (tool built and TPM-approved; waiting on the vendor endpoint)
 - **Domain / profile / actor / transaction:** RAD EBIW (TI rev 3.1, 2025-06-19) / Result
   Aggregator, POCUS Option / RAD-132 Notify of Imaging Results
 
@@ -61,16 +61,17 @@ Not a defect ticket. The question is who plays the Result Aggregator:
 ## Missing evidence
 - [ ] Gazelle test definition(s) for EBIW Result Aggregator / POCUS Manager RAD-132: what the
       test instance wants attached (message capture, validator link, screenshots).
-- [ ] TPM approval for the stand-in (CLAUDE.md: tools are partner stand-ins approved by the TPM).
+- [x] TPM approval for the stand-in: the RAD TPM requested it.
 - [ ] Vendor's target: hostname/IP + port the monitor will listen on; TLS or plain MLLP.
 - [ ] RAD TF-2 4.128.4.2 text, to confirm the ACK shape above.
 
 ## Next action
 1. Build `tools/mllp_receiver.py` (Result Aggregator mode), `tools/mllp_send.py`, and a sample
    `samples/ORU_R01_RAD-132_POCUS.hl7`; test loopback. **Done, see Resolution.**
-2. Ask the RAD TPM to approve the stand-in and point the vendor at `<this Mac's IP>:2575`.
+2. Give the vendor this Mac's floor IP and port 2575 (plain MLLP unless they want MLLPS; then
+   `TLS_CERT/TLS_KEY` = a GSS-issued "Client and Server" cert for this Mac, `TLS_CA` = `artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`).
 3. When the first real message lands, read it against the checklist above and paste the
    file path + findings into the Gazelle test instance.
 
 ## Resolution
-_Open._ Tool built 2026-10-12; waiting on TPM approval and a vendor endpoint.
+_Open._ Tool built 2026-10-12 at the RAD TPM's request; waiting on the vendor to send.
