@@ -33,6 +33,7 @@ Per-session detail: [docs/LOG.md](docs/LOG.md).
 | `docs/LOG.md` | Session log |
 | `tickets/` | One markdown file per problem statement, from `tickets/TEMPLATE.md` |
 | `artifacts/` | Evidence (CRLs, certs, captures). Tracked, keys included: private network, own CA, wiped after the event |
+| `docs/CONNECTIONS.md` | Live table of ports, endpoints, vendors, proxy channels |
 | `tools/` | Stand-in actors, when built. Each is one Python file; config by env vars; logs to `logs/<actor>/<ts>/` (ignored) |
 
 ## Using it

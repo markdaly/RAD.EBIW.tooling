@@ -50,6 +50,7 @@ He wears two hats this week:
 - `docs/ITI.md`: IT Infrastructure profiles, ATNA/TLS policy, tooling
 - `docs/TLS-CERTS.md`: cert/CRL/iOS trust troubleshooting
 - `docs/FLOOR-TOOLS.md`: NA 2026 tool URLs, syslog collector ports, subnets, proxy
+- `docs/CONNECTIONS.md`: every listener, target, vendor endpoint and proxy channel in one table
 - `docs/TOOLS.md`: existing simulators + stand-in actor designs
 - `docs/TROUBLESHOOTING-PROTOCOL.md`: how the monitor relays tickets from Zulip/Gazelle and
   how a ticket becomes a problem statement
