@@ -16,7 +16,7 @@ Private repo. Vendor names stay out of committed files.
 
 | Day | State |
 |---|---|
-| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/20261012-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. No tools built yet. |
+| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/20261012-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. **First tool built:** `tools/mllp_receiver.py`, an EBIW Result Aggregator stand-in for RAD-132 (`tickets/20261012-ebiw-result-aggregator.md`), loopback-tested, awaiting RAD TPM approval. |
 
 Per-session detail: [docs/LOG.md](docs/LOG.md).
 

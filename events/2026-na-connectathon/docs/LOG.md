@@ -3,6 +3,23 @@
 One entry per working session, newest first. Each ends with where the next session starts.
 Tickets live in `tickets/`; this is the cross-ticket record.
 
+## 2026-10-12 (Mon, day 1), third session: EBIW Result Aggregator stand-in
+
+- New request: a POCUS Manager vendor has no RAD-132 partner; offered to run Mirth
+  themselves. Ticket `tickets/20261012-ebiw-result-aggregator.md` explains what a Result
+  Aggregator is (RAD TF-1 47.1.1.4, RAD TF-2 4.132, quoted from the rev 3.1 supplement) and
+  why a monitor-run receiver beats vendor-run Mirth (neutrality, intermediate count).
+- Built `tools/mllp_receiver.py` (asyncio MLLP, raw logging, ACK^R01, optional MLLPS with
+  client cert required) and `tools/mllp_send.py`, plus `samples/ORU_R01_RAD-132_POCUS.hl7`.
+  Loopback tests: single message, two messages + garbage frame on one connection (AA, AA,
+  AR), MLLPS with client cert (AA), MLLPS without (connection refused by TLS). Known gap:
+  failed TLS handshakes leave no log line (asyncio swallows SSLError).
+- ACK shape taken from memory of RAD TF-2 4.128.4.2; not yet verified against the text.
+
+**Next session starts:** RAD TPM approval for the stand-in, then give the vendor this Mac's
+floor IP and port 2575. First real message: read it against the checklist in the ticket.
+TLS ticket still waiting on the TPM/vendor for the GSS permanent link and host/port.
+
 ## 2026-10-12 (Mon, day 1), second session: verification pass on the TLS ticket
 
 - Re-checked the first session's cert findings against live GSS with a different model

@@ -21,11 +21,16 @@ an existing simulator covers the gap before building anything.
 ## Stand-in actor designs (build only on request)
 Each is one Python file with env-var config and raw logging to `./logs/<actor>/<ts>/`.
 
-1. **mllp_receiver.py**: generic HL7 v2 responder (Result Aggregator for EBIW RAD-132,
-   Order Filler sink, ADT consumer). asyncio TCP, MLLP framing (0x0B … 0x1C 0x0D), log raw
-   message, reply AA ACK echoing MSH-10 and swapping sender/receiver. Optional TLS (MLLPS).
-2. **mllp_sender.py**: send a message file to a host:port, print ACK. Replays canned v2.5.1
-   OMI^O23 / ADT^A04 / ORU^R01 from `samples/`.
+1. **mllp_receiver.py** — **BUILT 2026-10-12** (`tools/mllp_receiver.py`): generic HL7 v2
+   responder (Result Aggregator for EBIW RAD-132, Order Filler sink, ADT consumer). asyncio
+   TCP, MLLP framing (0x0B … 0x1C 0x0D), logs every message and ACK raw to
+   `logs/<ACTOR>/<session>/`, replies `ACK^<trigger>^ACK` / `MSA|AA|<MSH-10>`, `AR` if MSH
+   won't parse. Env config; optional MLLPS with required client cert (`TLS_CERT/TLS_KEY/TLS_CA`).
+   Run: `LISTEN_PORT=2575 python3 tools/mllp_receiver.py`. Ticket: `tickets/20261012-ebiw-result-aggregator.md`.
+2. **mllp_send.py** — **BUILT 2026-10-12** (`tools/mllp_send.py`): send a message file to a
+   host:port, print and save the ACK. Sample: `samples/ORU_R01_RAD-132_POCUS.hl7` (RAD-132
+   POCUS Option ORU^R01; OBX-3 `113014^DICOM Study^DCM` for the Study UID is from memory of
+   RAD-128, check before citing).
 3. **mwl_scp.py**: pynetdicom MWL C-FIND SCP from a JSON/YAML worklist file. EBIW Encounter
    Manager mode: generate Study UID + Accession, reuse per (Admission ID, calling AE), with a
    configurable Issuer of Accession.
