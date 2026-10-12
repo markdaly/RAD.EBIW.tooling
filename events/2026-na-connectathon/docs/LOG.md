@@ -11,7 +11,7 @@ Tickets live in `tickets/`; this is the cross-ticket record.
   in the ticket. the monitor: that send was connectivity only, not the graded run. Gazelle proxy
   (proxy.ihe-europe.net = 192.168.2.5, reachable) will sit in front once the monitor has access.
 - New request: a VNA (Image Manager) scenario needs an EBIW Encounter Manager. Ticket
-  `tickets/20261012-ebiw-encounter-manager.md` quotes RAD TF-1 47.1.1.1 and RAD TF-2 4.130
+  `tickets/003-ebiw-encounter-manager.md` quotes RAD TF-1 47.1.1.1 and RAD TF-2 4.130
   (matching/return key tables, POCUS additions, expected actions).
 - Built `tools/mwl_scp.py` (pynetdicom MWL SCP, per-(admission, AE) accession + Study UID
   dict written through to state.json, query/response dumps) and `tools/mwl_find.py`, with
@@ -27,7 +27,7 @@ front of the Result Aggregator once the monitor has access.
 ## 2026-10-12 (Mon, day 1), third session: EBIW Result Aggregator stand-in
 
 - New request: a POCUS Manager vendor has no RAD-132 partner; offered to run Mirth
-  themselves. Ticket `tickets/20261012-ebiw-result-aggregator.md` explains what a Result
+  themselves. Ticket `tickets/002-ebiw-result-aggregator.md` explains what a Result
   Aggregator is (RAD TF-1 47.1.1.4, RAD TF-2 4.132, quoted from the rev 3.1 supplement) and
   why a monitor-run receiver beats vendor-run Mirth (neutrality, intermediate count).
 - Built `tools/mllp_receiver.py` (asyncio MLLP, raw logging, ACK^R01, optional MLLPS with
@@ -66,7 +66,7 @@ finding to the Zulip thread for the Gazelle maintainers.
   TROUBLESHOOTING-PROTOCOL), ticket template. Repo hygiene: `.gitignore`, README, this log.
   First push to GitHub (private).
 - Dry run of the troubleshooting protocol on a live Zulip thread:
-  `tickets/20261012-tls-server-verify-crl.md` (mobile POCUS app, TLS handshake error against
+  `tickets/001-tls-server-verify-crl.md` (mobile POCUS app, TLS handshake error against
   GSS; CRL Distribution Point on the deprecated `gazelle.ihe.net` host).
 - Finding from `artifacts/cacrl.crl`: the CRL signer `CN=IHE Europe CA` has a 128-byte RSA
   signature, so that CA key is RSA-1024. If it is the floor CA, iOS/Android/OpenSSL

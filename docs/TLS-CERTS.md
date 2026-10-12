@@ -14,7 +14,7 @@
   2656 cert carry CDP `https://gazelle.ihe.net/pki/crl/2656/cacrl.crl`. The host resolves; the
   path returns **404**. Working: `https://connectathon.ihe-catalyst.net/pki/crl/2656/cacrl.crl`
   (also `/gss/crl/2656/cacrl.crl`). Vendor certs generated this week already carry the
-  catalyst CDP. the Gazelle maintainers is fixing it as of Oct 12 11:04. Ticket: `tickets/20261012-tls-server-verify-crl.md`.
+  catalyst CDP. the Gazelle maintainers is fixing it as of Oct 12 11:04. Ticket: `tickets/001-tls-server-verify-crl.md`.
 - **GSS Floor server simulators** (151.80.220.161, ports 10075 DICOM / 10077 raw / 10078 HL7 /
   10081 HTTPS / 10082 syslog; 10040 = HTTPS **without** mTLS): cert `CN=Gazelle Simulators`,
   SAN only `gazelle-tools.ihe-europe.net`, `gazelle.ihe.net`, `gazelle.ihe-europe.net` (+ two

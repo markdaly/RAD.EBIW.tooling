@@ -3,8 +3,7 @@
 - **Source:** floor request via the monitor, Oct 12 afternoon. A VNA vendor's EBIW test scenario needs
   an Encounter Manager partner. No Zulip thread yet.
 - **Opened:** 2026-10-12 ~15:30 ET
-- **Status:** open (tool built, loopback-tested; needs the vendor's AE/modality and the Gazelle
-  test name)
+- **Status:** open (stand-in running on 10.242.1.184:11112 AE `ENC_MGR` since 15:41 ET; waiting for the first query)
 - **Domain / profile / actor / transaction:** RAD EBIW (TI rev 3.1, 2025-06-19) / Encounter
   Manager, POCUS Option / RAD-130 Get Encounter Imaging Context (MWL semantics); RAD-132
   Notify of Imaging Results as optional Responder
@@ -56,6 +55,18 @@
 ## Scope
 One VNA vendor's scenario now; any EBIW Acquisition Modality that needs a RAD-130 responder.
 
+### Floor facts (the monitor, 15:35 ET)
+- Gazelle EBIW registrations: Encounter Manager has two SUTs, both unavailable this week
+  (one declines, one not on site). Result Aggregator: none. The VNA vendor has two systems:
+  the VNA (Image Manager/Image Archive + Lightweight Modality; options MPEG4, JPEG, DICOM
+  Instance Storage, POCUS) and a sync/POCUS-manager box (POCUS Manager + Image Manager).
+- **Querying system:** the vendor's POCUS Manager box, 10.242.1.17. It will C-FIND the
+  stand-in at **10.242.1.184:11112, AE `ENC_MGR`**.
+- **VNA:** 10.242.1.11, AE `SYNVNA`, port 4000. Reachable from this Mac (TCP open); a C-ECHO
+  with calling AE `ENC_MGR` was rejected at association, which is normal for a VNA that only
+  accepts known calling AEs. Not needed for the Encounter Manager role.
+- Gazelle test name still to be read off the vendor's handwritten note.
+
 ## Evidence so far
 - Supplement text (rev 3.1) sections quoted above.
 
@@ -68,8 +79,8 @@ to `logs/encounter-manager/<session>/`.
 
 ## Missing evidence
 - [ ] Which Gazelle test instance: name/number and which actor the VNA is registered as.
-- [ ] Which modality will query (vendor, AE title, modality code) and the VNA's AE/port so
-      the modality can store after the query.
+- [x] Querying system 10.242.1.17 (POCUS Manager box); VNA 10.242.1.11 `SYNVNA` 4000. Calling AE
+      title and modality code will show up in the first query dump.
 - [ ] `EBIW_10_Read_This_First` code set from Gazelle (department type code, procedure code,
       reason-for-visit codes) to replace the placeholders in `samples/encounters.json`.
 - [ ] Whether the VNA will also send RAD-132 to the Encounter Manager (then run

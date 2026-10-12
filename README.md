@@ -16,7 +16,7 @@ Private repo. Vendor names stay out of committed files.
 
 | Day | State |
 |---|---|
-| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/20261012-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. **First tool built:** `tools/mllp_receiver.py`, an EBIW Result Aggregator stand-in for RAD-132 (`tickets/20261012-ebiw-result-aggregator.md`), live with the POCUS Manager vendor (first ORU received and reviewed). **Second tool:** `tools/mwl_scp.py`, EBIW Encounter Manager (RAD-130 MWL) for a VNA scenario (`tickets/20261012-ebiw-encounter-manager.md`), loopback-tested, waiting on test name and code set. |
+| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/001-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. **First tool built:** `tools/mllp_receiver.py`, an EBIW Result Aggregator stand-in for RAD-132 (`tickets/002-ebiw-result-aggregator.md`), live with the POCUS Manager vendor (first ORU received and reviewed). **Second tool:** `tools/mwl_scp.py`, EBIW Encounter Manager (RAD-130 MWL) for a VNA scenario (`tickets/003-ebiw-encounter-manager.md`), loopback-tested, waiting on test name and code set. |
 
 Per-session detail: [docs/LOG.md](docs/LOG.md).
 
@@ -37,7 +37,7 @@ Per-session detail: [docs/LOG.md](docs/LOG.md).
 
 ## Using it
 
-- **New problem:** copy `tickets/TEMPLATE.md` to `tickets/<yyyymmdd>-<slug>.md`, fill symptom,
+- **New problem:** copy `tickets/TEMPLATE.md` to `tickets/<NNN>-<slug>.md (next free three-digit number)`, fill symptom,
   scope, evidence, ranked hypotheses, missing evidence. Code only after the ticket exists.
 - **TLS triage:** run the commands in `docs/TLS-CERTS.md` against the leaf, issuer, and
   `openssl s_client -showcerts` output.

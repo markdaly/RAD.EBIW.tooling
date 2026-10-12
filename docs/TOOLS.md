@@ -26,7 +26,7 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
    TCP, MLLP framing (0x0B … 0x1C 0x0D), logs every message and ACK raw to
    `logs/<ACTOR>/<session>/`, replies `ACK^<trigger>^ACK` / `MSA|AA|<MSH-10>`, `AR` if MSH
    won't parse. Env config; optional MLLPS with required client cert (`TLS_CERT/TLS_KEY/TLS_CA`).
-   Run: `LISTEN_PORT=2575 python3 tools/mllp_receiver.py`. Ticket: `tickets/20261012-ebiw-result-aggregator.md`.
+   Run: `LISTEN_PORT=2575 python3 tools/mllp_receiver.py`. Ticket: `tickets/002-ebiw-result-aggregator.md`.
 2. **mllp_send.py** — **BUILT 2026-10-12** (`tools/mllp_send.py`): send a message file to a
    host:port, print and save the ACK. Sample: `samples/ORU_R01_RAD-132_POCUS.hl7` (RAD-132
    POCUS Option ORU^R01; OBX-3 `113014^DICOM Study^DCM` for the Study UID is from memory of
@@ -39,7 +39,7 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
    response. Run: `uv run --with pynetdicom --with pydicom python tools/mwl_scp.py`.
    Test SCU: `tools/mwl_find.py <host> <port> <AE> [PatientID] [AdmissionID]`.
    Codes in the sample are PLACEHOLDERS until `EBIW_10_Read_This_First` is pulled from Gazelle.
-   Ticket: `tickets/20261012-ebiw-encounter-manager.md`.
+   Ticket: `tickets/003-ebiw-encounter-manager.md`.
 4. **store_scp.py**: pynetdicom C-STORE SCP (+ optional Storage Commitment N-ACTION /
    N-EVENT-REPORT). Writes files + `dcmdump`-style header log. Minimal Image Manager receive side.
 5. **qr_scp.py**: C-FIND/C-MOVE over a folder of files written by store_scp (Image Manager

@@ -58,7 +58,7 @@ He wears two hats this week:
 ## Working style
 - Ground answers in the Technical Framework text; cite section/transaction numbers.
   If a requirement is from memory, say so.
-- When a ticket arrives, first write `tickets/<slug>.md` from the template, then code.
+- When a ticket arrives, first write `tickets/<NNN>-<slug>.md` (next free number, no date prefix) from the template, then code.
 - Keep vendor names out of committed files and logs unless the monitor says otherwise.
 
 ## Repo hygiene
