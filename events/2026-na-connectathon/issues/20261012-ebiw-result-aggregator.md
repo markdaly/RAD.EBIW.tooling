@@ -2,7 +2,7 @@
 
 - **Source:** RAD TPM asked the monitor to build the Result Aggregator stand-in (floor, Oct 12). No Zulip thread yet.
 - **Opened:** 2026-10-12 ~13:30 ET
-- **Status:** open (tool built and TPM-approved; waiting on the vendor endpoint)
+- **Status:** needs-evidence (first message received 15:07 ET; 8 blocking findings sent back)
 - **Domain / profile / actor / transaction:** RAD EBIW (TI rev 3.1, 2025-06-19) / Result
   Aggregator, POCUS Option / RAD-132 Notify of Imaging Results
 
@@ -49,6 +49,54 @@ partner this week.
 - Supplement text extracted from https://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_Suppl_EBIW.pdf
   (rev 3.1, 132 pages), sections quoted above.
 
+### First live message, 2026-10-12 15:07:57 ET (file `logs/result-aggregator/20261012-145646/20261012-150757-0001-ORU_R01.in.hl7`, ACKed AA)
+A connectivity probe at 15:05:52 (connect/close, no bytes) preceded it. The ORU parsed and was
+ACKed, so transport is done. Content read against RAD TF-2 4.132 (POCUS Option), monitor view:
+
+**Blocking (the message is not a RAD-132 as sent)**
+1. **MSH-12 = `2.4`.** Must be `2.5.1` (4.132.3, 4.132.4.1.2). Floor-wide nudge, same as everyone.
+2. **MSH-9 = `ORU^R01`**, no message-structure component. v2.5.1 wants `ORU^R01^ORU_R01`
+   (RAD TF-2 2.3.1 conventions, from memory).
+3. **Patient ID in PID-2 (retired), PID-3 empty.** RAD-128 PID requires PID-3 CX with an
+   assigning authority (PID-3.4). Nothing downstream can match the patient.
+4. **OBR-18 Accession Number empty** (R). Without it the Result Aggregator cannot tie the
+   report to the stored images. OBR-19 Issuer empty too (R2, fill if the images carry 0008,0051).
+5. **No Study Instance UID OBX** (`OBX|n|ST|113014^DICOM Study^DCM||<UID>`), which the message
+   table requires unbracketed. Needed for the RAD-106 link in 4.132.4.1.3.1.
+6. **OBR-16 Ordering Provider and OBR-32 Principal Result Interpreter empty.** Both are R
+   under the POCUS Option (Physician of Record, NPI in the US). ORC is absent, which is fine,
+   but then OBR-16 has to carry it.
+7. **OBX-11 Observation Result Status empty** on all three OBX (R: `R`, `F`, `C`).
+8. **OBX-5 says `Exam category: educational`.** 4.132.4.1.1.1: the POCUS Manager shall not
+   send RAD-132 for training studies. Ask what "educational" means in their model. If it is
+   the training flag, this message should not exist; if it is a worksheet category, fine.
+
+**Should fix**
+9. OBR-4 coding: `POCUS^POCUS^Point of Care Ultrasound` puts a description in 4.3 where the
+   coding system belongs. Local codes are allowed but 4.3 should name the scheme (e.g.
+   `99GEVP` or `L`); LOINC RadLex Playbook recommended. The eFAST code that the worksheet
+   actually used sits only in a Z-segment (ZED-1) and in OBX-3; per 4.132.4.1.2.3.3 it belongs
+   in OBR-4.
+10. Procedure code repeated in **OBR-47** (Filler Supplemental Service Info) instead of
+    **OBR-44** Procedure Code, which "shall match OBR-4". Off by three fields.
+11. **OBR-24 Diagnostic Serv Sect ID empty** (R; `US` or whatever 0008,1041 maps to).
+12. **TQ1 segment absent** and OBR-27 empty. TQ1 is required in the table (may be empty);
+    OBR-27.6 must match TQ1-9.1 if valued.
+13. Second OBR group (Quality Assurance) has **OBR-1 = 1** again; Set ID should be 2. Also
+    QA is not an imaging procedure; repeating OBR is for multiple procedures in one session
+    (eFAST example in the text), each with a distinct OBR-4. Ask whether QA belongs in RAD-132.
+14. **OBX-2 = `ST`** with `\.br\` formatting and >199 chars. Table 4.132.4.1.2.3.4-1 allows
+    `CE` or `TX`; ST is capped at 199 in v2.5.1. Use TX (or FT if they insist on escapes).
+15. Several findings bundled in one OBX (eFAST indication, views, findings). Text says one
+    finding per OBX is recommended, not required. Mention, don't fail.
+
+**Fine as sent:** PV1-19 valued (`V0005`); OBR-7 observation time; OBR-25 = `F`; MSH-18
+`UNICODE UTF-8`; Z-segment is permitted. Verify PV1-19 equals Admission ID (0038,0010) in the
+stored images when the Image Manager side is checked.
+
+Suggested validator: paste the capture into Gazelle EVSClient HL7v2 validation if a RAD-132
+profile exists there; otherwise this list is the review.
+
 ## Hypotheses (ranked)
 Not a defect ticket. The question is who plays the Result Aggregator:
 1. **Monitor-run stand-in** (`tools/mllp_receiver.py`): neutral, logs every message raw with
@@ -74,4 +122,4 @@ Not a defect ticket. The question is who plays the Result Aggregator:
    file path + findings into the Gazelle test instance.
 
 ## Resolution
-_Open._ Tool built 2026-10-12 at the RAD TPM's request; waiting on the vendor to send.
+_Open._ Tool built 2026-10-12 at the RAD TPM's request. First message 15:07 ET: transport works, content is v2.4 and missing PID-3, accession, Study UID OBX, physician of record, OBX-11. Waiting on a corrected send.
