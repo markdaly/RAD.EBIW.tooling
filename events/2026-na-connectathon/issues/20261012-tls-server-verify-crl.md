@@ -80,7 +80,107 @@ Ruled out: cipher mismatch (ECDHE-RSA-GCM offered and negotiated; iOS supports i
 - [ ] On the device: root full-trust toggle state (iOS); Safari against `https://gazelle-tools.ihe-europe.net:10040/` should load (or at least not complain about trust) if the root is trusted.
 
 ## Next action
-the monitor: ask the TPM/vendor for (a) the GSS permanent link, (b) host string + port the app uses, (c) whether a client identity is loaded. Tell them the 10040 vs 10081 A/B and the `gazelle-tools.ihe-europe.net` name. Post the two-CA finding and the dead-CDP path (`/pki/crl/2656/` on `gazelle.ihe.net`, 404) to the Zulip thread for the Gazelle maintainers; the fix on their side is CDP reissue or a redirect from the old path. No code needed yet; `tlscheck.sh` only if the s_client matrix gets run more than once.
+
+Goal: identify which side aborts the handshake and why, with evidence the vendor can attach in
+Gazelle. Work the steps in order; each one either closes the ticket or eliminates a hypothesis.
+Steps 1–3 need no vendor hardware and can be done from any floor laptop.
+
+### Step 1. Pin down what the app is actually doing (ask the vendor, 2 minutes)
+Get four facts before touching anything:
+1. **Platform and version** of the device running the app (iOS/iPadOS x.y, Android x).
+2. **Target of "server verify":** the exact host string typed into the app (IP
+   `151.80.220.161`, `connectathon.ihe-catalyst.net`, or `gazelle-tools.ihe-europe.net`) and
+   the **port** (10040, 10075, 10077, 10081, …).
+3. **Client identity:** is a PKCS#12 (key + cert + chain) loaded into the app or the device,
+   or only the CA root? If loaded, which GSS cert id / CN.
+4. **Trust store:** on iOS, is the root toggled on under Settings → General → About →
+   Certificate Trust Settings? Or does the app bundle its own trust store (ask the vendor's
+   engineer; many SDKs do)?
+
+Interpretation: a host string that is the IP or the catalyst name already explains a
+client-side abort (hypothesis 2). No client identity plus an mTLS port already explains a
+server-side abort (hypothesis 1). Either finding can short-circuit the rest.
+
+### Step 2. Get the GSS connection record (TPM or vendor, 5 minutes)
+GSS → TLS / SSL → Connection logs (https://connectathon.ihe-catalyst.net/gss/simulators/logs.seam).
+Filter on the simulator and time window, open the failed connection, copy the **permanent
+link** into this ticket. Read three things off it:
+- **Which simulator/port** was hit (confirms Step 1 item 2 independently).
+- **Who sent the alert and which one.** Alert 42 `bad_certificate` sent by the *server* with
+  "no client certificate" = hypothesis 1. A `handshake_failure` / `unknown_ca` /
+  `bad_certificate` coming *from the client* after the ServerHello = the client rejected the
+  server chain (hypotheses 2, 3, 4).
+- **Was a client cert received at all**, and if so its subject/issuer.
+
+### Step 3. Reproduce from a laptop, both ways (monitor, 5 minutes)
+Use the artifacts in this repo. Run the three commands and record the last two lines of each.
+
+```bash
+# A. No client cert, mTLS port: expect alert 42 bad_certificate from the server.
+openssl s_client -connect gazelle-tools.ihe-europe.net:10081 -servername gazelle-tools.ihe-europe.net \
+  -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem </dev/null
+```
+```bash
+# B. No client cert, non-mTLS port: expect "Verify return code: 0 (ok)" and a completed handshake.
+openssl s_client -connect gazelle-tools.ihe-europe.net:10040 -servername gazelle-tools.ihe-europe.net \
+  -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem </dev/null
+```
+```bash
+# C. Hostname strictness: what a client connecting by IP sees. Expect "verification failed".
+openssl verify -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem -verify_ip 151.80.220.161 artifacts/gss-simulators-server-cert.pem
+```
+If the vendor hands you their PKCS#12, add a fourth run: A again with `-cert client.pem -key client.key`
+(extract with `openssl pkcs12 -in vendor.p12 -nodes -out client.pem`). Expect it to complete.
+If it does not, read the server's alert: `unknown_ca` means the client cert was not issued by
+CA 2656; `certificate_expired` / `bad_certificate` means look at the cert itself with
+`openssl x509 -in client.pem -noout -text`.
+
+Interpretation: A and B behaving as predicted proves the GSS side is healthy and the failure is
+in the app's configuration or trust, not in GSS. C is the line to show a vendor who insists on
+connecting by IP.
+
+### Step 4. Make the device talk to 10040 (vendor, 10 minutes)
+Point the app at `gazelle-tools.ihe-europe.net`, port **10040**, with the same root installed.
+- **Passes:** server-side trust is fine. The original failure was mTLS (hypothesis 1) and/or
+  the host string (hypothesis 2). Go to Step 5.
+- **Still fails:** the client rejects the server chain even without mTLS. On iOS check the
+  Certificate Trust Settings toggle (hypothesis 4) and open
+  `https://gazelle-tools.ihe-europe.net:10040/` in Safari on the same device: a trust warning
+  there means the OS store is wrong; no warning in Safari but failure in the app means the app
+  uses its own trust store and the vendor has to load the root into the app, not the OS.
+
+### Step 5. Provision a client identity and retest an mTLS port (vendor, 15–30 minutes)
+The ATNA test (11109) requires mutual TLS, so this step is unavoidable for a pass.
+- Generate a **"Client and Server"** cert in GSS (https://connectathon.ihe-catalyst.net/gss/request/withoutcsr.seam)
+  with SAN = the device's `<gazelle hostname>.na2026.net`, download as **PKCS#12** (GSS offers
+  the keystore download on the certificate's view page), and load it into the app or, on iOS,
+  via a configuration profile so the app can select it.
+- Retest against port 10081 (HTTPS) or the port matching the app's transport (10075 DICOM,
+  10078 HL7). Grab the GSS permanent link for the successful connection: that is the artifact
+  for Gazelle.
+- If the app cannot select a client identity at all, that is a vendor product gap, not a
+  Connectathon configuration issue. Record it as such and let the TPM decide how to score.
+
+### Step 6. Tell the Gazelle maintainers what is actually broken (monitor, Zulip thread)
+Post to the existing thread, no vendor names:
+- There are two CAs named `IHE Europe CA`; the floor CA is id 2656 and is 2048-bit. The
+  1024-bit CRL at `/pki/crl/643/` is the legacy CA and confused at least one investigation.
+- The simulator leaf **and** the CA 2656 cert carry CDP `https://gazelle.ihe.net/pki/crl/2656/cacrl.crl`,
+  which returns 404. Clients with revocation checking enabled will fail until that path
+  serves the CRL (redirect to `connectathon.ihe-catalyst.net/pki/crl/2656/cacrl.crl` is enough)
+  or the simulator certs are reissued with the catalyst CDP.
+- The simulator SAN has no IP and no `connectathon.ihe-catalyst.net`; the server list should
+  show `gazelle-tools.ihe-europe.net`, not the bare IP, so vendors do not configure a name that
+  cannot verify.
+- GSS generator leafs are 10-year; any iOS client verifying a vendor server with one will fail
+  Apple's 825-day rule. Ask whether the generator can offer ≤ 825 days.
+
+### Step 7. Close out
+Fill in **Resolution** with: the alert and sender from the GSS record, which step fixed it, and
+the GSS permanent link of the passing run. If the fix was "provision a client identity on
+iOS", write it up as a one-page recipe in `docs/` so the next vendor with a handheld gets it
+in five minutes instead of a morning. Build `tlscheck.sh` only if Step 3 has to be run for a
+third system.
 
 ## Resolution
 _Open._
