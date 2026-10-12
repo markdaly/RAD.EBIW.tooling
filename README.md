@@ -16,7 +16,7 @@ Private repo. Vendor names stay out of committed files.
 
 | Day | State |
 |---|---|
-| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/20261012-tls-server-verify-crl.md`). No tools built yet. |
+| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/20261012-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. No tools built yet. |
 
 Per-session detail: [docs/LOG.md](docs/LOG.md).
 
