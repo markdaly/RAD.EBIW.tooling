@@ -18,6 +18,10 @@ What it does, and nothing else:
     Date/Time = now; "Perform Imaging" as the generic procedure (4.130.4.1.3).
   - Returns only the keys the SCU asked for (DICOM C-FIND rules), one response per encounter.
   - Dumps every C-FIND identifier and every response dataset to the log folder, raw.
+  - Optional ITI-31 intake (ADT_PORT > 0): accepts HL7 v2 ADT^A01/A04/A05/A08 over MLLP from a
+    Result Aggregator / ADT feed, ACKs AA, and adds the encounter (PID-3/5/7/8, PV1-3/7/19/44,
+    DG1-4; mapping RAD TF-2x Appendix U, Table U-1) to the worklist. Written to
+    logs/encounter-manager/encounters-from-adt.json so ups_rs.py and restarts see it too.
 
 Config (env):
   AE_TITLE          default ENC_MGR            LISTEN_PORT  default 11112
@@ -26,11 +30,12 @@ Config (env):
   ACCESSION_PREFIX  prefix to avoid collisions with other issuers; default EM
   UID_ROOT          Study UID root; default 1.2.826.0.1.3680043.10.1431  (pydicom's root + suffix)
   LOG_DIR           default ./logs   (folder logs/encounter-manager/<session>/)
+  ADT_PORT          MLLP port for ITI-31 intake; default 2576; 0 disables
 
 Run:  uv run --with pynetdicom --with pydicom python tools/mwl_scp.py
 Test: uv run --with pynetdicom --with pydicom python tools/mwl_find.py 127.0.0.1 11112 ENC_MGR
 """
-import json, os, re, sys
+import json, os, re, socketserver, sys, threading
 from datetime import datetime
 from pathlib import Path
 
@@ -50,9 +55,20 @@ SESSION_DIR = Path(os.environ.get("LOG_DIR", "logs")) / "encounter-manager" / da
 SESSION_DIR.mkdir(parents=True, exist_ok=True)
 STATE_FILE = Path(os.environ.get("LOG_DIR", "logs")) / "encounter-manager" / "state.json"
 
+ADT_PORT = int(os.environ.get("ADT_PORT", "2576"))
+ADT_FILE = Path(os.environ.get("LOG_DIR", "logs")) / "encounter-manager" / "encounters-from-adt.json"
 CONF = json.loads(ENCOUNTERS.read_text())
 state = json.loads(STATE_FILE.read_text()) if STATE_FILE.exists() else {}  # "admission|AE" -> {accession, study_uid}
 counter = 0
+
+
+def encounters():
+    """Sample-file encounters plus those received over ITI-31 (re-read each call: ups_rs.py is a
+    separate process and writes the same file). An ADT for an existing Admission ID replaces it."""
+    merged = {e["admission_id"]: e for e in CONF["encounters"]}
+    if ADT_FILE.exists():
+        merged.update({e["admission_id"]: e for e in json.loads(ADT_FILE.read_text())})
+    return list(merged.values())
 
 
 def log(line):
@@ -206,7 +222,7 @@ def handle_find(event):
     log(f"C-FIND #{counter} from {calling_ae}@{peer} keys: " + ", ".join(
         f"{e.keyword}={e.value!r}" for e in query if e.VR != "SQ" and e.value != ""))
     n = 0
-    for enc in CONF["encounters"]:
+    for enc in encounters():
         if event.is_cancelled:
             yield 0xFE00, None
             return
@@ -222,6 +238,86 @@ def handle_find(event):
     yield 0x0000, None
 
 
+# ---- ITI-31 intake: ADT -> encounter (RAD TF-2x Appendix U, Table U-1) -----------------------
+VT, FS, CR = b"\x0b", b"\x1c", b"\x0d"
+
+
+def adt_to_encounter(msg: str):
+    seg = {}
+    for line in msg.replace("\n", "\r").split("\r"):
+        if len(line) > 3 and line[3] == "|" and line[:3] not in seg:
+            seg[line[:3]] = line.split("|")
+    f = lambda name, n: (seg.get(name, []) + [""] * 50)[n]
+    comp = lambda v, i: (v.split("^") + [""] * 10)[i]
+    if "PID" not in seg or "PV1" not in seg:
+        return None
+    pid3 = f("PID", 3).split("~")[0]
+    pv1_3, pv1_7, pv1_19 = f("PV1", 3), f("PV1", 7), f("PV1", 19)
+    npi = comp(pv1_7, 0)
+    phys_name = f"{comp(pv1_7, 1)}^{comp(pv1_7, 2)}".strip("^")
+    dept = comp(pv1_3, 8) or comp(pv1_3, 0)
+    return {
+        "patient_name": "^".join(f("PID", 5).split("^")[:2]),
+        "patient_id": comp(pid3, 0),
+        "issuer_of_patient_id": comp(pid3, 3).split("&")[0],
+        "birth_date": f("PID", 7)[:8],
+        "sex": f("PID", 8),
+        "admission_id": comp(pv1_19, 0),
+        "issuer_of_admission_id": comp(pv1_19, 3).split("&")[0],
+        "admitting_date": f("PV1", 44)[:8],
+        "admitting_time": f("PV1", 44)[8:14],
+        "department_name": dept,
+        "department_type": {"value": comp(pv1_3, 0), "scheme": "99IHE", "meaning": dept},  # CID 7030 if the site uses it
+        "reason_for_visit": f("DG1", 4) or comp(f("DG1", 3), 1),
+        "physician_of_record": {"name": phys_name, "id": npi, "scheme": "NPI" if npi else "99IHE", "meaning": phys_name},
+        "_source": f"ITI-31 {f('MSH', 8)} ctrl {f('MSH', 9)} at {datetime.now().isoformat(timespec='seconds')}",
+    }
+
+
+class ADTHandler(socketserver.StreamRequestHandler):
+    def handle(self):
+        peer = "%s:%s" % self.client_address
+        buf = b""
+        while True:
+            chunk = self.request.recv(65536)
+            if not chunk:
+                break
+            buf += chunk
+            while VT in buf and FS + CR in buf:
+                start, end = buf.find(VT), buf.find(FS + CR)
+                raw, buf = buf[start + 1:end], buf[end + 2:]
+                stem = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-adt-{peer.replace(':', '_')}"
+                (SESSION_DIR / f"{stem}.in.hl7").write_bytes(raw)
+                text = raw.decode("latin-1")
+                msh = (text.split("\r", 1)[0].split("|") + [""] * 12)
+                enc = adt_to_encounter(text)
+                if enc and enc["admission_id"]:
+                    existing = json.loads(ADT_FILE.read_text()) if ADT_FILE.exists() else []
+                    existing = [e for e in existing if e["admission_id"] != enc["admission_id"]] + [enc]
+                    ADT_FILE.write_text(json.dumps(existing, indent=1))
+                    code = "AA"
+                    log(f"ITI-31 {msh[8]} from {peer}: added/updated encounter {enc['admission_id']} "
+                        f"{enc['patient_name']} {enc['patient_id']} ({len(encounters())} encounters now) file={stem}.in.hl7")
+                else:
+                    code = "AR"
+                    log(f"ITI-31 from {peer}: no PID/PV1-19, rejected (AR) file={stem}.in.hl7")
+                trig = msh[8].split("^")[1] if "^" in msh[8] else ""
+                ack = (f"MSH|^~\\&|{AE_TITLE}|IHE_NA2026|{msh[2]}|{msh[3]}|{datetime.now().strftime('%Y%m%d%H%M%S')}||"
+                       f"ACK^{trig}^ACK|ACK{datetime.now().strftime('%H%M%S%f')}|{msh[10] or 'P'}|{msh[11] or '2.5'}\r"
+                       f"MSA|{code}|{msh[9]}\r").encode("latin-1")
+                (SESSION_DIR / f"{stem}.ack.hl7").write_bytes(ack)
+                self.request.sendall(VT + ack + FS + CR)
+
+
+def start_adt_listener():
+    if ADT_PORT <= 0:
+        return
+    srv = socketserver.ThreadingTCPServer(("0.0.0.0", ADT_PORT), ADTHandler)
+    srv.allow_reuse_address = True
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    log(f"ITI-31 ADT intake listening on MLLP port {ADT_PORT}")
+
+
 def handle_open(event):
     log(f"ASSOC open from {event.assoc.requestor.ae_title.strip()}@{event.assoc.requestor.address}")
 
@@ -234,7 +330,8 @@ if __name__ == "__main__":
     ae = AE(ae_title=AE_TITLE)
     ae.add_supported_context(ModalityWorklistInformationFind)
     ae.add_supported_context(Verification)
-    log(f"Encounter Manager {AE_TITLE} on port {PORT}; {len(CONF['encounters'])} encounters from {ENCOUNTERS}; "
+    start_adt_listener()
+    log(f"Encounter Manager {AE_TITLE} on port {PORT}; {len(encounters())} encounters ({len(CONF['encounters'])} from {ENCOUNTERS}); "
         f"issuer={ISSUER} prefix={PREFIX}; logs in {SESSION_DIR}; {len(state)} remembered contexts")
     ae.start_server(("0.0.0.0", PORT), block=True, evt_handlers=[
         (evt.EVT_C_FIND, handle_find), (evt.EVT_CONN_OPEN, handle_open), (evt.EVT_CONN_CLOSE, handle_close)])

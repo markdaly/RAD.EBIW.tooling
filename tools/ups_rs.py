@@ -143,7 +143,7 @@ def search(request: Request):
     (em.SESSION_DIR / f"{stem}.request.txt").write_text(
         f"{request.method} {request.url}\n" + "".join(f"{k}: {v}\n" for k, v in request.headers.items()))
     em.log(f"UPS-RS search #{counter} from {peer} station={station} modality={modality} params={params}")
-    hits = [workitem(enc, station, modality) for enc in em.CONF["encounters"]]
+    hits = [workitem(enc, station, modality) for enc in em.encounters()]
     hits = [u for u in hits if matches(u, params)]
     off, lim = int(params.get("offset", 0)), int(params.get("limit", 0) or 0)
     hits = hits[off: off + lim] if lim else hits[off:]
@@ -161,6 +161,6 @@ def search(request: Request):
 
 if __name__ == "__main__":
     em.log(f"Encounter Manager UPS-RS on port {PORT}, path {BASE}/workitems; "
-           f"{len(em.CONF['encounters'])} encounters; issuer={em.ISSUER} prefix={em.PREFIX}")
+           f"{len(em.encounters())} encounters; issuer={em.ISSUER} prefix={em.PREFIX}")
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="warning",
                 ssl_certfile=os.environ.get("TLS_CERT"), ssl_keyfile=os.environ.get("TLS_KEY"))

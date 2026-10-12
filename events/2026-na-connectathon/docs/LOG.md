@@ -3,6 +3,22 @@
 One entry per working session, newest first. Each ends with where the next session starts.
 Tickets live in `tickets/`; this is the cross-ticket record.
 
+## 2026-10-12 (Mon, day 1), sixth session: test definitions in hand, ITI-31 intake
+
+- the monitor is now Gazelle admin and a registered SUT (DDX) for Encounter Manager + Result
+  Aggregator, which unlocks the proxy channels. Two test PDFs saved to `docs/tests/`:
+  EBIW_35_Full_Workflow-RESTful (13478, Lightweight Modality via UPS-RS, ticket 003) and
+  EBIW_POCUS_Simple_Workflow (13884, ticket 004). Monitor checklists copied into the tickets.
+- 13884 has no Encounter Manager role (grouped into POCUS_MGR) and makes the Result
+  Aggregator *send* ITI-31. Added ADT intake to `tools/mwl_scp.py` (MLLP 2576, Appendix U
+  mapping, persisted and shared with UPS-RS) and `samples/ADT_A04_ITI-31.hl7`. Loopback
+  passed incl. A08 replace semantics. `mllp_receiver.py` summary line now shows PID-5.
+- Second-source check: the first hand-typed PV1 was a pipe short; samples are now generated
+  with explicit field numbers. Worth remembering before trusting any hand-typed segment.
+
+**Next session starts:** restart the EM tab with the ADT listener; load EBIW_10_Read_This_First
+data; confirm POCUS_MGR identity for 13884 and TPM acceptance; proxy channels for 2575/2576/8042/11112.
+
 ## 2026-10-12 (Mon, day 1), fifth session: UPS-RS for the Encounter Manager
 
 - Gazelle test 13478 (login needed, text not captured): the VNA vendor is a **Lightweight

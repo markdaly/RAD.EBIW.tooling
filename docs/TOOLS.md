@@ -38,6 +38,10 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
    Modality; SPS start = now; "Perform Imaging" generic procedure. Dumps every query and
    response. Run: `uv run --with pynetdicom --with pydicom python tools/mwl_scp.py`.
    Test SCU: `tools/mwl_find.py <host> <port> <AE> [PatientID] [AdmissionID]`.
+   **ITI-31 intake** (added 2026-10-12, ticket 004): MLLP port `ADT_PORT` (default 2576) accepts
+   ADT^A01/A04/A05/A08, maps PID/PV1/DG1 → encounter per RAD TF-2x Appendix U Table U-1, ACKs
+   AA, persists to `logs/encounter-manager/encounters-from-adt.json` (shared with ups_rs.py).
+   Sample: `samples/ADT_A04_ITI-31.hl7`.
    Codes in the sample are PLACEHOLDERS until `EBIW_10_Read_This_First` is pulled from Gazelle.
    Ticket: `tickets/003-ebiw-encounter-manager.md`.
    **ups_rs.py** — **BUILT 2026-10-12** (`tools/ups_rs.py`): the same Encounter Manager over

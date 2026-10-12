@@ -16,7 +16,7 @@ Private repo. Vendor names stay out of committed files.
 
 | Day | State |
 |---|---|
-| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/001-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. **First tool built:** `tools/mllp_receiver.py`, an EBIW Result Aggregator stand-in for RAD-132 (`tickets/002-ebiw-result-aggregator.md`), live with the POCUS Manager vendor (first ORU received and reviewed). **Second tool:** `tools/mwl_scp.py`, EBIW Encounter Manager (RAD-130 MWL) for a VNA scenario (`tickets/003-ebiw-encounter-manager.md`), now with a UPS-RS half (`tools/ups_rs.py`) because the vendor is a Lightweight Modality; both running, waiting on the first query. |
+| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/001-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. **First tool built:** `tools/mllp_receiver.py`, an EBIW Result Aggregator stand-in for RAD-132 (`tickets/002-ebiw-result-aggregator.md`), live with the POCUS Manager vendor (first ORU received and reviewed). **Second tool:** `tools/mwl_scp.py`, EBIW Encounter Manager (RAD-130 MWL) for a VNA scenario (`tickets/003-ebiw-encounter-manager.md`), now with a UPS-RS half (`tools/ups_rs.py`) because the vendor is a Lightweight Modality; both running, plus ITI-31 ADT intake for test 13884 (`tickets/004-ebiw-pocus-simple-workflow.md`). Test PDFs in `docs/tests/`. |
 
 Per-session detail: [docs/LOG.md](docs/LOG.md).
 
