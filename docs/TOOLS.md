@@ -31,9 +31,15 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
    host:port, print and save the ACK. Sample: `samples/ORU_R01_RAD-132_POCUS.hl7` (RAD-132
    POCUS Option ORU^R01; OBX-3 `113014^DICOM Study^DCM` for the Study UID is from memory of
    RAD-128, check before citing).
-3. **mwl_scp.py**: pynetdicom MWL C-FIND SCP from a JSON/YAML worklist file. EBIW Encounter
-   Manager mode: generate Study UID + Accession, reuse per (Admission ID, calling AE), with a
-   configurable Issuer of Accession.
+3. **mwl_scp.py** — **BUILT 2026-10-12** (`tools/mwl_scp.py`): pynetdicom MWL C-FIND SCP as
+   EBIW Encounter Manager (RAD-130 MWL semantics + POCUS Option return keys). Encounters from
+   `samples/encounters.json`; Study UID + Accession generated once per (Admission ID, calling
+   AE) and kept in `logs/encounter-manager/state.json`; echoes Scheduled Station AE Title and
+   Modality; SPS start = now; "Perform Imaging" generic procedure. Dumps every query and
+   response. Run: `uv run --with pynetdicom --with pydicom python tools/mwl_scp.py`.
+   Test SCU: `tools/mwl_find.py <host> <port> <AE> [PatientID] [AdmissionID]`.
+   Codes in the sample are PLACEHOLDERS until `EBIW_10_Read_This_First` is pulled from Gazelle.
+   Ticket: `tickets/20261012-ebiw-encounter-manager.md`.
 4. **store_scp.py**: pynetdicom C-STORE SCP (+ optional Storage Commitment N-ACTION /
    N-EVENT-REPORT). Writes files + `dcmdump`-style header log. Minimal Image Manager receive side.
 5. **qr_scp.py**: C-FIND/C-MOVE over a folder of files written by store_scp (Image Manager

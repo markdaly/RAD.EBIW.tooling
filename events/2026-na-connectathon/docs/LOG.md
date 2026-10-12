@@ -3,6 +3,27 @@
 One entry per working session, newest first. Each ends with where the next session starts.
 Tickets live in `tickets/`; this is the cross-ticket record.
 
+## 2026-10-12 (Mon, day 1), fourth session: live Result Aggregator, Encounter Manager stand-in
+
+- Result Aggregator went live on this Mac (10.242.1.184:2575). Vendor probe 15:05, first
+  ORU^R01 15:07:57, ACKed AA. Content review (15 findings, v2.4, PID-2 not PID-3, no
+  accession, no Study UID OBX, no physician of record, OBX-11 empty, "educational" exam) is
+  in the ticket. the monitor: that send was connectivity only, not the graded run. Gazelle proxy
+  (proxy.ihe-europe.net = 192.168.2.5, reachable) will sit in front once the monitor has access.
+- New request: a VNA (Image Manager) scenario needs an EBIW Encounter Manager. Ticket
+  `tickets/20261012-ebiw-encounter-manager.md` quotes RAD TF-1 47.1.1.1 and RAD TF-2 4.130
+  (matching/return key tables, POCUS additions, expected actions).
+- Built `tools/mwl_scp.py` (pynetdicom MWL SCP, per-(admission, AE) accession + Study UID
+  dict written through to state.json, query/response dumps) and `tools/mwl_find.py`, with
+  `samples/encounters.json` (two encounters incl. a John Doe). Loopback: match-all, by Patient
+  ID, by Admission ID, no-match, accession stable across restart. All pass.
+- Open on both EBIW tickets: Gazelle test names, the `EBIW_10_Read_This_First` code set, and
+  the vendors' AE titles/endpoints.
+
+**Next session starts:** pull the code set from Gazelle and replace the PLACEHOLDER codes in
+`samples/encounters.json`; get the VNA test name and the modality's AE; put the proxy in
+front of the Result Aggregator once the monitor has access.
+
 ## 2026-10-12 (Mon, day 1), third session: EBIW Result Aggregator stand-in
 
 - New request: a POCUS Manager vendor has no RAD-132 partner; offered to run Mirth

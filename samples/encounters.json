@@ -1,0 +1,44 @@
+{
+  "_comment": "Encounters served by tools/mwl_scp.py (EBIW Encounter Manager). Codes marked PLACEHOLDER must be replaced from Gazelle EBIW_10_Read_This_First before a graded test. Dates YYYYMMDD, times HHMMSS.",
+  "institution": {
+    "name": "Connectathon Test Hospital",
+    "address": "Mason Square, Arlington VA",
+    "code": {"value": "NA2026", "scheme": "99IHE", "meaning": "Connectathon Test Hospital"}
+  },
+  "procedure": {
+    "description": "Perform Imaging",
+    "code": {"value": "PERFORM-IMAGING", "scheme": "99IHE", "meaning": "Perform Imaging (PLACEHOLDER)"}
+  },
+  "encounters": [
+    {
+      "patient_name": "DOE^JANE",
+      "patient_id": "MRN12345",
+      "issuer_of_patient_id": "SITE_A",
+      "birth_date": "19800101",
+      "sex": "F",
+      "admission_id": "VISIT0001",
+      "issuer_of_admission_id": "SITE_A",
+      "admitting_date": "20261012",
+      "admitting_time": "084500",
+      "department_name": "Emergency Department",
+      "department_type": {"value": "ED", "scheme": "99IHE", "meaning": "Emergency Department (PLACEHOLDER)"},
+      "reason_for_visit": "Blunt abdominal trauma",
+      "physician_of_record": {"name": "ATTENDING^ALICE", "id": "1234567890", "scheme": "NPI", "meaning": "ATTENDING^ALICE"}
+    },
+    {
+      "patient_name": "UNIDENTIFIED^PATIENT",
+      "patient_id": "0",
+      "issuer_of_patient_id": "SITE_A",
+      "birth_date": "",
+      "sex": "O",
+      "admission_id": "VISIT0002",
+      "issuer_of_admission_id": "SITE_A",
+      "admitting_date": "20261012",
+      "admitting_time": "101500",
+      "department_name": "Emergency Department",
+      "department_type": {"value": "ED", "scheme": "99IHE", "meaning": "Emergency Department (PLACEHOLDER)"},
+      "reason_for_visit": "Unidentified trauma patient (John Doe case, 47.4.1.10)",
+      "physician_of_record": {"name": "ATTENDING^ALICE", "id": "1234567890", "scheme": "NPI", "meaning": "ATTENDING^ALICE"}
+    }
+  ]
+}
