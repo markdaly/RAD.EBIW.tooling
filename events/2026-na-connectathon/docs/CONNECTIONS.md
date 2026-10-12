@@ -15,7 +15,7 @@ Proxy: `proxy.ihe-europe.net` = 192.168.2.5. **Vendors target the proxy port bel
 | Webservice | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 8042 | **11066** | RAD-130 (UPS-RS), URL `http://ddx0:8042/studies`, HTTP rewrite disabled |
 | HL7 V2 Responder | RESULT_AGGREGATOR | ddx0 / 10.242.1.184 | 2575 | **11067** | receiving app/facility `SIMULATOR / SIMULATOR` (RAD-132 in) |
 
-All four approved, none secured (plain MLLP / DICOM / HTTP). Vendor-side targets therefore:
+**Status 16:50 ET: the proxy accepts TCP on all four ports but closes immediately and forwards nothing (ticket 005). Until fixed, vendors hit the Mac directly and attach captures.** All four approved, none secured (plain MLLP / DICOM / HTTP). Vendor-side targets once the proxy works:
 - RAD-132 ORU → `proxy.ihe-europe.net:11067`, MSH-5/6 = `SIMULATOR`/`SIMULATOR`
 - ITI-31 ADT → `proxy.ihe-europe.net:11064` (our own step-10 send goes there too, so it is captured)
 - RAD-130 MWL → `proxy.ihe-europe.net:11065`, called AE `ENC_MGR`
