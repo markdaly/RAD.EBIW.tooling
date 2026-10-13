@@ -57,17 +57,26 @@ validated. Use it as an EBIW Result Aggregator (RAD-132), an Order Filler sink, 
 | `TLS_CERT` + `TLS_KEY` | unset | both set: MLLPS (TLS 1.2+) |
 | `TLS_CA` | unset | set: client certificate required (ATNA mutual TLS) |
 
-Console line per message: MSH-9/10/12, PID-3, PID-5, PV1-19, OBR-4/18/19/25, first OBX-5, and the
-file name. Files: `<ts>-<n>-<MSH-9>.in.hl7` and `.ack.hl7`, plus `summary.log`.
+Console line per message: MSH-9/12/10, segment counts, PID-3 (and PID-2 if someone still
+uses it), PID-5, PV1-19, OBR-4/16/18/19/25/32/44, TQ1-9, first OBX-2/3/5/11, and the file name:
+the fields the EBIW_90 scrutiny test reads. **AA means received and logged, never
+"conformant"**; the monitor grades from the raw capture. Files: `<ts>-<n>-<MSH-9>.in.hl7` and `.ack.hl7`, plus `summary.log`.
 
 ## Encounter Manager, DIMSE side: `tools/mwl_scp.py`
 
 DICOM Modality Worklist C-FIND SCP implementing RAD-130 MWL semantics with the POCUS Option
 return keys (RAD TF-2 Tables 4.130.4.1.2.1-1 and 4.130.4.1.2.1.1-1). Serves the encounters in a
-JSON file; generates one Accession Number and Study Instance UID per (Admission ID, calling AE
-title) and keeps returning the same pair (RAD TF-1 47.1.1.1); echoes Scheduled Station AE Title
-and Modality; SPS start = now; generic "Perform Imaging" procedure (4.130.4.1.3). Also takes
-ITI-31 ADT over MLLP and adds the encounter (RAD TF-2x Appendix U mapping).
+JSON file, one row per procedure and device type (the Gazelle EBIW_10 model: a patient with a
+US and an XC procedure under one admission is two rows, each with its own `modality`,
+`scheduled_station_ae_title` and `procedure`; rows without them match any device and get the
+generic "Perform Imaging" procedure allowed by 4.130.4.1.3). Modality and Scheduled Station AE
+Title are matching keys when the row names them, echoed otherwise. One Accession Number and
+Study Instance UID per (Admission ID, modality, station), kept across restarts (RAD TF-1
+47.1.1.1). SPS start = now. Issuer sequences carry an OID as Universal Entity ID when
+`issuer_oid` (file) or `ACCESSION_ISSUER_OID` (env) is set. Also takes ITI-31 ADT over MLLP and
+adds the encounter (RAD TF-2x Appendix U mapping; PV1-3 point of care → department type code via
+`department_codes` in the file). `samples/encounters.json` ships the EBIW_10 patient set; fill
+the partner AE titles and the Gazelle OID before a graded run.
 
 | Env | Default | Meaning |
 |---|---|---|

@@ -8,9 +8,12 @@ or ADT consumer unchanged.
 Behavior (RAD TF-2 4.132.4.1.3 / 4.128.4.2, HL7 v2.5.1 ch.2 original-mode ACK):
   - Accept one or more MLLP frames per TCP connection: <VT 0x0B> message <FS 0x1C><CR 0x0D>.
   - Write every inbound message and every outbound ACK to disk, byte-for-byte.
-  - Reply ACK^<trigger>^ACK with MSA-1 = AA and MSA-2 = inbound MSH-10.
-    If MSH cannot be parsed, reply MSA-1 = AR. Nothing else is validated: the monitor
-    reads the captured message against the profile; this tool does not grade.
+  - Reply ACK^<trigger>^ACK (MSH-9 three components, RAD TF-2 2.4.4.2; MSH-12 2.5.1) with
+    MSA-1 = AA and MSA-2 = inbound MSH-10 (RAD TF-2 2.4.4.3, original mode per 2.4.1.2).
+    If MSH cannot be parsed, reply MSA-1 = AR plus an ERR segment (2.4.4.4).
+    **AA means "received and logged", not "conformant".** RD 4.128.4.2.3 lets a Result
+    Aggregator answer AE for an invalid ORU; this stand-in never does, by design: the monitor
+    grades from the raw capture, the tool does not.
   - Stateless. Multiple messages for the same study are simply logged in order.
 
 Config (env vars):
@@ -74,8 +77,9 @@ def build_ack(msg: bytes) -> tuple[bytes, str]:
     now = datetime.now().strftime("%Y%m%d%H%M%S")
     if fields is None:
         ack = "\r".join([
-            f"MSH|^~\\&|{ACK_APP}|{ACK_FAC}|||{now}||ACK|{now}|P|2.5.1",
-            "MSA|AR||Cannot parse MSH",
+            f"MSH|^~\\&|{ACK_APP}|{ACK_FAC}|||{now}||ACK^^ACK|{now}|P|2.5.1",
+            "MSA|AR|",
+            "ERR|||207^Application internal error^HL70357|E|||||Cannot parse MSH",
         ]) + "\r"
         return ack.encode("latin-1"), "AR"
     enc = field(fields, 2, "^~\\&")
@@ -85,7 +89,7 @@ def build_ack(msg: bytes) -> tuple[bytes, str]:
     trigger = msg_type.split(comp)[1] if comp in msg_type else ""
     ctrl_id = field(fields, 10)
     proc_id = field(fields, 11, "P")
-    version = field(fields, 12, "2.5.1")
+    version = "2.5.1"  # the ACK's own version (RAD TF-2 2.4.4.2), not an echo of the inbound MSH-12
     ack_type = f"ACK{comp}{trigger}{comp}ACK" if trigger else "ACK"
     ack = sep.join(["MSH", enc, ACK_APP, ACK_FAC, sending_app, sending_fac, now, "",
                     ack_type, f"ACK{now}{counter:04d}", proc_id, version]) + "\r"
@@ -95,19 +99,25 @@ def build_ack(msg: bytes) -> tuple[bytes, str]:
 
 def summarize(msg: bytes) -> str:
     """One line for the console: the fields a monitor looks at first. Read-only, no grading."""
-    segs = {}
+    segs, counts = {}, {}
     for seg in msg.decode("latin-1").replace("\n", "\r").split("\r"):
-        if len(seg) > 3 and seg[3] == "|" and seg[:3] not in segs:
-            segs[seg[:3]] = seg.split("|")
+        if len(seg) > 3 and seg[3] == "|":
+            counts[seg[:3]] = counts.get(seg[:3], 0) + 1
+            if seg[:3] not in segs:
+                segs[seg[:3]] = seg.split("|")
     def g(seg, n):
         s = segs.get(seg)
         if not s:
             return "-"
         i = n - 1 if seg == "MSH" else n  # MSH-1 is the separator, so MSH indexes shift by one
         return s[i] if i < len(s) else "-"
-    return (f"MSH-9={g('MSH',9)} MSH-10={g('MSH',10)} MSH-12={g('MSH',12)} "
-            f"PID-3={g('PID',3)} PID-5={g('PID',5)} PV1-19={g('PV1',19)} OBR-4={g('OBR',4)} "
-            f"OBR-18={g('OBR',18)} OBR-19={g('OBR',19)} OBR-25={g('OBR',25)} OBX-5(1st)={g('OBX',5)}")
+    segcount = " ".join(f"{k}x{v}" for k, v in counts.items())
+    pid2 = g('PID', 2)
+    return (f"MSH-9={g('MSH',9)} MSH-12={g('MSH',12)} MSH-10={g('MSH',10)} [{segcount}] "
+            f"PID-3={g('PID',3)}{' PID-2(retired!)=' + pid2 if pid2 not in ('', '-') else ''} PID-5={g('PID',5)} PV1-19={g('PV1',19)} "
+            f"OBR-4={g('OBR',4)} OBR-16={g('OBR',16)} OBR-18={g('OBR',18)} OBR-19={g('OBR',19)} OBR-25={g('OBR',25)} "
+            f"OBR-32={g('OBR',32)} OBR-44={g('OBR',44)} TQ1-9={g('TQ1',9)} "
+            f"OBX1: 2={g('OBX',2)} 3={g('OBX',3)} 5={g('OBX',5)[:60]} 11={g('OBX',11)}")
 
 
 async def handle(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:

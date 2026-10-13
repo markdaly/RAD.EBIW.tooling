@@ -50,8 +50,12 @@ in a hex viewer. The receiver does not reject on content; every parseable messag
   reject is on the SCU side (wrong host/port) or a TLS expectation.
 - Dates: SPS Start Date in the response is always today; a date-range query for another day
   returns nothing, which is correct.
-- Same admission, different accession: the station (calling AE title for MWL, Scheduled Station
-  Name Code for UPS-RS) is part of the key on purpose (RAD TF-1 47.1.1.1).
+- Same admission, different accession: the key is (Admission ID, modality, station), where
+  station is the Scheduled Station AE Title in the query (MWL) or the Station Name Code
+  (UPS-RS). Same admission to the same device gives the same accession (RAD TF-1 47.1.1.1);
+  another device or the other procedure under that admission gets its own.
+- A row names a modality or AE title and never matches: those are matching keys when set.
+  Blank them in the encounters file to make a row match any device.
 
 ## UPS-RS returns 204 or 404
 

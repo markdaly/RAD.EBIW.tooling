@@ -28,9 +28,10 @@ expires: 2026-10-16
 - Expected actions (4.132.4.1.3): "accept and process the message"; must accept multiple
   messages for the same Study Instance UID. POCUS Option (4.132.4.1.3.1): link the OBX
   report to the encounter in PV1-19. Nothing else is testable on the wire.
-- Reply: Acknowledge Imaging Result "as described in 4.128.4.2" (RAD TF-2, RD profile).
-  From memory of 4.128.4.2: HL7 v2.5.1 Chapter 2 original-mode ACK, `MSH-9 = ACK^R01^ACK`,
-  `MSA-1 = AA|AE|AR`, `MSA-2 = MSH-10` of the ORU. Verify against RAD TF-2 if a vendor argues.
+- Reply: Acknowledge Imaging Result "as described in 4.128.4.2", which lives in the RD
+  supplement rev 1.2 (RAD TF-2 only holds a placeholder): HL7 v2.5.1 original-mode ACK
+  (RAD TF-2 2.4.1.2), `MSH-9 = ACK^R01^ACK` (three components, 2.4.4.2), `MSA-1 = AA|AE|AR`,
+  `MSA-2 = MSH-10` of the ORU (2.4.4.3). Verified overnight: `research/from-memory-claims.md` (a).
 - What the Sender must put in the ORU under the POCUS Option (4.132.4.1.2.3), the parts a
   monitor reads off the captured message:
   - PV1-19 Visit Number **R**, = Admission ID (0038,0010) from the images.
@@ -70,14 +71,16 @@ ACKed, so transport is done. Content read against RAD TF-2 4.132 (POCUS Option),
 
 **Blocking (the message is not a RAD-132 as sent)**
 1. **MSH-12 = `2.4`.** Must be `2.5.1` (4.132.3, 4.132.4.1.2). Floor-wide nudge, same as everyone.
-2. **MSH-9 = `ORU^R01`**, no message-structure component. v2.5.1 wants `ORU^R01^ORU_R01`
-   (RAD TF-2 2.3.1 conventions, from memory).
+2. **MSH-9 = `ORU^R01`**, no message-structure component. Must be `ORU^R01^ORU_R01`:
+   RAD TF-2 2.4.4.2 ("all three components are required") and RD 4.128.4.1.2.2 (verified
+   overnight, `research/from-memory-claims.md` (c)).
 3. **Patient ID in PID-2 (retired), PID-3 empty.** RAD-128 PID requires PID-3 CX with an
    assigning authority (PID-3.4). Nothing downstream can match the patient.
 4. **OBR-18 Accession Number empty** (R). Without it the Result Aggregator cannot tie the
    report to the stored images. OBR-19 Issuer empty too (R2, fill if the images carry 0008,0051).
-5. **No Study Instance UID OBX** (`OBX|n|ST|113014^DICOM Study^DCM||<UID>`), which the message
-   table requires unbracketed. Needed for the RAD-106 link in 4.132.4.1.3.1.
+5. **No Study Instance UID OBX** (`OBX|n|ST|113014^DICOM Study^DCM||<UID>||||||O`, OBX-2 ST,
+   OBX-11 O per RD 4.128.4.1.2.8, verified), which the message table requires unbracketed.
+   Needed for the RAD-106 link in 4.132.4.1.3.1.
 6. **OBR-16 Ordering Provider and OBR-32 Principal Result Interpreter empty.** Both are R
    under the POCUS Option (Physician of Record, NPI in the US). ORC is absent, which is fine,
    but then OBR-16 has to carry it.

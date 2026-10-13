@@ -53,19 +53,19 @@ def code(value, scheme, meaning):
     return ds
 
 
-def workitem(enc, station, modality):
+def workitem(enc, station, modality, create=True):
     """MWL worklist item re-shaped as a UPS instance per Table 4.130.4.1.2.2-1."""
     q = Dataset()  # minimal 'query' so worklist_item() echoes station/modality
     sps = Dataset(); sps.ScheduledStationAETitle = station; sps.Modality = modality
     q.ScheduledProcedureStepSequence = Sequence([sps])
-    m = em.worklist_item(enc, station, q)           # generates/reuses accession + Study UID
+    m = em.worklist_item(enc, station, q, create)   # generates/reuses accession + Study UID (create=False: placeholder)
     s = m.ScheduledProcedureStepSequence[0]
     now = datetime.now().strftime("%Y%m%d%H%M%S")
     u = Dataset()
     u.SpecificCharacterSet = "ISO_IR 100"
     # UPS identity / state (PS3.4 CC.2.5-3 required return keys)
     u.SOPClassUID = "1.2.840.10008.5.1.4.34.6.1"   # Unified Procedure Step - Push SOP Class
-    u.SOPInstanceUID = generate_uid(prefix=em.UID_ROOT, entropy_srcs=[m.StudyInstanceUID, station])
+    u.SOPInstanceUID = generate_uid(prefix=em.UID_ROOT, entropy_srcs=[m.StudyInstanceUID or enc["admission_id"], station])
     u.ProcedureStepState = "SCHEDULED"
     u.InputReadinessState = "READY"
     u.ScheduledProcedureStepPriority = "MEDIUM"
@@ -88,8 +88,10 @@ def workitem(enc, station, modality):
     rr.RequestedProcedureCodeSequence = m.RequestedProcedureCodeSequence
     u.ReferencedRequestSequence = Sequence([rr])
     # Scheduled Procedure Step mappings
-    u.ScheduledStationNameCodeSequence = Sequence([code(station, "99IHE", station)])          # AE title as code meaning
-    u.ScheduledStationClassCodeSequence = Sequence([code(modality, "DCM", CID29.get(modality, modality))])
+    st = str(s.ScheduledStationAETitle)  # the row's configured AE title, or the echoed query value
+    u.ScheduledStationNameCodeSequence = Sequence([code(st, "99IHE", st)])          # AE title as code meaning
+    md = str(s.Modality)
+    u.ScheduledStationClassCodeSequence = Sequence([code(md, "DCM", CID29.get(md, md))])
     u.ScheduledProcedureStepStartDateTime = s.ScheduledProcedureStepStartDate + s.ScheduledProcedureStepStartTime
     u.ProcedureStepLabel = s.ScheduledProcedureStepDescription
     u.ScheduledWorkitemCodeSequence = m.RequestedProcedureCodeSequence
@@ -116,7 +118,7 @@ def values_at(ds, path):
 def match(key, value):
     if key == "":
         return True
-    if "-" in key and re.fullmatch(r"[0-9.\-]*", key):      # date/time range
+    if re.fullmatch(r"(\d{8}(\d{6})?)?-(\d{8}(\d{6})?)?", key):   # DA/DT range only; "123-45" is an ID
         lo, hi = key.split("-", 1)
         return (not lo or lo <= value[:len(lo)]) and (not hi or value[:len(hi)] <= hi)
     pat = re.escape(key).replace(r"\*", ".*").replace(r"\?", ".")
@@ -145,8 +147,8 @@ def search(request: Request):
     (em.SESSION_DIR / f"{stem}.request.txt").write_text(
         f"{request.method} {request.url}\n" + "".join(f"{k}: {v}\n" for k, v in request.headers.items()))
     em.log(f"UPS-RS search #{counter} from {peer} station={station} modality={modality} params={params}")
-    hits = [workitem(enc, station, modality) for enc in em.encounters()]
-    hits = [u for u in hits if matches(u, params)]
+    rows = [(enc, workitem(enc, station, modality, create=False)) for enc in em.encounters()]
+    hits = [workitem(enc, station, modality) for enc, u in rows if matches(u, params)]  # allocate only for matches
     off, lim = int(params.get("offset", 0)), int(params.get("limit", 0) or 0)
     hits = hits[off: off + lim] if lim else hits[off:]
     for u in hits:

@@ -44,6 +44,37 @@ responses one click away, and "download raw" for the byte-exact Gazelle attachme
 to the repo and docs. Console twin: `tools/hl7show.py <file>`. Tested end to end through its
 endpoints including a port change plus restart; the panel survives "stop all".
 
+**Research thread merged and applied (01:00 ET).** The overnight research session delivered six
+files under `research/` (RAD-130/131/132 monitor checklists, the four from-memory claims
+verified with citations, all ten Gazelle EBIW tests transcribed incl. the EBIW_10 patient set
+and code set, a tool-gap list). Applied from `research/tool-gaps.md`:
+- **M1–M4, U1 (data model):** encounters are rows per procedure and device type; `modality`,
+  `scheduled_station_ae_title` and `procedure` per row; Modality and Scheduled Station AE Title
+  are SCP matching keys when a row names them, echoed otherwise; accession + Study UID keyed on
+  (admission, modality, station) and allocated only for matched rows. `samples/encounters.json`
+  now carries the EBIW_10 set (PEREZ..BERGER as `^TEST`, AE titles blank, OID blank) plus the two
+  generic rows. Verified against the EBIW_20/30 step 100/110/120/200 expectations over both
+  MWL and UPS-RS: 2 / 3 / 2 / 1, correct procedure codes, same accession on both protocols.
+- **M5/U5:** issuer sequences carry Universal Entity ID + ISO when `issuer_oid` or
+  `ACCESSION_ISSUER_OID` is set. **M6:** repeating PID-3 → Other Patient IDs Sequence, matched.
+  **M8:** station = Scheduled Station AE Title from the query. **M10:** PV1-3 → department type
+  code via `department_codes`. **U9:** range parsing only for DA/DT shapes.
+- **R2/R4:** ACK is always 2.5.1 with a three-component MSH-9; the unparseable path sends
+  `MSA|AR` + ERR instead of MSA-3. **R7/R6:** summary line now shows segment counts, PID-2 if
+  present, OBR-16/32/44, TQ1-9, first OBX-2/3/11. **R3:** docstring and RUNNING say AA ≠ conformant.
+- **X1:** `samples/ADT_A04_ITI-31_EBIW10.hl7` (PEREZ, ADM001, PV1-3 `ED` → 225728007).
+  **X2:** issue 002 citations corrected (RAD TF-2 2.4.4.2, RD 4.128.4.1.2.2, OBX-11 = O).
+  Sample ORU's Study UID OBX-11 set to `O`.
+Not applied, by choice: M7 (SPS start time matching, over-matches harmlessly), M9 (`NPI` vs
+`99NPI` scheme designator, cosmetic). All loopback and Gazelle-scenario tests pass; floor.sh
+start/status/stop re-verified before shutdown.
+
+**Before the first graded EBIW_20/30 run (you, five minutes):** in `samples/encounters.json`
+replace `TEST` in the patient names with the partner's identifier as Gazelle wants, put the
+modality's and lightweight modality's AE titles into `scheduled_station_ae_title` on the US / XC
+rows, and set `issuer_oid` if Gazelle publishes one (any value is acceptable for POCUS per
+EBIW_20). Then `tools/floor.sh restart em` and `restart ups`.
+
 **Still open from yesterday:** proxy channels (issue 005), Read_This_First code set, the TLS
 ticket's GSS permanent link, first real vendor queries.
 
