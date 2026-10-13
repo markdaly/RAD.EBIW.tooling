@@ -16,8 +16,8 @@
   <text x="28" y="40" class="ttl">EBIW, POCUS Option: where the kit's stand-ins sit</text>
   
   <!-- callout: what the yellow ring means -->
-  <g transform="translate(676,18)">
-    <rect width="336" height="92" rx="10" fill="#fff8dc" stroke="#e0a800" stroke-width="2"/>
+  <g transform="translate(628,18)">
+    <rect width="384" height="92" rx="10" fill="#fff8dc" stroke="#e0a800" stroke-width="2"/>
     <circle cx="26" cy="26" r="11" class="ours"/>
     <text x="48" y="31" class="lbl">Stops this kit plays</text>
     <text x="48" y="51" class="sub">Encounter Manager: tools/mwl_scp.py, tools/ups_rs.py</text>
