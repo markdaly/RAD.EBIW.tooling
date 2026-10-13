@@ -99,11 +99,18 @@ def row_key(e):
 
 def encounters():
     """Sample-file rows plus those received over ITI-31 (re-read each call: ups_rs.py is a
-    separate process and writes the same file). An ADT for an existing row key replaces it."""
-    merged = {row_key(e): e for e in CONF["encounters"]}
-    if ADT_FILE.exists():
-        merged.update({row_key(e): e for e in json.loads(ADT_FILE.read_text())})
-    return list(merged.values())
+    separate process and writes the same file). An ADT for an admission the file already has
+    overlays its patient/visit fields onto every row of that admission (one per device type),
+    keeping the row's modality, station AE title and procedure; otherwise it is a row of its own."""
+    rows = [dict(e) for e in CONF["encounters"]]
+    adts = json.loads(ADT_FILE.read_text()) if ADT_FILE.exists() else []
+    for adt in adts:
+        same = [r for r in rows if r.get("admission_id") == adt["admission_id"]]
+        for r in same:
+            r.update({k: v for k, v in adt.items() if k not in ("modality", "scheduled_station_ae_title", "procedure")})
+        if not same:
+            rows.append(adt)
+    return rows
 
 
 def context_for(admission_id, modality, station, create=True):
