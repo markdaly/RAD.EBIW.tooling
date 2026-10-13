@@ -16,6 +16,8 @@ Workflow, POCUS Option) and reusable for any HL7 v2 or DICOM worklist partner yo
 | `tools/panel.py` | | local web panel: service control, port config, log browser with HL7 field view and raw export | 8090 |
 | `tools/hl7show.py` | | console HL7 pretty-printer with field names; prev/next through a session folder | |
 
+![Where the kit's stand-ins sit in EBIW](docs/images/ebiw-map.svg)
+
 Quick start (macOS or Linux, needs [uv](https://docs.astral.sh/uv/)):
 
 ```bash
@@ -28,6 +30,20 @@ tmux attach -t ihe
 
 Then read [docs/RUNNING.md](docs/RUNNING.md) for env vars, ports, where logs and state live, and
 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) when something does not arrive.
+
+The panel (`tools/floor.sh panel`, http://127.0.0.1:8090/) shows service status, lets you start,
+stop and restart the servers, edit ports and the encounter set, and browse every capture with
+HL7 rendered field by field, prev/next, the paired ACK, and a byte-exact raw download for Gazelle:
+
+![Panel: a captured RAD-132 ORU rendered field by field](docs/images/panel-message.png)
+
+<details><summary>More screenshots: index and encounter setup</summary>
+
+![Panel index: services, config, logs](docs/images/panel-index.png)
+
+![Panel: encounter rows and the EBIW_20/30 pre-run setup form](docs/images/panel-encounters.png)
+
+</details>
 
 ## Status and honesty
 

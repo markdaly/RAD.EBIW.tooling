@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 650" width="1040" height="650" font-family="-apple-system, Helvetica Neue, Helvetica, Arial, sans-serif">
+  <defs>
+    <style>
+      .track { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      .dash  { stroke-dasharray: 14 10; }
+      .st    { fill: #fff; stroke: #222; stroke-width: 4; }
+      .ours  { fill: #fff; stroke: #e0a800; stroke-width: 8; }
+      .lbl   { font-size: 15px; font-weight: 700; fill: #1a1a1a; }
+      .sub   { font-size: 12px; fill: #555; }
+      .tag   { font-size: 12px; font-weight: 700; fill: #8a6300; }
+      .leg   { font-size: 13px; fill: #1a1a1a; }
+      .ttl   { font-size: 22px; font-weight: 800; fill: #1a1a1a; }
+    </style>
+  </defs>
+  <rect width="1040" height="650" rx="14" fill="#f6f5f0"/>
+  <text x="28" y="40" class="ttl">EBIW, POCUS Option: where the kit's stand-ins sit</text>
+  <text x="28" y="62" class="sub">Metro view of the transactions. Yellow-ringed stops are played by this kit; every other stop is a vendor system under test.</text>
+
+  <!-- tracks -->
+  <!-- RAD-131 C-STORE: Modality -> Image Manager, and POCUS Manager -> Image Manager -->
+  <polyline class="track" stroke="#e8702a" points="140,152 660,152 660,370"/>
+  <!-- RAD-108 STOW-RS: Lightweight Modality -> Image Manager -->
+  <polyline class="track dash" stroke="#f0a030" points="400,168 660,168"/>
+  <!-- RAD-130 MWL: Modality -> Encounter Manager -->
+  <polyline class="track" stroke="#2e9e5b" points="132,160 132,360 400,360"/>
+  <!-- RAD-130 UPS-RS: Lightweight Modality -> Encounter Manager -->
+  <polyline class="track" stroke="#1c9aa8" points="408,168 408,370"/>
+  <!-- RAD-132 ORU: POCUS Manager -> Result Aggregator; Image Manager -> Result Aggregator -->
+  <polyline class="track" stroke="#7a4bd1" points="660,378 880,378"/>
+  <polyline class="track" stroke="#7a4bd1" points="668,160 888,160 888,370"/>
+  <!-- RAD-132 ORU optional: POCUS Manager / Image Manager -> Encounter Manager -->
+  <polyline class="track dash" stroke="#b39ae6" points="652,386 400,386"/>
+  <!-- ITI-31 ADT: Result Aggregator -> Encounter Manager -->
+  <polyline class="track" stroke="#2f6fd6" points="888,386 1000,386 1000,505 240,505 240,386 392,386"/>
+
+  <!-- vendor stations -->
+  <circle class="st" cx="140" cy="160" r="12"/>
+  <text x="140" y="128" text-anchor="middle" class="lbl">Acquisition Modality</text>
+  <text x="140" y="110" text-anchor="middle" class="sub">POCUS device, DIMSE</text>
+
+  <circle class="st" cx="400" cy="160" r="12"/>
+  <text x="400" y="128" text-anchor="middle" class="lbl">Lightweight Modality</text>
+  <text x="400" y="110" text-anchor="middle" class="sub">camera / app, REST</text>
+
+  <circle class="st" cx="660" cy="160" r="12"/>
+  <text x="660" y="128" text-anchor="middle" class="lbl">Image Manager / Archive</text>
+  <text x="660" y="110" text-anchor="middle" class="sub">VNA</text>
+
+  <circle class="st" cx="660" cy="378" r="12"/>
+  <text x="660" y="420" text-anchor="middle" class="lbl">POCUS Manager</text>
+  <text x="660" y="438" text-anchor="middle" class="sub">worksheets, report, QA</text>
+
+  <!-- our stations -->
+  <circle class="ours" cx="400" cy="378" r="18"/>
+  <text x="400" y="420" text-anchor="middle" class="lbl">Encounter Manager</text>
+  <text x="400" y="438" text-anchor="middle" class="tag">kit: tools/mwl_scp.py + tools/ups_rs.py</text>
+  <text x="400" y="455" text-anchor="middle" class="sub">MWL C-FIND 11112 · UPS-RS 8042 · ADT in 2576</text>
+
+  <circle class="ours" cx="880" cy="378" r="18"/>
+  <text x="880" y="420" text-anchor="middle" class="lbl">Result Aggregator</text>
+  <text x="880" y="438" text-anchor="middle" class="tag">kit: tools/mllp_receiver.py</text>
+  <text x="880" y="455" text-anchor="middle" class="sub">ORU in 2575 · ADT out via mllp_send.py</text>
+
+  <!-- line labels on tracks -->
+  <text x="270" y="145" text-anchor="middle" class="sub" fill="#e8702a">RAD-131 C-STORE</text>
+  <text x="530" y="186" text-anchor="middle" class="sub">RAD-108 STOW-RS</text>
+  <text x="250" y="352" text-anchor="middle" class="sub" fill="#2e9e5b">RAD-130 MWL</text>
+  <text x="430" y="270" class="sub" fill="#1c9aa8">RAD-130 UPS-RS</text>
+  <text x="770" y="370" text-anchor="middle" class="sub" fill="#7a4bd1">RAD-132 ORU^R01</text>
+  <text x="900" y="270" class="sub" fill="#7a4bd1">RAD-132 ORU^R01</text>
+  <text x="525" y="404" text-anchor="middle" class="sub" fill="#8c6fd0">RAD-132 (optional, to EM)</text>
+  <text x="620" y="528" text-anchor="middle" class="sub" fill="#2f6fd6">ITI-31 ADT^A04: the Result Aggregator feeds the Encounter Manager (tools/mllp_send.py → port 2576)</text>
+
+  <!-- legend -->
+  <g transform="translate(28,560)">
+    <line x1="0" y1="0" x2="36" y2="0" class="track" stroke="#2e9e5b"/><text x="46" y="5" class="leg">RAD-130 Get Encounter Imaging Context, MWL semantics</text>
+    <line x1="0" y1="24" x2="36" y2="24" class="track" stroke="#1c9aa8"/><text x="46" y="29" class="leg">RAD-130, UPS-RS semantics</text>
+    <line x1="0" y1="48" x2="36" y2="48" class="track" stroke="#2f6fd6"/><text x="46" y="53" class="leg">ITI-31 Patient Encounter Management</text>
+    <line x1="420" y1="0" x2="456" y2="0" class="track" stroke="#e8702a"/><text x="466" y="5" class="leg">RAD-131 Store Encounter Images (C-STORE)</text>
+    <line x1="420" y1="24" x2="456" y2="24" class="track dash" stroke="#f0a030"/><text x="466" y="29" class="leg">RAD-108 Store Instances over the Web (STOW-RS)</text>
+    <line x1="420" y1="48" x2="456" y2="48" class="track" stroke="#7a4bd1"/><text x="466" y="53" class="leg">RAD-132 Notify of Imaging Results (ORU^R01); dashed = optional copy to the EM</text>
+  </g>
+  <text x="1012" y="636" text-anchor="end" class="sub">RAD TF-1 47 (EBIW rev 3.1) · RAD TF-2 4.108, 4.130, 4.131, 4.132 · ITI TF-2 3.31</text>
+</svg>
