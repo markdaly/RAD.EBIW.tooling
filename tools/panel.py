@@ -8,6 +8,8 @@ a vendor; it only reads logs/ and runs tools/floor.sh.
   GET  /logs/<actor>/<session> files in a session (pairs: message + ACK, query + responses)
   GET  /view?f=<relpath>      one capture, rendered (HL7 field table, DICOM dump, JSON), prev/next, raw link
   GET  /raw?f=<relpath>       the raw bytes as a download (what a vendor attaches in Gazelle)
+  GET  /howto                 get-started page for vendors, rendered from events/<event>/docs/HOWTO.md
+                              (PANEL_HOWTO overrides the path)
   GET  /tail                  live view: summary lines of every actor merged by time, plus the newest
                               captures, refreshed every 2 s (follows the bottom unless you scroll up)
   POST /config                writes .floor.env (ports, AE title, issuer, encounters file)
@@ -38,6 +40,14 @@ ROOT = Path(__file__).resolve().parent.parent
 LOG_DIR = (ROOT / os.environ.get("LOG_DIR", "logs")).resolve()
 ENV_FILE = ROOT / ".floor.env"
 FLOOR = ROOT / "tools" / "floor.sh"
+
+
+def howto_path():
+    """PANEL_HOWTO, else the newest events/<event>/docs/HOWTO.md (event facts stay under events/)."""
+    if os.environ.get("PANEL_HOWTO"):
+        return (ROOT / os.environ["PANEL_HOWTO"]).resolve()
+    found = sorted(ROOT.glob("events/*/docs/HOWTO.md"))
+    return found[-1] if found else None
 HOST, PORT = os.environ.get("PANEL_HOST", "0.0.0.0"), int(os.environ.get("PANEL_PORT", "8090"))
 REMOTE_CONTROL = os.environ.get("PANEL_REMOTE_CONTROL", "") == "1"
 LOCAL = {"127.0.0.1", "::1", "localhost"}
@@ -96,13 +106,14 @@ def page(title, body, nav=""):
     pre{background:#0b0b0b;padding:8px;overflow:auto;border:1px solid #333}.up{color:#6f6}.down{color:#f66}.btn{background:#2b4a6b;color:#fff;border:0;padding:4px 10px;border-radius:3px;cursor:pointer}
     .btn.red{background:#6b2b2b}input{background:#222;color:#eee;border:1px solid #444;padding:3px 6px}form.inline{display:inline}small{color:#888}.comp{color:#8d8}
     .banner{padding:6px 16px;font-weight:bold}.banner.admin{background:#1f3a1f;color:#bfb}.banner.ro{background:#4a3a10;color:#fe9}
-    body.ro form{opacity:.4;pointer-events:none}"""
+    body.ro form{opacity:.4;pointer-events:none}.callout{background:#16304a;border:1px solid #2b5a85;padding:8px 12px;border-radius:4px;font-size:15px}
+    .md{max-width:1000px}.md h1{font-size:22px}.md h2{font-size:17px;margin-top:22px;border-bottom:1px solid #333}.md code{background:#222;padding:1px 4px;border-radius:3px}.md td code{white-space:nowrap}"""
     admin = IS_ADMIN.get()
     banner = (f"<div class='banner admin'>ADMIN: you are on the machine running this panel. Config, start/stop/restart and encounter edits work here only; floor laptops get a read-only view.</div>"
               if admin else
               f"<div class='banner ro'>READ-ONLY VIEW: browse logs and download raw captures. Administration (config, start/stop/restart, encounter edits) is only available on the machine running this panel.</div>")
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>{html.escape(title)}</title><style>{css}</style></head>
-<body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> <a href="/tail">live</a> <a href="/encounters">encounters</a> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
+<body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> <a href="/howto">howto</a> <a href="/tail">live</a> <a href="/encounters">encounters</a> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
 {banner}<main>{body}</main><script>document.addEventListener('keydown',e=>{{const a=document.querySelector(e.key==='j'||e.key==='ArrowRight'?'#next':e.key==='k'||e.key==='ArrowLeft'?'#prev':null);if(a)location=a.href}})</script></body></html>"""
 
 
@@ -120,7 +131,8 @@ def index():
             sessions = sorted((s for s in actor.iterdir() if s.is_dir()), reverse=True)
             items = "".join(f"<li><a href='/logs/{actor.name}/{s.name}'>{s.name}</a> <small>{len(session_files(s))} files</small></li>" for s in sessions[:12])
             actors += f"<h3>{html.escape(actor.name)}</h3><ul>{items or '<li><small>no sessions</small></li>'}</ul>"
-    body = f"""<h2>Services</h2><pre>{status}</pre>
+    body = f"""<p class='callout'>New here? <a href='/howto'><b>Get started: how to connect, what to send, how to watch it arrive</b></a></p>
+<h2>Services</h2><pre>{status}</pre>
 <form class='inline' method='post' action='/service/start'><button class='btn'>start all</button></form>
 <form class='inline' method='post' action='/service/stop'><button class='btn red'>stop all</button></form>
 {' '.join(f"<form class='inline' method='post' action='/service/restart/{w}'><button class='btn'>restart {w}</button></form>" for w in ('ra','em','ups'))}
@@ -284,6 +296,59 @@ def tail_data(n=300):
     lines.sort()
     caps = sorted(caps, reverse=True)[:25]
     return lines[-n:], caps
+
+
+def md_inline(t):
+    t = html.escape(t, quote=False)
+    t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
+    t = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", t)
+    return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r"<a href='\2' target='_blank'>\1</a>", t)
+
+
+def md_to_html(text):
+    """Just enough Markdown for HOWTO.md: front matter, #/## headings, paragraphs, - and 1. lists,
+    pipe tables, `code`, **bold**, [links](https://...). No dependency."""
+    text = re.sub(r"\A---\n.*?\n---\n", "", text, flags=re.S)
+    out, para, items, kind, rows = [], [], [], "", []
+    def flush():
+        nonlocal para, items, kind, rows
+        if para: out.append("<p>" + md_inline(" ".join(para)) + "</p>")
+        if items: out.append(f"<{kind}>" + "".join(f"<li>{md_inline(i)}</li>" for i in items) + f"</{kind}>")
+        if rows:
+            cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows if not re.match(r"^\|[\s:|-]+\|?$", r.strip())]
+            if cells:
+                out.append("<table><tr>" + "".join(f"<th>{md_inline(c)}</th>" for c in cells[0]) + "</tr>" +
+                           "".join("<tr>" + "".join(f"<td>{md_inline(c)}</td>" for c in r) + "</tr>" for r in cells[1:]) + "</table>")
+        para, items, kind, rows = [], [], "", []
+    for line in text.splitlines():
+        st = line.strip()
+        m = re.match(r"^(#{1,3}) (.*)", st)
+        if not st:
+            flush()
+        elif m:
+            flush(); n = len(m.group(1)); out.append(f"<h{n}>{md_inline(m.group(2))}</h{n}>")
+        elif st.startswith("|"):
+            if para or items: flush()
+            rows.append(st)
+        elif re.match(r"^(- |\d+\. )", st):
+            k = "ul" if st.startswith("- ") else "ol"
+            if para or rows or (items and k != kind): flush()
+            kind = k; items.append(re.sub(r"^(- |\d+\. )", "", st))
+        elif items and line.startswith("  "):
+            items[-1] += " " + st          # continuation of a list item
+        else:
+            if items or rows: flush()
+            para.append(st)
+    flush()
+    return "\n".join(out)
+
+
+@app.get("/howto", response_class=HTMLResponse)
+def howto():
+    p = howto_path()
+    if not p or not p.is_file():
+        return page("howto", "<p>No HOWTO.md found under events/*/docs/ (set PANEL_HOWTO).</p>")
+    return page("get started", f"<div class='md'>{md_to_html(p.read_text('utf-8', 'replace'))}</div>")
 
 
 @app.get("/tail.json")

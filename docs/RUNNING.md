@@ -36,6 +36,9 @@ and a thin front end to `floor.sh` for control:
   identifier for the EBIW_10 names, one AE title per modality, issuer OID) that rewrites the
   encounters file in place. Restart `em` and `ups` afterwards.
 - Log index by actor and session; per-session file list with `summary.log`.
+- **howto** (header link, `/howto`; the index has a "New here?" callout): vendor get-started page
+  rendered from `events/<event>/docs/HOWTO.md` (newest event, or `PANEL_HOWTO=<path>`). Edit that
+  Markdown, not the panel; a reload shows the change.
 - **live** (header link, `/tail`): every actor's `summary.log` merged by time, newest at the
   bottom, refreshed every 2 s and following the end unless you scroll up; lines that name a
   capture link to it. Below it, the 25 newest captures with the time each was written.

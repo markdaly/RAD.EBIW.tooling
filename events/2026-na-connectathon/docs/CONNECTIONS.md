@@ -8,6 +8,9 @@ expires: 2026-10-16
 
 *As of Tue Oct 13, 10:40 ET. All four proxy channels forward; direct connections also work.*
 
+**Short version, one URL:** http://ddx0.na2026.net:8090/howto (the same panel shows your
+captures live). This page is the full reference.
+
 TOOL_DDx is a monitor-run partner substitute, approved by the RAD Technical Project Manager, for
 EBIW tests that have no vendor in one of the roles. It plays the **Result Aggregator** (receives
 RAD-132 ORU) and the **Encounter Manager** (worklist over DICOM MWL and UPS-RS, plus an ITI-31
