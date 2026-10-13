@@ -111,11 +111,11 @@ def page(title, body, nav=""):
       --admin-bg:#dff5e3;--admin-fg:#11612b;--ro-bg:#fff4d1;--ro-fg:#7a5300;--callout-bg:#e7f1fd;--callout-bd:#9cc3ef;--ra:#0b62c4;--em:#8250df}}
     body{font:15px/1.5 var(--sans);margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
     a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
-    header{background:var(--surface);padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:center}header b a{color:var(--text)}
+    header{background:var(--surface);padding:8px 16px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}header a,header b,header small,header span{white-space:nowrap}.nw{white-space:nowrap;overflow-wrap:normal}header b a{color:var(--text)}
     h1,h2,h3{font-weight:600;letter-spacing:-.01em}h2 small,h3 small{font-weight:400}
-    main{padding:12px 16px;max-width:1400px}table{border-collapse:collapse;width:100%}td,th{padding:3px 8px;border-bottom:1px solid var(--border);vertical-align:top;text-align:left}
+    main{padding:12px 16px;max-width:1400px;overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{padding:3px 8px;border-bottom:1px solid var(--border);vertical-align:top;text-align:left}td{overflow-wrap:anywhere}
     th{color:var(--muted);font-weight:500}tr.seg td{background:var(--seg);font-weight:700;color:var(--segtext);font-family:var(--mono);border-left:3px solid var(--accent)}
-    td.n{white-space:nowrap;color:var(--id);width:6em;font-family:var(--mono);font-size:13.5px}td.name{color:var(--muted);width:22em}td.v{font-family:var(--mono);font-size:13.5px}
+    td.n{white-space:nowrap;color:var(--id);width:6em;font-family:var(--mono);font-size:13.5px}td.name{color:var(--muted);width:22em}td.v{font-family:var(--mono);font-size:13.5px;overflow-wrap:anywhere}
     td.v small{color:var(--comp)}
     pre{background:var(--surface);padding:8px;overflow:auto;border:1px solid var(--border);font:13px/1.45 var(--mono);color:var(--text)}
     code{font-family:var(--mono);font-size:.92em}.up{color:var(--sep)}.down{color:var(--btnred)}
@@ -125,13 +125,13 @@ def page(title, body, nav=""):
     .banner{padding:6px 16px;font-weight:600}.banner.admin{background:var(--admin-bg);color:var(--admin-fg)}.banner.ro{background:var(--ro-bg);color:var(--ro-fg)}
     body.ro form{opacity:.4;pointer-events:none}.callout{background:var(--callout-bg);border:1px solid var(--callout-bd);padding:8px 12px;border-radius:4px;font-size:15px}
     .md{max-width:1000px}.md h1{font-size:24px}.md h2{font-size:18px;margin-top:22px;border-bottom:1px solid var(--border);padding-bottom:2px}
-    .md code{background:var(--code);padding:1px 4px;border-radius:3px}.md td code{white-space:nowrap}.md b{font-weight:600}
+    .md code{background:var(--code);padding:1px 4px;border-radius:3px}.md td code{overflow-wrap:anywhere}.md b{font-weight:600}
     .a-result-aggregator{color:var(--ra)}.a-encounter-manager{color:var(--em)}.a-other{color:var(--muted)}"""
     admin = IS_ADMIN.get()
     banner = (f"<div class='banner admin'>ADMIN: you are on the machine running this panel. Config, start/stop/restart and encounter edits work here only; floor laptops get a read-only view.</div>"
               if admin else
               f"<div class='banner ro'>READ-ONLY VIEW: browse logs and download raw captures. Administration (config, start/stop/restart, encounter edits) is only available on the machine running this panel.</div>")
-    return f"""<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="dark light"><title>{html.escape(title)}</title><style>{css}</style></head>
+    return f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark light"><title>{html.escape(title)}</title><style>{css}</style></head>
 <body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> <a href="/howto">howto</a> <a href="/tail">live</a> <a href="/encounters">encounters</a> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
 {banner}<main>{body}</main><script>document.addEventListener('keydown',e=>{{const a=document.querySelector(e.key==='j'||e.key==='ArrowRight'?'#next':e.key==='k'||e.key==='ArrowLeft'?'#prev':null);if(a)location=a.href}})</script></body></html>"""
 
@@ -382,7 +382,7 @@ def tail_json():
 def tail_page():
     body = """<h2>Live <small>summary lines of every actor, merged by time; refreshes every 2 s</small></h2>
 <p><label><input type='checkbox' id='follow' checked> follow the newest line</label> <small id='stamp'></small></p>
-<pre id='lines' style='height:55vh;overflow:auto;white-space:pre-wrap'></pre>
+<pre id='lines' style='height:55vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere'></pre>
 <h3>Newest captures</h3><table id='caps'><tr><th>time</th><th>actor</th><th>size</th><th>file</th></tr></table>
 <script>
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -395,7 +395,7 @@ async function tick(){
       return tag+' '+(l.link?`<a href='/view?f=${encodeURIComponent(l.link)}'>${t}</a>`:t)}).join('\\n');
     if(document.getElementById('follow').checked&&atBottom||box.dataset.first!=='done'){box.scrollTop=box.scrollHeight;box.dataset.first='done'}
     document.getElementById('caps').innerHTML='<tr><th>time</th><th>actor</th><th>size</th><th>file</th></tr>'+d.captures.map(c=>
-      `<tr><td>${c.time}</td><td class='${cls(c.actor)}'>${esc(c.actor)}</td><td>${c.size} B</td><td><a href='/view?f=${encodeURIComponent(c.link)}'>${esc(c.name)}</a> <small><a href='/raw?f=${encodeURIComponent(c.link)}'>raw</a></small></td></tr>`).join('');
+      `<tr><td class='nw'>${c.time}</td><td class='nw ${cls(c.actor)}'>${esc(c.actor)}</td><td class='nw'>${c.size} B</td><td><a href='/view?f=${encodeURIComponent(c.link)}'>${esc(c.name)}</a> <small><a href='/raw?f=${encodeURIComponent(c.link)}'>raw</a></small></td></tr>`).join('');
     document.getElementById('stamp').textContent='updated '+new Date().toLocaleTimeString();
   }catch(e){document.getElementById('stamp').textContent='panel unreachable, retrying'}
 }
