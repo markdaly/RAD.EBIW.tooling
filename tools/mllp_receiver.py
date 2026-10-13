@@ -90,7 +90,7 @@ def build_ack(msg: bytes) -> tuple[bytes, str]:
     ctrl_id = field(fields, 10)
     proc_id = field(fields, 11, "P")
     version = "2.5.1"  # the ACK's own version (RAD TF-2 2.4.4.2), not an echo of the inbound MSH-12
-    ack_type = f"ACK{comp}{trigger}{comp}ACK" if trigger else "ACK"
+    ack_type = f"ACK{comp}{trigger}{comp}ACK"  # always three components (RAD TF-2 2.4.4.2), ACK^^ACK if no trigger
     ack = sep.join(["MSH", enc, ACK_APP, ACK_FAC, sending_app, sending_fac, now, "",
                     ack_type, f"ACK{now}{counter:04d}", proc_id, version]) + "\r"
     ack += sep.join(["MSA", "AA", ctrl_id]) + "\r"

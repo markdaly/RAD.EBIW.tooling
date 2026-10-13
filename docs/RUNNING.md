@@ -67,6 +67,14 @@ Console line per message: MSH-9/12/10, segment counts, PID-3 (and PID-2 if someo
 uses it), PID-5, PV1-19, OBR-4/16/18/19/25/32/44, TQ1-9, first OBX-2/3/5/11, and the file name:
 the fields the EBIW_90 scrutiny test reads. **AA means received and logged, never
 "conformant"**; the monitor grades from the raw capture. Files: `<ts>-<n>-<MSH-9>.in.hl7` and `.ack.hl7`, plus `summary.log`.
+Edge cases, as tested with the 2026-10-13 adversarial corpus: MSH-9 with no trigger gets
+`ACK^^ACK` (always three components); empty MSH-10 gets `MSA|AA|` with MSA-2 empty; an
+unparseable MSH gets `MSA|AR|` + ERR. Bytes outside an MLLP frame (no VT, no FS/CR) get no ACK,
+are saved as-is when the connection closes and show as `WARN ... unframed bytes` in the summary.
+10 MiB messages, two messages per connection, LF or CRLF segment ends, NUL bytes and 8
+concurrent senders are all ACKed; captures are byte-exact, undeclared Latin-1 included.
+ITI-31 intake: A01/A04/A08 add or update the encounter; A03 is ACKed and stored like the others
+(the stand-in does not remove discharged encounters); no PV1-19 gets AR.
 
 ## Encounter Manager, DIMSE side: `tools/mwl_scp.py`
 
