@@ -9,6 +9,9 @@ a vendor; it only reads logs/ and runs tools/floor.sh.
   GET  /view?f=<relpath>      one capture, rendered (HL7 field table, DICOM dump, JSON), prev/next, raw link
   GET  /raw?f=<relpath>       the raw bytes as a download (what a vendor attaches in Gazelle)
   POST /config                writes .floor.env (ports, AE title, issuer, encounters file)
+  GET  /encounters            the rows the Encounter Manager serves, plus the pre-run setup form:
+                              partner identifier (replaces the name suffix on the EBIW_10 rows),
+                              one AE title per modality, issuer OID. POST /encounters writes the file.
   POST /service/<start|stop|restart>[/<ra|em|ups>]   runs tools/floor.sh
 
 Config (env): PANEL_HOST default 127.0.0.1 (set 0.0.0.0 to let others on the floor read it),
@@ -111,6 +114,7 @@ def index():
 <small> &nbsp; actions run <code>tools/floor.sh</code>; a restart reads the config below.</small>
 <h2>Config <small>(.floor.env, applied on next start/restart)</small></h2>
 <form method='post' action='/config'><table>{rows}</table><button class='btn'>save</button></form>
+<h2>Encounters</h2><p><a href='/encounters'>rows served by the Encounter Manager, pre-run setup (partner identifier, AE titles, OID)</a></p>
 <h2>Logs <small>{html.escape(str(LOG_DIR))}</small></h2>{actors or '<small>no logs yet</small>'}"""
     return page("kit panel", body)
 
@@ -130,6 +134,56 @@ def service(action: str, win: str = ""):
         return Response("bad action", status_code=400)
     out = floor(action, *([win] if win else []))
     return page("service", f"<pre>{html.escape(out)}</pre><a href='/'>back</a>")
+
+
+def enc_path():
+    return (ROOT / read_env().get("ENCOUNTERS", "samples/encounters.json")).resolve()
+
+
+@app.get("/encounters", response_class=HTMLResponse)
+def encounters_page(msg: str = ""):
+    path = enc_path()
+    try:
+        d = json.loads(path.read_text())
+    except Exception as e:
+        return page("encounters", f"<p>cannot read {html.escape(str(path))}: {html.escape(str(e))}</p>")
+    rows = d.get("encounters", [])
+    mods = sorted({r.get("modality", "") for r in rows if r.get("modality")})
+    ebiw = [r for r in rows if "^" in r.get("patient_name", "") and str(r.get("patient_id", "")).startswith("EBIW")]
+    suffix = ebiw[0]["patient_name"].split("^", 1)[1] if ebiw else ""
+    aet_now = {m: next((r.get("scheduled_station_ae_title", "") for r in rows if r.get("modality") == m), "") for m in mods}
+    form = f"""<form method='post' action='/encounters'><table>
+<tr><td>Partner identifier (name suffix on the {len(ebiw)} EBIW_10 rows, e.g. PEREZ^&lt;this&gt;)</td><td><input name='suffix' value='{html.escape(suffix)}'></td></tr>
+{''.join(f"<tr><td>AE title for modality {html.escape(m)} rows</td><td><input name='aet_{m}' value='{html.escape(aet_now[m])}'> <small>blank = any device</small></td></tr>" for m in mods)}
+<tr><td>Issuer OID (Universal Entity ID on issuer sequences)</td><td><input name='issuer_oid' value='{html.escape(d.get("issuer_oid", ""))}' size='40'> <small>blank = Local Namespace only</small></td></tr>
+<tr><td>Issuer (Local Namespace) on EBIW rows</td><td><input name='issuer_local' value='{html.escape(ebiw[0].get("issuer_of_patient_id", "") if ebiw else "")}'></td></tr>
+</table><button class='btn'>save to {html.escape(path.name)}</button> <small>then restart em and ups from the index page</small></form>"""
+    table = "".join(f"<tr><td>{html.escape(r.get('patient_name',''))}</td><td>{html.escape(r.get('patient_id',''))}</td><td>{html.escape(r.get('admission_id',''))}</td>"
+                    f"<td>{html.escape(r.get('modality','') or 'any')}</td><td>{html.escape(r.get('scheduled_station_ae_title','') or 'any')}</td>"
+                    f"<td>{html.escape(((r.get('procedure') or {}).get('code') or {}).get('value', '') or 'generic')}</td><td>{html.escape(r.get('department_name',''))}</td></tr>" for r in rows)
+    body = f"<h2>Encounters <small>{html.escape(str(path))}</small></h2>{('<p class=up>' + html.escape(msg) + '</p>') if msg else ''}<h3>Pre-run setup</h3>{form}<h3>Rows served</h3><table><tr><th>name</th><th>patient id</th><th>admission</th><th>modality</th><th>AE title</th><th>procedure</th><th>department</th></tr>{table}</table>"
+    return page("encounters", body, "<a href='/'>index</a>")
+
+
+@app.post("/encounters")
+async def encounters_save(request: Request):
+    form = {k: v[0].strip() for k, v in parse_qs((await request.body()).decode("utf-8", "replace")).items()}
+    path = enc_path()
+    d = json.loads(path.read_text())
+    changed = 0
+    for r in d.get("encounters", []):
+        if str(r.get("patient_id", "")).startswith("EBIW") and "^" in r.get("patient_name", "") and form.get("suffix"):
+            new = r["patient_name"].split("^", 1)[0] + "^" + form["suffix"]
+            changed += new != r["patient_name"]; r["patient_name"] = new
+            if form.get("issuer_local"):
+                r["issuer_of_patient_id"] = r["issuer_of_admission_id"] = form["issuer_local"]
+        m = r.get("modality")
+        if m and f"aet_{m}" in form:
+            changed += form[f"aet_{m}"] != r.get("scheduled_station_ae_title", ""); r["scheduled_station_ae_title"] = form[f"aet_{m}"]
+    if "issuer_oid" in form:
+        changed += form["issuer_oid"] != d.get("issuer_oid", ""); d["issuer_oid"] = form["issuer_oid"]
+    path.write_text(json.dumps(d, indent=2) + "\n")
+    return RedirectResponse(f"/encounters?msg=saved+({changed}+field+changes)", status_code=303)
 
 
 @app.get("/logs/{actor}/{session}", response_class=HTMLResponse)

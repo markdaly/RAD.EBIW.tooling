@@ -31,6 +31,9 @@ and a thin front end to `floor.sh` for control:
 
 - Service status (tmux windows + which ports listen), start all / stop all / restart one.
 - Config form that writes `.floor.env`; takes effect on the next start or restart.
+- Encounters page: the rows the Encounter Manager serves, and the pre-run setup form (partner
+  identifier for the EBIW_10 names, one AE title per modality, issuer OID) that rewrites the
+  encounters file in place. Restart `em` and `ups` afterwards.
 - Log index by actor and session; per-session file list with `summary.log`.
 - One capture rendered: HL7 as a field table with HL7 2.5.1 names and components split, DICOM
   query/response dumps and UPS-RS JSON as text. Prev/next (keys `j`/`k` or arrows), the related

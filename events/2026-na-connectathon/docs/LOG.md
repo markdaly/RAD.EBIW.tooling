@@ -14,9 +14,15 @@ Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket 
 **Morning checklist for the monitor (three lines):**
 1. Skim this tree, then flip GitHub visibility to public (Settings → General → Danger zone).
    Nothing else happens until you do.
-2. Optional: rename the GitHub repo to `ihe-connectathon-kit` (GitHub keeps a redirect) and
-   add the one or two staffers as collaborators, or point them at fork-and-PR (CONTRIBUTING.md).
-3. Check `research/` for the overnight research thread's output and the section below.
+2. Naming: the IHE GitHub org uses `DOMAIN.Profile` for spec repos (`ITI.MHD`, `PaLM.DPOW`,
+   `DEV.tooling`) and plain kebab-case for cross-domain tooling (`connectathon-artifacts`,
+   Apache-2.0). For a personal repo there is no convention to follow; `ihe-connectathon-kit`
+   reads fine, `connectathon-kit` if you want it shorter. If it ever moves under the IHE org,
+   something like `RAD.EBIW.tooling` would fit their pattern. Ask the TPM only if you want it
+   under their org. Add staffers as collaborators or point them at fork-and-PR.
+3. Pre-run setup for EBIW_20/30 is now a form: `tools/floor.sh panel`, open
+   http://127.0.0.1:8090/encounters, enter the partner identifier, the US and XC AE titles and
+   the OID, save, then restart `em` and `ups` from the index page.
 
 **What ran:**
 - Backup first: `../ihe-connectathon-2026-PRIVATE-20261012-234222.bundle` plus a full directory
@@ -69,11 +75,9 @@ Not applied, by choice: M7 (SPS start time matching, over-matches harmlessly), M
 `99NPI` scheme designator, cosmetic). All loopback and Gazelle-scenario tests pass; floor.sh
 start/status/stop re-verified before shutdown.
 
-**Before the first graded EBIW_20/30 run (you, five minutes):** in `samples/encounters.json`
-replace `TEST` in the patient names with the partner's identifier as Gazelle wants, put the
-modality's and lightweight modality's AE titles into `scheduled_station_ae_title` on the US / XC
-rows, and set `issuer_oid` if Gazelle publishes one (any value is acceptable for POCUS per
-EBIW_20). Then `tools/floor.sh restart em` and `restart ups`.
+**Before the first graded EBIW_20/30 run:** the panel's Encounters page (checklist item 3),
+or edit `samples/encounters.json` by hand: name suffix, US/XC AE titles, `issuer_oid`.
+Then `tools/floor.sh restart em` and `restart ups`.
 
 **Still open from yesterday:** proxy channels (issue 005), Read_This_First code set, the TLS
 ticket's GSS permanent link, first real vendor queries.
