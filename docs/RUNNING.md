@@ -128,8 +128,10 @@ Files per request: `<ts>-upsN-<station>.request.txt` and `.response.json` (or `.
 
 ## Senders and probes
 
-- `tools/mllp_send.py <file.hl7> <host> <port>`: send one message, print the ACK, save it next to
-  the input as `<file>.ack.hl7`. Env `TLS_CA`, `TLS_CERT`/`TLS_KEY`, `TLS_SERVERNAME`,
+- `tools/mllp_send.py <file.hl7> <host> <port>`: send one message, print the ACK. The bytes sent
+  and the ACK are logged as `logs/result-aggregator/send-<date>/<ts>-out-<host>_<port>-<MSH-9>.out.hl7`
+  and `.ack.hl7` with a `summary.log` line, failures included (`SEND_ACTOR`, `LOG_DIR` override).
+  That pair is the sender-side evidence, e.g. EBIW_POCUS_Simple_Workflow step 10. Env `TLS_CA`, `TLS_CERT`/`TLS_KEY`, `TLS_SERVERNAME`,
   `TLS_INSECURE=1` for MLLPS.
 - `tools/mwl_find.py`: see above.
 - `samples/`: `ORU_R01_RAD-132_POCUS.hl7` (RAD-132 with the POCUS Option fields),

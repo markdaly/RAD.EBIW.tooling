@@ -249,7 +249,7 @@ def view(f: str):
     rel = lambda q: f"{q.parent.parent.name}/{q.parent.name}/{q.name}"
     prev_ = f"<a id='prev' href='/view?f={rel(files[i-1])}'>&larr; prev</a>" if i > 0 else "<span style='color:#555'>&larr; prev</span>"
     next_ = f"<a id='next' href='/view?f={rel(files[i+1])}'>next &rarr;</a>" if i + 1 < len(files) else "<span style='color:#555'>next &rarr;</span>"
-    stem = re.sub(r"\.(in|ack)\.hl7$|\.query\.txt$|\.resp\d+\.txt$|\.request\.txt$|\.response\.(json|txt)$", "", p.name)
+    stem = re.sub(r"\.(in|out|ack)\.hl7$|\.query\.txt$|\.resp\d+\.txt$|\.request\.txt$|\.response\.(json|txt)$", "", p.name)
     pair = [q for q in files if q.name.startswith(stem) and q != p]
     pairs = " ".join(f"<a href='/view?f={rel(q)}'>{html.escape(q.name[len(stem):])}</a>" for q in pair)
     text = p.read_bytes().decode("utf-8", "replace")
