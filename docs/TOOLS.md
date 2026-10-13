@@ -21,30 +21,30 @@ an existing simulator covers the gap before building anything.
 ## Stand-in actor designs (build only on request)
 Each is one Python file with env-var config and raw logging to `./logs/<actor>/<ts>/`.
 
-1. **mllp_receiver.py** — **BUILT 2026-10-12** (`tools/mllp_receiver.py`): generic HL7 v2
+1. **mllp_receiver.py** — **built** (`tools/mllp_receiver.py`): generic HL7 v2
    responder (Result Aggregator for EBIW RAD-132, Order Filler sink, ADT consumer). asyncio
    TCP, MLLP framing (0x0B … 0x1C 0x0D), logs every message and ACK raw to
    `logs/<ACTOR>/<session>/`, replies `ACK^<trigger>^ACK` / `MSA|AA|<MSH-10>`, `AR` if MSH
    won't parse. Env config; optional MLLPS with required client cert (`TLS_CERT/TLS_KEY/TLS_CA`).
-   Run: `LISTEN_PORT=2575 python3 tools/mllp_receiver.py`. Ticket: `tickets/002-ebiw-result-aggregator.md`.
-2. **mllp_send.py** — **BUILT 2026-10-12** (`tools/mllp_send.py`): send a message file to a
+   Run: `LISTEN_PORT=2575 python3 tools/mllp_receiver.py`. Issue: `events/2026-na-connectathon/issues/002-ebiw-result-aggregator.md`.
+2. **mllp_send.py** — **built** (`tools/mllp_send.py`): send a message file to a
    host:port, print and save the ACK. Sample: `samples/ORU_R01_RAD-132_POCUS.hl7` (RAD-132
    POCUS Option ORU^R01; OBX-3 `113014^DICOM Study^DCM` for the Study UID is from memory of
    RAD-128, check before citing).
-3. **mwl_scp.py** — **BUILT 2026-10-12** (`tools/mwl_scp.py`): pynetdicom MWL C-FIND SCP as
+3. **mwl_scp.py** — **built** (`tools/mwl_scp.py`): pynetdicom MWL C-FIND SCP as
    EBIW Encounter Manager (RAD-130 MWL semantics + POCUS Option return keys). Encounters from
    `samples/encounters.json`; Study UID + Accession generated once per (Admission ID, calling
    AE) and kept in `logs/encounter-manager/state.json`; echoes Scheduled Station AE Title and
    Modality; SPS start = now; "Perform Imaging" generic procedure. Dumps every query and
    response. Run: `uv run --with pynetdicom --with pydicom python tools/mwl_scp.py`.
    Test SCU: `tools/mwl_find.py <host> <port> <AE> [PatientID] [AdmissionID]`.
-   **ITI-31 intake** (added 2026-10-12, ticket 004): MLLP port `ADT_PORT` (default 2576) accepts
+   **ITI-31 intake** (issue 004): MLLP port `ADT_PORT` (default 2576) accepts
    ADT^A01/A04/A05/A08, maps PID/PV1/DG1 → encounter per RAD TF-2x Appendix U Table U-1, ACKs
    AA, persists to `logs/encounter-manager/encounters-from-adt.json` (shared with ups_rs.py).
    Sample: `samples/ADT_A04_ITI-31.hl7`.
    Codes in the sample are PLACEHOLDERS until `EBIW_10_Read_This_First` is pulled from Gazelle.
-   Ticket: `tickets/003-ebiw-encounter-manager.md`.
-   **ups_rs.py** — **BUILT 2026-10-12** (`tools/ups_rs.py`): the same Encounter Manager over
+   Issue: `events/2026-na-connectathon/issues/003-ebiw-encounter-manager.md`.
+   **ups_rs.py** — **built** (`tools/ups_rs.py`): the same Encounter Manager over
    UPS-RS (RAD-130 UPS-RS semantics for Lightweight Modalities, mapping Table 4.130.4.1.2.2-1).
    FastAPI `GET /workitems?...` → `application/dicom+json`, 204 on no match; dotted keys for
    sequences; shares encounters and `state.json` with `mwl_scp.py` so DIMSE and REST hand out the
@@ -63,8 +63,8 @@ Each is one Python file with env-var config and raw logging to `./logs/<actor>/<
 9. **tlscheck.sh**: wraps the openssl commands in TLS-CERTS.md for a host:port + root bundle.
 
 **Log watching:** `tools/logwatch.sh <actor>` tails every `logs/<actor>/*/summary.log` and
-picks up new session folders; `tools/newfiles.sh` lists the newest raw captures. Both live in
-the tmux session `ihe-logs` (see CONNECTIONS.md).
+picks up new session folders; `tools/newfiles.sh` lists the newest raw captures. Both run in
+the `logs` window of the tmux session started by `tools/floor.sh`.
 
 ## Libraries
 - pydicom / pynetdicom: https://pydicom.github.io/pynetdicom/

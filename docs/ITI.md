@@ -38,8 +38,8 @@ Recent revisions:
   TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
   TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384.
 - Certificates: historically **only from Gazelle Security Suite (GSS)** (2048-bit CA; FQDN in
-  subjectAltName, so FQDN-validation option works). This year the floor uses a private root
-  plus generator. See TLS-CERTS.md and confirm which applies.
+  subjectAltName, so FQDN-validation option works). Confirm which CA the event uses in
+  `events/<event>/docs/`; triage commands in `docs/TLS-CERTS.md`.
 - TLS 1.0 floor options retired in 2021 (CP-ITI-1247).
 - ITI-20 over syslog uses the **DICOM audit schema** (PS3.15 A.5.1); GSS validates only that.
   RFC 5424 message, RFC 5425 TLS framing, RFC 5426 UDP. FHIR Feed option uses AuditEvent
@@ -67,8 +67,7 @@ Recent revisions:
 
 ## Tooling
 - **Gazelle Security Suite (GSS)**: certs, TLS simulators, syslog collector, ATNA questionnaire.
-  NA 2026 instance: https://connectathon.ihe-catalyst.net/gss (old gazelle.ihe.net is
-  deprecated). Endpoints/ports in FLOOR-TOOLS.md.
+  The event's instance URL and ports are in `events/<event>/docs/FLOOR-TOOLS.md`.
 - **Gazelle EVSClient**: validators for HL7 v2/v3, CDA, DICOM, FHIR, audit messages.
   https://gazelle.ihe.net/EVSClient
 - **Gazelle Proxy**: captures traffic between partners; monitors use it as evidence.

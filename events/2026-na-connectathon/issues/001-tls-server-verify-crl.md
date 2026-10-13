@@ -1,3 +1,11 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: issue
+opened: 2026-10-12
+status: needs-evidence
+expires: 2026-10-16
+---
 # Mobile POCUS app: TLS handshake error on "server verify" against GSS; CRL DP host deprecated
 
 - **Source:** Zulip, Support on Gazelle tools → "Gazelle CRL endpoint location does not exist"
@@ -30,22 +38,22 @@ fetch failure only hurts clients/servers that hard-fail on revocation.
 - GSS shows the handshake error (TPM). No permanent link to the GSS connection result posted.
 
 ### Verified Oct 12 ~12:30 ET (second pass, independent re-check of the first pass)
-Everything below was observed from the monitor's Mac against the live GSS instance; files in `artifacts/`.
+Everything below was observed from the monitor's Mac against the live GSS instance; files in `events/2026-na-connectathon/artifacts/`.
 
 **There are two "IHE Europe CA"s in GSS, and the first pass conflated them.**
 
 | | CA id 643 (legacy) | CA id 2656 (**floor CA**) |
 |---|---|---|
 | Subject | `C=FR,O=IHE Europe,CN=IHE Europe CA` | `C=FR,O=IHE Europe,CN=IHE Europe CA,OU=Gazelle` |
-| Key | **RSA-1024** (modulus from GSS view page) | **RSA-2048** (verified from cert in `artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`) |
+| Key | **RSA-1024** (modulus from GSS view page) | **RSA-2048** (verified from cert in `events/2026-na-connectathon/artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`) |
 | Validity | n/a (not fetched) | 2018-11-27 → 2028-11-27, serial 1, self-signed, SHA-512 |
 | SKI | (CRL AKI `EC:33:0E:13…`) | `1E:43:73:B4:55:FD:2A:AD:5F:A1:EC:8A:26:89:94:30:6D:62:39:8F` |
 | CRL | `/pki/crl/643/cacrl.crl` and `/gss/crl/643/cacrl.crl`, 128-byte sig, revocations from 2015/2017 | `/pki/crl/2656/cacrl.crl` and `/gss/crl/2656/cacrl.crl`, 256-byte sig, AKI matches SKI above, one revocation (serial 06, 2018-11-29) |
 | Issues floor certs? | No: every cert in GSS "List certificates" (ids 4610–4631, all issued this week) names CA 2656 as issuer | **Yes** |
 
-So: `artifacts/cacrl.crl` (= `artifacts/cacrl-643-legacy.crl`) is real and is RSA-1024 signed, but it belongs to a CA that is **not in the floor chain**. The CRL number for 643 still increments on every fetch (dynamically generated), which is why it looked alive.
+So: `events/2026-na-connectathon/artifacts/cacrl.crl` (= `events/2026-na-connectathon/artifacts/cacrl-643-legacy.crl`) is real and is RSA-1024 signed, but it belongs to a CA that is **not in the floor chain**. The CRL number for 643 still increments on every fetch (dynamically generated), which is why it looked alive.
 
-**What the GSS "Floor" server simulators actually present** (`openssl s_client` to 151.80.220.161 ports 10040, 10075, 10077, 10081; identical on all four; leaf saved as `artifacts/gss-simulators-server-cert.pem`):
+**What the GSS "Floor" server simulators actually present** (`openssl s_client` to 151.80.220.161 ports 10040, 10075, 10077, 10081; identical on all four; leaf saved as `events/2026-na-connectathon/artifacts/gss-simulators-server-cert.pem`):
 - Leaf `CN=Gazelle Simulators`, issued by CA 2656, RSA-2048, SHA-512, **valid 2018-11-29 → 2028-11-29**.
 - SAN: `gazelle-tools.ihe-europe.net, gazelle-tools.ihe.net, gazelle-tools.ihe-us-test.net, gazelle.ihe.net, gazelle.ihe-europe.net`. **No `connectathon.ihe-catalyst.net`, no IP SAN.**
 - EKU: serverAuth, clientAuth, emailProtection, MS smartcard logon.
@@ -75,7 +83,7 @@ Ruled out: cipher mismatch (ECDHE-RSA-GCM offered and negotiated; iOS supports i
 - [ ] App platform (iOS/Android + version) and what "server verify" connects to: **host string** (IP vs name) and **port** (10040 vs an mTLS port).
 - [ ] Is a client cert/PKCS#12 provisioned in the app? Which CN / serial?
 - [ ] Reproduce from a floor laptop with the vendor's client cert:
-      `openssl s_client -connect gazelle-tools.ihe-europe.net:10081 -servername gazelle-tools.ihe-europe.net -cert client.pem -key client.key -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`
+      `openssl s_client -connect gazelle-tools.ihe-europe.net:10081 -servername gazelle-tools.ihe-europe.net -cert client.pem -key client.key -CAfile events/2026-na-connectathon/artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`
       then without `-cert/-key` (expect alert 42), then against 10040 without a client cert (expect success).
 - [ ] On the device: root full-trust toggle state (iOS); Safari against `https://gazelle-tools.ihe-europe.net:10040/` should load (or at least not complain about trust) if the root is trusted.
 
@@ -118,16 +126,16 @@ Use the artifacts in this repo. Run the three commands and record the last two l
 ```bash
 # A. No client cert, mTLS port: expect alert 42 bad_certificate from the server.
 openssl s_client -connect gazelle-tools.ihe-europe.net:10081 -servername gazelle-tools.ihe-europe.net \
-  -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem </dev/null
+  -CAfile events/2026-na-connectathon/artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem </dev/null
 ```
 ```bash
 # B. No client cert, non-mTLS port: expect "Verify return code: 0 (ok)" and a completed handshake.
 openssl s_client -connect gazelle-tools.ihe-europe.net:10040 -servername gazelle-tools.ihe-europe.net \
-  -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem </dev/null
+  -CAfile events/2026-na-connectathon/artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem </dev/null
 ```
 ```bash
 # C. Hostname strictness: what a client connecting by IP sees. Expect "verification failed".
-openssl verify -CAfile artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem -verify_ip 151.80.220.161 artifacts/gss-simulators-server-cert.pem
+openssl verify -CAfile events/2026-na-connectathon/artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem -verify_ip 151.80.220.161 events/2026-na-connectathon/artifacts/gss-simulators-server-cert.pem
 ```
 If the vendor hands you their PKCS#12, add a fourth run: A again with `-cert client.pem -key client.key`
 (extract with `openssl pkcs12 -in vendor.p12 -nodes -out client.pem`). Expect it to complete.

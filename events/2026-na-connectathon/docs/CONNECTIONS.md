@@ -1,6 +1,12 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: event-doc
+expires: 2026-10-16
+---
 # Floor connections (NA 2026, EBIW), as of Oct 12 16:20 ET
 
-the monitor's Mac = **10.242.1.184**, Gazelle hostname **ddx0** (`ddx0.na2026.net`), organization DDx, system
+The monitor's Mac = **10.242.1.184**, Gazelle hostname **ddx0** (`ddx0.na2026.net`), organization DDx, system
 **TOOL_DDx** (Encounter Manager + Result Aggregator). Gazelle configurations approved and proxy
 ports assigned 16:40 ET (Gazelle TM → Configurations, org DDx).
 Tests: 13478 EBIW_35_Full_Workflow-RESTful (ticket 003), 13884 EBIW_POCUS_Simple_Workflow (ticket 004).

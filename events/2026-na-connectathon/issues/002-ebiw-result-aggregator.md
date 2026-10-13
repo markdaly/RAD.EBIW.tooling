@@ -1,3 +1,11 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: issue
+opened: 2026-10-12
+status: needs-evidence
+expires: 2026-10-16
+---
 # EBIW POCUS: no Result Aggregator on the floor; stand-in needed for RAD-132
 
 - **Source:** RAD TPM asked the monitor to build the Result Aggregator stand-in (floor, Oct 12). No Zulip thread yet.
@@ -42,10 +50,10 @@
     completeness criteria are met; addenda may trigger another.
 
 ## Gazelle test context (added 16:20 ET)
-EBIW_35_Full_Workflow-RESTful (id 13478, `docs/tests/`) step 50/55: IM-EBIW → RESULT_AGGREGATOR-EBIW
+EBIW_35_Full_Workflow-RESTful (id 13478, Gazelle) step 50/55: IM-EBIW → RESULT_AGGREGATOR-EBIW
 ORU^R01, ACK AA with MSA-2 = MSH-10. Monitor checks at the Aggregator: PID-3 with assigning
 authority, PID-5, OBR-18 with assigning authority, OBX-5 Study UID, OBR-4, all matching the
-worklist the EM served. the monitor's Gazelle system (DDX) is the registered Result Aggregator, so
+worklist the EM served. The monitor's Gazelle system (DDX) is the registered Result Aggregator, so
 the proxy channel for port 2575 comes from that system's configuration.
 
 ## Scope
@@ -124,7 +132,7 @@ Not a defect ticket. The question is who plays the Result Aggregator:
 1. Build `tools/mllp_receiver.py` (Result Aggregator mode), `tools/mllp_send.py`, and a sample
    `samples/ORU_R01_RAD-132_POCUS.hl7`; test loopback. **Done, see Resolution.**
 2. Give the vendor this Mac's floor IP and port 2575 (plain MLLP unless they want MLLPS; then
-   `TLS_CERT/TLS_KEY` = a GSS-issued "Client and Server" cert for this Mac, `TLS_CA` = `artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`).
+   `TLS_CERT/TLS_KEY` = a GSS-issued "Client and Server" cert for this Mac, `TLS_CA` = `events/2026-na-connectathon/artifacts/gss-ca-2656-ihe-europe-ca-gazelle.pem`).
 3. When the first real message lands, read it against the checklist above and paste the
    file path + findings into the Gazelle test instance.
 

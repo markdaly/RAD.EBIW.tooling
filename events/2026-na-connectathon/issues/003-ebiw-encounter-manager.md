@@ -1,3 +1,11 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: issue
+opened: 2026-10-12
+status: open
+expires: 2026-10-16
+---
 # EBIW: no Encounter Manager on the floor; stand-in needed for RAD-130 (MWL semantics)
 
 - **Source:** floor request via the monitor, Oct 12 afternoon. A VNA vendor's EBIW test scenario needs
@@ -66,8 +74,8 @@ One VNA vendor's scenario now; any EBIW Acquisition Modality that needs a RAD-13
   with calling AE `ENC_MGR` was rejected at association, which is normal for a VNA that only
   accepts known calling AEs. Not needed for the Encounter Manager role.
 - **Gazelle test:** EBIW_35_Full_Workflow-RESTful, id 13478, peer-to-peer, version EU2020
-  (https://connectathon.ihe-catalyst.net/tm/test.seam?id=13478; PDF in `docs/tests/`). Roles:
-  ENCOUNTER_MGR-EBIW, IM-EBIW, MOD-EBIW, RESULT_AGGREGATOR-EBIW, one each. **the monitor's Gazelle
+  (https://connectathon.ihe-catalyst.net/tm/test.seam?id=13478). Roles:
+  ENCOUNTER_MGR-EBIW, IM-EBIW, MOD-EBIW, RESULT_AGGREGATOR-EBIW, one each. **The monitor's Gazelle
   system (DDX) is registered as Encounter Manager and Result Aggregator**; the VNA vendor is
   MOD-EBIW (Lightweight Modality) and IM-EBIW. Steps: 20 RAD-130 UPS-RS GET workitems →
   EM; 40 RAD-131 STOW-RS → IM; 50 RAD-132 ORU^R01 → Result Aggregator; 55 ACK (original

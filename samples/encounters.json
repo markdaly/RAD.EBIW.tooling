@@ -3,7 +3,7 @@
   "institution": {
     "name": "Connectathon Test Hospital",
     "address": "Mason Square, Arlington VA",
-    "code": {"value": "NA2026", "scheme": "99IHE", "meaning": "Connectathon Test Hospital"}
+    "code": {"value": "CONNECTATHON", "scheme": "99IHE", "meaning": "Connectathon Test Hospital"}
   },
   "procedure": {
     "description": "Perform Imaging",

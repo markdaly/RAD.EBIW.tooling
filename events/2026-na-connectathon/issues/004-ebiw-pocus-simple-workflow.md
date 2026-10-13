@@ -1,6 +1,14 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: issue
+opened: 2026-10-12
+status: open
+expires: 2026-10-16
+---
 # EBIW_POCUS_Simple_Workflow (Gazelle test 13884): Encounter Manager grouped into POCUS Manager; Result Aggregator sends ITI-31
 
-- **Source:** the monitor, from Gazelle test definition (PDF in `docs/tests/EBIW_POCUS_Simple_Workflow.pdf`),
+- **Source:** the monitor, from Gazelle test definition (test definition in Gazelle),
   Oct 12 ~16:40 ET. Permanent link https://connectathon.ihe-catalyst.net/tm/test.seam?id=13884
 - **Opened:** 2026-10-12 16:45 ET
 - **Status:** open (stand-ins extended; who plays POCUS_MGR-EBIW still to confirm)
@@ -62,7 +70,7 @@ Not a defect ticket. Deliverables:
 ## Next action
 1. Extend `mwl_scp.py` with ITI-31 intake; sample ADT; loopback: ADT in → MWL and UPS-RS
    return the new encounter with the same accession. **Done, see Resolution.**
-2. the monitor: confirm the POCUS_MGR system and TPM acceptance; restart the Encounter Manager tab
+2. The monitor: confirm the POCUS_MGR system and TPM acceptance; restart the Encounter Manager tab
    so the ADT listener is up (`ADT_PORT=2576`).
 3. Step 10 on the floor: `uv run python tools/mllp_send.py samples/ADT_A04_ITI-31.hl7 10.242.1.184 2576`
    (through the proxy once the channel exists), attach the ACK.

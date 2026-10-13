@@ -1,54 +1,81 @@
-# IHE NA Connectathon 2026: monitor support kit
+# IHE Connectathon kit
 
-Working notes, problem statements, and small stand-in actors for a volunteer monitor at the
-IHE North America Connectathon, Oct 12–16 2026, George Mason University, Arlington VA.
+Small stand-in IHE actors and monitor notes, written on a Connectathon floor when a vendor's
+test partner did not exist. Python, one file per actor, raw logs of every message, config by
+environment variables. Built for the Radiology **EBIW** profile (Encounter-Based Imaging
+Workflow, POCUS Option) and reusable for any HL7 v2 or DICOM worklist partner you are missing.
 
-Two jobs this week:
+| Tool | Actor it stands in for | Transaction | Port (default) |
+|---|---|---|---|
+| `tools/mllp_receiver.py` | Result Aggregator, or any HL7 v2 sink | RAD-132 ORU in, ACK out (MLLP, optional TLS) | 2575 |
+| `tools/mwl_scp.py` | Encounter Manager | RAD-130 Modality Worklist C-FIND (POCUS Option keys); ITI-31 ADT intake | 11112, 2576 |
+| `tools/ups_rs.py` | Encounter Manager, REST side | RAD-130 UPS-RS search (`GET /workitems`, `/studies`), dicom+json | 8042 |
+| `tools/mllp_send.py` | test sender | send one HL7 file, print the ACK | |
+| `tools/mwl_find.py` | test modality | RAD-130 C-FIND with the EBIW required keys | |
+| `tools/floor.sh` | | run everything in one tmux session; restart one server; status | |
 
-1. **Monitor.** Verify test instances in Gazelle Test Management; relay vendor problems from
-   Zulip into written problem statements with evidence.
-2. **Contingency tool-builder.** When a profile is missing a partner actor, stand up a
-   minimal, monitor-readable stand-in (one file, one actor, raw logging) so vendors can test.
+Quick start (macOS or Linux, needs [uv](https://docs.astral.sh/uv/)):
 
-Private repo. Vendor names stay out of committed files.
+```bash
+git clone <this repo> && cd <this repo>
+tools/floor.sh start      # three servers + a log window in tmux session "ihe"
+tools/floor.sh status     # four ports listening?
+tmux attach -t ihe
+```
 
-## Status
+Then read [docs/RUNNING.md](docs/RUNNING.md) for env vars, ports, where logs and state live, and
+[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) when something does not arrive.
 
-| Day | State |
-|---|---|
-| Mon Oct 12 | Kit assembled. Tickets 001 (TLS/CRL, verified: floor CA is 2048-bit, mTLS/hostname top causes), 002 (Result Aggregator stand-in, live), 003 (Encounter Manager MWL + UPS-RS, live), 004 (POCUS simple workflow, ITI-31 intake), 005 (Gazelle proxy channels reset, open). the monitor is Gazelle admin + SUT TOOL_DDx with proxy ports 11064–11067. All stand-ins run via `tools/floor.sh` (tmux `ihe`). Shut down 17:00 ET; restart with `tools/floor.sh start`. |
+## Status and honesty
 
-Per-session detail: [docs/LOG.md](docs/LOG.md).
+This is a **rapid-response toolkit, not a product**. It was written during a Connectathon, in
+hours, with AI assistance (Claude), to unblock testing when a profile had no partner actor on the
+floor. Read any tool top to bottom before trusting it; each is short on purpose. Specifically:
+
+- The tools are **test partners**, not reference implementations of any IHE profile. They accept,
+  log, and answer with the minimum the transaction requires. They do not validate, grade, or
+  rewrite anything a vendor sends.
+- Requirements quoted in the docs and issues cite IHE Technical Framework section and table
+  numbers. Where something was written from memory the text says so. Check the TF before
+  arguing with a vendor.
+- Not endorsed by, affiliated with, or reviewed by IHE International. IHE, Gazelle and DICOM are
+  marks of their respective owners. Technical Framework text is quoted briefly under fair use and
+  is copyright IHE International; the documents themselves are not redistributed here.
+- Never for clinical use. Test-floor traffic only.
+- MIT licensed, no warranty. See [LICENSE](LICENSE).
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `CLAUDE.md` | Project brief and hard rules for stand-in tools |
-| `docs/RAD.md`, `docs/ITI.md` | Radiology and IT Infrastructure profile/transaction cheat sheets |
-| `docs/TLS-CERTS.md` | Cert, CRL, and iOS trust triage, with the openssl commands |
-| `docs/FLOOR-TOOLS.md` | NA 2026 tool URLs, syslog collector, subnets, proxy |
-| `docs/TOOLS.md` | Existing simulators to use first; stand-in actor designs to build on request |
-| `docs/TROUBLESHOOTING-PROTOCOL.md` | How a Zulip/Gazelle thread becomes a ticket, then a tool |
-| `docs/LOG.md` | Session log |
-| `tickets/` | One markdown file per problem statement, from `tickets/TEMPLATE.md` |
-| `artifacts/` | Evidence (CRLs, certs, captures). Tracked, keys included: private network, own CA, wiped after the event |
-| `docs/CONNECTIONS.md` | Live table of ports, endpoints, vendors, proxy channels |
-| `tools/` | Stand-in actors, when built. Each is one Python file; config by env vars; logs to `logs/<actor>/<ts>/` (ignored) |
+| `tools/` | The stand-ins and test scripts. Each tool documents itself at the top of the file. |
+| `samples/` | Canned HL7 v2 messages and a sample encounter list, synthetic data only. |
+| `docs/INSTALL.md` | Prerequisites and first run. |
+| `docs/RUNNING.md` | Every tool, every env var, every port, logs and state. |
+| `docs/TROUBLESHOOTING.md` | When nothing arrives, when ACKs say AR, when the worklist is empty. |
+| `docs/TOOLS.md` | Existing Gazelle/NIST simulators to use first; stand-in designs, built and unbuilt. |
+| `docs/RAD.md`, `docs/ITI.md` | Radiology and IT Infrastructure cheat sheets for monitors. |
+| `docs/TLS-CERTS.md` | Cert, CRL and mobile trust triage with the openssl commands. |
+| `docs/TROUBLESHOOTING-PROTOCOL.md` | How a support-chat thread becomes a written issue, then a tool. |
+| `templates/ISSUE.md` | Issue template: symptom, scope, evidence, ranked hypotheses, missing evidence. |
+| `events/<event>/` | Everything specific to one Connectathon: connection tables, issues, session log, artifacts. Each file carries a front-matter header naming the event. Nothing in there outlives the event. |
+| `CLAUDE.md` | Brief for AI-assisted sessions: hard rules for stand-in tools, stack, working style. |
 
-## Using it
+Current event: [events/2026-na-connectathon/](events/2026-na-connectathon/README.md).
 
-- **New problem:** copy `tickets/TEMPLATE.md` to `tickets/<NNN>-<slug>.md (next free three-digit number)`, fill symptom,
-  scope, evidence, ranked hypotheses, missing evidence. Code only after the ticket exists.
-- **TLS triage:** run the commands in `docs/TLS-CERTS.md` against the leaf, issuer, and
-  `openssl s_client -showcerts` output.
-- **Stand-in actor:** check `docs/TOOLS.md` for an existing simulator first. If one is built,
-  it goes in `tools/`, runs with Python 3.11+ in a `.venv` (`uv venv && uv pip install -r requirements.txt`; Homebrew python@3.13 and `uv` are on this Mac), and is documented at the top of its
-  own file.
+## Hard rules for stand-in tools
 
-## Repo hygiene
+- Stand-ins are partner substitutes approved by the event's Technical Project Manager, never
+  judges. Nothing here grades, auto-passes, or rewrites a vendor's messages.
+- One file, one actor, one or two transactions, readable top to bottom in about five minutes.
+- Log everything raw: every inbound message and every outbound response to a timestamped file.
+  Those files are the evidence a vendor attaches in Gazelle.
+- Stateless unless the specification forces state (the Encounter Manager must hand out the same
+  accession for the same admission and device: that is a dict written to a JSON file, not a database).
+- Config by environment variables. Must be re-pointable on a floor network in seconds.
+- No vendor or product names in committed files or logs. Roles and Gazelle system keywords only.
 
-- Commits go straight to `main`, small and frequent, one per ticket/tool/doc change.
-- Only the Claude Code session commits; the parallel chat session edits files.
-- Every session ends with a `docs/LOG.md` entry and the status table above brought up to date.
-- Licensing and other logistics are deferred; private repo for now.
+## Contributing
+
+Fork, branch, PR. See [CONTRIBUTING.md](CONTRIBUTING.md) for the flow, the rules above in more
+detail, and how to loopback-test a change before it meets a vendor.

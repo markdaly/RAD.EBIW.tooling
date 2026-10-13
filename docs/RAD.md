@@ -1,12 +1,9 @@
 # IHE Radiology (RAD): Connectathon reference
 
+Event-specific priorities and observations live in `events/<event>/README.md`.
+
 Canonical index: https://profiles.ihe.net/RAD/ (TF Rev 23.0, Vols 1–4 published 2025-08-08)
 Change Proposal index (Final Text CPs, which modify the TF): linked from the RAD index page.
-
-## Floor reality, NA 2026
-Light radiology load, no AI profiles in testing, EBIW possible, heavy HL7 v2.5.1 nudging.
-Prioritize: **SWF.b, EBIW, PIR, IOCM, XDS-I.b/XCA-I, PDI, KIN, REM, WIA/WIC, IID, BIR**.
-AI profiles (AIR/AIRA/AIW-I/IRA/IMR) and XC-WADO/MADO are hallway topics; notes kept short below.
 
 ## Final Text profiles (in TF volumes)
 SWF, SWF.b, PIR, CPI, PGP, ARI, KIN, SINR, CHG, PWF, RWF, ED, PDI, NM, MAMMO, IRWF, TCE,
@@ -120,10 +117,10 @@ WIA = QIDO-RS (RAD-129) + WADO-RS (RAD-107), backend-neutral, optional XDS-I bac
 WIC = STOW-RS (RAD-108) from capture devices; the Image Manager fills Image Pixel Macro fields
 the capturer leaves empty.
 
-## AI profiles (hallway only this year)
+## AI profiles
 - **AIR**: AI results as DICOM SR TID 1500, SEG, Parametric Map, KOS. Monitor evaluation via
   no-peer AIR_Content_* tests; Image Display evaluated hands-on against RAD-136.
-  Test data: https://github.com/IHE/connectathon-artifacts/tree/main/profile_test_data/RAD/AIR
+  Test data: https://github.com/IHE/connectathon-events/2026-na-connectathon/artifacts/tree/main/profile_test_data/RAD/AIR
 - **AIRA**: Quality Note Creator records per-result accepted / modified / rejected / added /
   unassessed / unable-to-assess (AIRA_111..116) in an Assessment Status SR
   (TID IHE_RADAIRA1), writes replacement Output AI Result Objects, rejects originals via KOS

@@ -5,10 +5,10 @@
 # output on screen; restart one with `tools/floor.sh restart <ra|em|ups>`.
 # Usage: tools/floor.sh start | restart <win> | status | stop
 R="$(cd "$(dirname "$0")/.." && pwd)"; cd "$R"
-PY="uv run --with pynetdicom --with pydicom --with fastapi --with uvicorn python"
+PY="${PYTHON:-uv run --python '>=3.11' --with pynetdicom --with pydicom --with fastapi --with uvicorn python}"
 cmd() {  # macOS ships bash 3.2: no associative arrays
   case "$1" in
-    ra)  echo "LISTEN_PORT=2575 /opt/homebrew/bin/python3.13 tools/mllp_receiver.py";;
+    ra)  echo "LISTEN_PORT=2575 $PY tools/mllp_receiver.py";;
     em)  echo "$PY tools/mwl_scp.py";;
     ups) echo "$PY tools/ups_rs.py";;
   esac

@@ -1,0 +1,5 @@
+# For running without uv: python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+pydicom>=3.0
+pynetdicom>=3.0
+fastapi>=0.110
+uvicorn>=0.29

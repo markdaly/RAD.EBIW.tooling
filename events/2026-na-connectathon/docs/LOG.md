@@ -1,13 +1,19 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: event-doc
+expires: 2026-10-16
+---
 # Session log
 
 One entry per working session, newest first. Each ends with where the next session starts.
-Tickets live in `tickets/`; this is the cross-ticket record.
+Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket record.
 
 ## 2026-10-12 (Mon, day 1), end of day: everything in tmux, proxy blocked
 
-- the monitor is Gazelle admin and SUT **TOOL_DDx** (org DDx, host `ddx0`, 10.242.1.184). Four
+- The monitor is Gazelle admin and SUT **TOOL_DDx** (org DDx, host `ddx0`, 10.242.1.184). Four
   configurations approved with proxy ports 11064 (ADT 2576), 11065 (MWL 11112), 11066 (UPS-RS
-  8042, URL `http://ddx0:8042/studies`), 11067 (ORU 2575). Recorded in `docs/CONNECTIONS.md`.
+  8042, URL `http://ddx0:8042/studies`), 11067 (ORU 2575). Recorded in `events/2026-na-connectathon/docs/CONNECTIONS.md`.
 - All stand-ins now run from `tools/floor.sh` in tmux session `ihe` (windows ra / em / ups /
   logs). ACK and ITI-31 MSH-3/4 = `SIMULATOR`/`SIMULATOR` to match the registration. UPS-RS
   also answers at `/studies`.
@@ -32,8 +38,8 @@ Tickets live in `tickets/`; this is the cross-ticket record.
 
 ## 2026-10-12 (Mon, day 1), sixth session: test definitions in hand, ITI-31 intake
 
-- the monitor is now Gazelle admin and a registered SUT (DDX) for Encounter Manager + Result
-  Aggregator, which unlocks the proxy channels. Two test PDFs saved to `docs/tests/`:
+- The monitor is now Gazelle admin and a registered SUT (DDX) for Encounter Manager + Result
+  Aggregator, which unlocks the proxy channels. Two test PDFs saved to Gazelle:
   EBIW_35_Full_Workflow-RESTful (13478, Lightweight Modality via UPS-RS, ticket 003) and
   EBIW_POCUS_Simple_Workflow (13884, ticket 004). Monitor checklists copied into the tickets.
 - 13884 has no Encounter Manager role (grouped into POCUS_MGR) and makes the Result
@@ -61,17 +67,17 @@ data; confirm POCUS_MGR identity for 13884 and TPM acceptance; proxy channels fo
 - Result Aggregator still live on 2575; Gazelle proxy access still being chased.
 
 **Next session starts:** capture the 13478 test text and the code set; watch for the first
-the VNA vendor query on either port; proxy in front of the Result Aggregator when access arrives.
+the VNA vendor's query on either port; proxy in front of the Result Aggregator when access arrives.
 
 ## 2026-10-12 (Mon, day 1), fourth session: live Result Aggregator, Encounter Manager stand-in
 
 - Result Aggregator went live on this Mac (10.242.1.184:2575). Vendor probe 15:05, first
   ORU^R01 15:07:57, ACKed AA. Content review (15 findings, v2.4, PID-2 not PID-3, no
   accession, no Study UID OBX, no physician of record, OBX-11 empty, "educational" exam) is
-  in the ticket. the monitor: that send was connectivity only, not the graded run. Gazelle proxy
+  in the ticket. The monitor: that send was connectivity only, not the graded run. Gazelle proxy
   (proxy.ihe-europe.net = 192.168.2.5, reachable) will sit in front once the monitor has access.
 - New request: a VNA (Image Manager) scenario needs an EBIW Encounter Manager. Ticket
-  `tickets/003-ebiw-encounter-manager.md` quotes RAD TF-1 47.1.1.1 and RAD TF-2 4.130
+  `events/2026-na-connectathon/issues/003-ebiw-encounter-manager.md` quotes RAD TF-1 47.1.1.1 and RAD TF-2 4.130
   (matching/return key tables, POCUS additions, expected actions).
 - Built `tools/mwl_scp.py` (pynetdicom MWL SCP, per-(admission, AE) accession + Study UID
   dict written through to state.json, query/response dumps) and `tools/mwl_find.py`, with
@@ -87,7 +93,7 @@ front of the Result Aggregator once the monitor has access.
 ## 2026-10-12 (Mon, day 1), third session: EBIW Result Aggregator stand-in
 
 - New request: a POCUS Manager vendor has no RAD-132 partner; offered to run Mirth
-  themselves. Ticket `tickets/002-ebiw-result-aggregator.md` explains what a Result
+  themselves. Ticket `events/2026-na-connectathon/issues/002-ebiw-result-aggregator.md` explains what a Result
   Aggregator is (RAD TF-1 47.1.1.4, RAD TF-2 4.132, quoted from the rev 3.1 supplement) and
   why a monitor-run receiver beats vendor-run Mirth (neutrality, intermediate count).
 - Built `tools/mllp_receiver.py` (asyncio MLLP, raw logging, ACK^R01, optional MLLPS with
@@ -126,9 +132,9 @@ finding to the Zulip thread for the Gazelle maintainers.
   TROUBLESHOOTING-PROTOCOL), ticket template. Repo hygiene: `.gitignore`, README, this log.
   First push to GitHub (private).
 - Dry run of the troubleshooting protocol on a live Zulip thread:
-  `tickets/001-tls-server-verify-crl.md` (mobile POCUS app, TLS handshake error against
+  `events/2026-na-connectathon/issues/001-tls-server-verify-crl.md` (mobile POCUS app, TLS handshake error against
   GSS; CRL Distribution Point on the deprecated `gazelle.ihe.net` host).
-- Finding from `artifacts/cacrl.crl`: the CRL signer `CN=IHE Europe CA` has a 128-byte RSA
+- Finding from `events/2026-na-connectathon/artifacts/cacrl.crl`: the CRL signer `CN=IHE Europe CA` has a 128-byte RSA
   signature, so that CA key is RSA-1024. If it is the floor CA, iOS/Android/OpenSSL
   SECLEVEL≥2 reject the chain regardless of root trust. Needs the CA cert to confirm.
 - No tools built yet. `docs/TOOLS.md` lists the stand-in designs on the shelf.

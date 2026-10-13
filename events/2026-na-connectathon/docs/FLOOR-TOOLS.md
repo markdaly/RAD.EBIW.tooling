@@ -1,3 +1,9 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: event-doc
+expires: 2026-10-16
+---
 # NA 2026 floor: tool endpoints and network (from Zulip, Oct 9–12)
 
 Source: Zulip, 2026 IHE North America Connectathon Floor → topics "tools & support" and "network".

@@ -14,5 +14,11 @@ __pycache__/
 /.claude/worktrees/
 /.claude/settings.local.json
 
-# artifacts/ IS tracked, keys included: the floor network is private, the CA is
-# ours, and everything is wiped when the event ends.
+# Personal brief for AI sessions; never committed (the public CLAUDE.md is generic).
+CLAUDE.local.md
+
+# Untracked planning scratch at the repo root.
+/PUBLIC-RELEASE-PLAN.md
+/COWORK-BRIEF.md
+
+# events/<event>/artifacts/ IS tracked: public PKI material from the test CA, no private keys.

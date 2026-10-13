@@ -1,3 +1,11 @@
+---
+event: IHE North America Connectathon 2026
+dates: 2026-10-12 to 2026-10-16
+kind: issue
+opened: 2026-10-12
+status: needs-evidence
+expires: 2026-10-16
+---
 # Gazelle Proxy channels for TOOL_DDx accept TCP then close immediately; nothing forwarded
 
 - **Source:** the monitor's own validation of the new proxy channels, Oct 12 16:45 ET. No Zulip thread yet.
@@ -48,7 +56,7 @@ Only our system's channels tested. Unknown whether other systems' proxy channels
 - [ ] Whether `ddx0.na2026.net` resolves from a floor machine that uses 192.168.2.4 successfully.
 
 ## Next action
-the monitor (admin): look at the channel detail; if the target is `ddx0`, get the DNS record
+The monitor (admin): look at the channel detail; if the target is `ddx0`, get the DNS record
 published or switch the config host to the IP; if channels show stopped, start them. Re-test with
 `tools/mllp_send.py samples/ORU_R01_RAD-132_POCUS.hl7 proxy.ihe-europe.net 11067`; success =
 `MSA|AA` back and a line in `logs/result-aggregator/<session>/summary.log` from 192.168.2.5.
