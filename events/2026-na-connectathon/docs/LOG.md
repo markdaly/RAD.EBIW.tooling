@@ -10,6 +10,29 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-13 (Tue, day 2), late morning: first vendor traffic, proxy fixed, panel on the floor
+
+- **Issue 007, fixed:** a POCUS Manager vendor sent RAD-132 through the proxy and got no ACK.
+  Floor DNS still had ddx0 at the old DHCP address (.184), so the proxy forwarded to nothing.
+  Direct to 10.242.1.99:2575 worked at 10:10:11 (AA). The message was a known-bad one kept for
+  connectivity; it is byte-identical to Monday's, so issue 002's review stands (plus a correction:
+  Z-segments are prohibited, RAD TF-2 2.4.1.5). DNS fixed 10:25; the proxy re-test returned AA
+  from 192.168.2.5, which also **closes issue 005**.
+- **Panel on the floor:** `floor.sh start` starts it; listens on all interfaces; POSTs are 403
+  from other machines; banner on every page (green ADMIN locally, amber READ-ONLY elsewhere).
+- **mllp_send.py logs outbound:** `.out.hl7` + `.ack.hl7` + summary line under
+  `logs/result-aggregator/send-<date>/`, failures included. Needed for EBIW_POCUS_Simple_Workflow
+  step 10, where the Result Aggregator (us) initiates ITI-31 to the POCUS Manager.
+- **Adversarial review delivered** as `docs/review-kit-2026-10-13.zip` (untracked, not committed).
+  Web-only, never saw the code. Its drivers are written to run against the live services; not
+  run. Confirmed by reading code: `state.json` writes are not atomic and two processes allocate
+  `n = len(state)+1`, so a simultaneous MWL and UPS-RS allocation could hand out one accession
+  for two contexts. Spec errata A-C in its section 4.3 are worth the clarification list.
+
+**Next session starts:** step 10 with the vendor (their ADT listener host:port and MSH-5/6;
+patient from the EBIW_10 set); run the review's MLLP corpus against an isolated instance; decide
+on the state-file lock. Main still has admin bypass on and PR #2 open.
+
 ## 2026-10-13 (Tue, day 2), morning: services live, worklist pre-run fixes, main locked
 
 - Services up from 09:04 ET on ddx0 / 10.242.1.184 (ra 2575, adt 2576, em 11112, ups 8042,

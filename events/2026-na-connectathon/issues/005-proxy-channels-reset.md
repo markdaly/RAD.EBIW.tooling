@@ -3,7 +3,7 @@ event: IHE North America Connectathon 2026
 dates: 2026-10-12 to 2026-10-16
 kind: issue
 opened: 2026-10-12
-status: needs-evidence
+status: fixed
 expires: 2026-10-16
 ---
 # Gazelle Proxy channels for TOOL_DDx accept TCP then close immediately; nothing forwarded
@@ -64,3 +64,10 @@ If it stays broken, post to Zulip "Support on Gazelle tools" with the symptom li
 
 ## Resolution
 _Open._
+
+**Fixed 2026-10-13 10:25 ET.** The floor team pointed ddx0 at the static address. `dig @192.168.2.5 ddx0.na2026.net A` returns 10.242.1.99 (10:25 ET). `mllp_send.py
+samples/ORU_R01_RAD-132_POCUS.hl7 proxy.ihe-europe.net 11067` got `MSA|AA|MSG00001`, and the
+Result Aggregator logged `CONNECT from 192.168.2.5` (file
+`logs/result-aggregator/20261013-094740/20261013-102542-0002-ORU_R01_ORU_R01.in.hl7`; sender side
+under `logs/result-aggregator/send-20261013/`). This Mac's own resolver cache still said .184;
+`sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder` clears it.
