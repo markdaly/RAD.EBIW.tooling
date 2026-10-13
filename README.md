@@ -16,7 +16,7 @@ Private repo. Vendor names stay out of committed files.
 
 | Day | State |
 |---|---|
-| Mon Oct 12 | Kit assembled; one TLS/CRL ticket open (`tickets/001-tls-server-verify-crl.md`), verified against live GSS: floor CA is 2048-bit (id 2656), RSA-1024 lead dropped, mTLS/hostname now top hypotheses. **First tool built:** `tools/mllp_receiver.py`, an EBIW Result Aggregator stand-in for RAD-132 (`tickets/002-ebiw-result-aggregator.md`), live with the POCUS Manager vendor (first ORU received and reviewed). **Second tool:** `tools/mwl_scp.py`, EBIW Encounter Manager (RAD-130 MWL) for a VNA scenario (`tickets/003-ebiw-encounter-manager.md`), now with a UPS-RS half (`tools/ups_rs.py`) because the vendor is a Lightweight Modality; both running, plus ITI-31 ADT intake for test 13884 (`tickets/004-ebiw-pocus-simple-workflow.md`). Test PDFs in `docs/tests/`. |
+| Mon Oct 12 | Kit assembled. Tickets 001 (TLS/CRL, verified: floor CA is 2048-bit, mTLS/hostname top causes), 002 (Result Aggregator stand-in, live), 003 (Encounter Manager MWL + UPS-RS, live), 004 (POCUS simple workflow, ITI-31 intake), 005 (Gazelle proxy channels reset, open). the monitor is Gazelle admin + SUT TOOL_DDx with proxy ports 11064–11067. All stand-ins run via `tools/floor.sh` (tmux `ihe`). Shut down 17:00 ET; restart with `tools/floor.sh start`. |
 
 Per-session detail: [docs/LOG.md](docs/LOG.md).
 

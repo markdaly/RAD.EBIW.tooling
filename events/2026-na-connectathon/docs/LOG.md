@@ -3,6 +3,33 @@
 One entry per working session, newest first. Each ends with where the next session starts.
 Tickets live in `tickets/`; this is the cross-ticket record.
 
+## 2026-10-12 (Mon, day 1), end of day: everything in tmux, proxy blocked
+
+- the monitor is Gazelle admin and SUT **TOOL_DDx** (org DDx, host `ddx0`, 10.242.1.184). Four
+  configurations approved with proxy ports 11064 (ADT 2576), 11065 (MWL 11112), 11066 (UPS-RS
+  8042, URL `http://ddx0:8042/studies`), 11067 (ORU 2575). Recorded in `docs/CONNECTIONS.md`.
+- All stand-ins now run from `tools/floor.sh` in tmux session `ihe` (windows ra / em / ups /
+  logs). ACK and ITI-31 MSH-3/4 = `SIMULATOR`/`SIMULATOR` to match the registration. UPS-RS
+  also answers at `/studies`.
+- **Proxy does not forward** (ticket 005): all four proxy ports accept TCP then close in 0.1 s,
+  nothing reaches the Mac. Leading cause: target hostname `ddx0` not resolvable from the proxy.
+  Needs the Gazelle admin view of the channels. Vendors hit the Mac directly meanwhile.
+- No vendor traffic today beyond the 15:07 connectivity ORU. First real queries from the VNA
+  vendor's POCUS Manager box (10.242.1.17) and Lightweight Modality (10.242.1.11) still pending.
+- Shut down 17:00 ET: `tools/floor.sh stop`; ports 2575/2576/8042/11112 free. `logs/` kept
+  on disk (gitignored): accession state in `logs/encounter-manager/state.json`, ADT-fed
+  encounters in `encounters-from-adt.json`, raw captures per session folder.
+
+**Next session starts (Tue Oct 13, early):**
+1. `tools/floor.sh start` then `tools/floor.sh status` (four ports listening). Accession state
+   carries over from `state.json`, so yesterday's loopback accessions EM26101200xx persist;
+   delete the file for a clean numbering if the TPM prefers.
+2. Proxy (ticket 005): check channel targets/status as admin, then re-test with
+   `tools/mllp_send.py samples/ORU_R01_RAD-132_POCUS.hl7 proxy.ihe-europe.net 11067`.
+3. Export EBIW_10_Read_This_First from Gazelle and load its patients/codes into
+   `samples/encounters.json` (both EBIW tickets wait on it).
+4. Ticket 001 (TLS): still waiting on the TPM/vendor for the GSS permanent link and host/port.
+
 ## 2026-10-12 (Mon, day 1), sixth session: test definitions in hand, ITI-31 intake
 
 - the monitor is now Gazelle admin and a registered SUT (DDX) for Encounter Manager + Result
