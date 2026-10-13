@@ -23,6 +23,10 @@ on AC, system sleep off, lid must stay open. Tree clean, pushed. main: admin byp
 required. Ubuntu CI (22.04/24.04/26.04 x64+ARM, bare 26.04) green. Vendor files in
 `events/*/artifacts/` are untracked and locally excluded (`.git/info/exclude`), never commit them.
 
+**Shutdown, ~17:05 ET:** the monitor stopped the kit for the day (tmux gone, all ports closed; no
+sleep). Last traffic: the POCUS Manager probed 2575 directly at 17:00:57 (connect/close, no data);
+no step-120 ORU received. Restart Wed with `tools/floor.sh start` (also starts the panel).
+
 **Resume here (Wed):**
 1. Ask the TPMs how the instances landed. If the EHR vendor holds EM/RA in an instance, TOOL_DDx is
    out of it: reword `docs/HOWTO.md` and `docs/CONNECTIONS.md` to "backup partner", and the
