@@ -14,8 +14,16 @@
   </defs>
   <rect width="1040" height="650" rx="14" fill="#f6f5f0"/>
   <text x="28" y="40" class="ttl">EBIW, POCUS Option: where the kit's stand-ins sit</text>
-  <text x="28" y="62" class="sub">Metro view of the transactions. Yellow-ringed stops are played by this kit; every other stop is a vendor system under test.</text>
-
+  
+  <!-- callout: what the yellow ring means -->
+  <g transform="translate(676,18)">
+    <rect width="336" height="92" rx="10" fill="#fff8dc" stroke="#e0a800" stroke-width="2"/>
+    <circle cx="26" cy="26" r="11" class="ours"/>
+    <text x="48" y="31" class="lbl">Stops this kit plays</text>
+    <text x="48" y="51" class="sub">Encounter Manager: tools/mwl_scp.py, tools/ups_rs.py</text>
+    <text x="48" y="67" class="sub">Result Aggregator: tools/mllp_receiver.py</text>
+    <text x="48" y="83" class="sub">ITI-31 sender: tools/mllp_send.py</text>
+  </g>
   <!-- tracks -->
   <!-- RAD-131 C-STORE: Modality -> Image Manager, and POCUS Manager -> Image Manager -->
   <polyline class="track" stroke="#e8702a" points="140,152 660,152 660,370"/>
@@ -32,35 +40,22 @@
   <polyline class="track dash" stroke="#b39ae6" points="652,386 400,386"/>
   <!-- ITI-31 ADT: Result Aggregator -> Encounter Manager -->
   <polyline class="track" stroke="#2f6fd6" points="888,386 1000,386 1000,505 240,505 240,386 392,386"/>
-
   <!-- vendor stations -->
   <circle class="st" cx="140" cy="160" r="12"/>
   <text x="140" y="128" text-anchor="middle" class="lbl">Acquisition Modality</text>
-  <text x="140" y="110" text-anchor="middle" class="sub">POCUS device, DIMSE</text>
-
   <circle class="st" cx="400" cy="160" r="12"/>
   <text x="400" y="128" text-anchor="middle" class="lbl">Lightweight Modality</text>
-  <text x="400" y="110" text-anchor="middle" class="sub">camera / app, REST</text>
-
   <circle class="st" cx="660" cy="160" r="12"/>
   <text x="660" y="128" text-anchor="middle" class="lbl">Image Manager / Archive</text>
-  <text x="660" y="110" text-anchor="middle" class="sub">VNA</text>
-
   <circle class="st" cx="660" cy="378" r="12"/>
   <text x="660" y="420" text-anchor="middle" class="lbl">POCUS Manager</text>
-  <text x="660" y="438" text-anchor="middle" class="sub">worksheets, report, QA</text>
-
   <!-- our stations -->
   <circle class="ours" cx="400" cy="378" r="18"/>
   <text x="400" y="420" text-anchor="middle" class="lbl">Encounter Manager</text>
-  <text x="400" y="438" text-anchor="middle" class="tag">kit: tools/mwl_scp.py + tools/ups_rs.py</text>
-  <text x="400" y="455" text-anchor="middle" class="sub">MWL C-FIND 11112 · UPS-RS 8042 · ADT in 2576</text>
-
+  
   <circle class="ours" cx="880" cy="378" r="18"/>
   <text x="880" y="420" text-anchor="middle" class="lbl">Result Aggregator</text>
-  <text x="880" y="438" text-anchor="middle" class="tag">kit: tools/mllp_receiver.py</text>
-  <text x="880" y="455" text-anchor="middle" class="sub">ORU in 2575 · ADT out via mllp_send.py</text>
-
+  
   <!-- line labels on tracks -->
   <text x="270" y="145" text-anchor="middle" class="sub" fill="#e8702a">RAD-131 C-STORE</text>
   <text x="530" y="186" text-anchor="middle" class="sub">RAD-108 STOW-RS</text>
@@ -68,9 +63,8 @@
   <text x="430" y="270" class="sub" fill="#1c9aa8">RAD-130 UPS-RS</text>
   <text x="770" y="370" text-anchor="middle" class="sub" fill="#7a4bd1">RAD-132 ORU^R01</text>
   <text x="900" y="270" class="sub" fill="#7a4bd1">RAD-132 ORU^R01</text>
-  <text x="525" y="404" text-anchor="middle" class="sub" fill="#8c6fd0">RAD-132 (optional, to EM)</text>
-  <text x="620" y="528" text-anchor="middle" class="sub" fill="#2f6fd6">ITI-31 ADT^A04: the Result Aggregator feeds the Encounter Manager (tools/mllp_send.py → port 2576)</text>
-
+  <text x="525" y="404" text-anchor="middle" class="sub" fill="#8c6fd0">RAD-132 (optional)</text>
+  <text x="620" y="528" text-anchor="middle" class="sub" fill="#2f6fd6">ITI-31 ADT</text>
   <!-- legend -->
   <g transform="translate(28,560)">
     <line x1="0" y1="0" x2="36" y2="0" class="track" stroke="#2e9e5b"/><text x="46" y="5" class="leg">RAD-130 Get Encounter Imaging Context, MWL semantics</text>
