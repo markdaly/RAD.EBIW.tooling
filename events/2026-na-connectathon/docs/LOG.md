@@ -10,6 +10,32 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-13 (Tue, day 2), end of day: hand-off
+
+**Late news (16:30 ET):** an EHR vendor that had declined is now registered for ENCOUNTER_MGR-EBIW and
+RESULT_AGGREGATOR-EBIW, correctly, but sends direct (skips the proxy). Both TPMs are reworking the
+Gazelle test instances; maybe not resolved today. A real partner beats a stand-in, so TOOL_DDx
+likely becomes backup for those roles.
+
+**State at hand-off:** all five listeners up on ddx0 / 10.242.1.99 in tmux `ihe` and `ihe-panel`
+(em/ups restarted 10:34 on the locked state code, ra 10:40, panel on 80 and 8090 since 11:30); Mac
+on AC, system sleep off, lid must stay open. Tree clean, pushed. main: admin bypass on, 1 approval
+required. Ubuntu CI (22.04/24.04/26.04 x64+ARM, bare 26.04) green. Vendor files in
+`events/*/artifacts/` are untracked and locally excluded (`.git/info/exclude`), never commit them.
+
+**Resume here (Wed):**
+1. Ask the TPMs how the instances landed. If the EHR vendor holds EM/RA in an instance, TOOL_DDx is
+   out of it: reword `docs/HOWTO.md` and `docs/CONNECTIONS.md` to "backup partner", and the
+   step-10 ADT sent today may need redoing by the vendor. Their skipping the proxy means no Message
+   Capture: push them onto their proxy channels before graded runs.
+2. If TOOL_DDx stays RA for the POCUS Manager: its step-120 ORU arrives on 11067; check PV1-19 =
+   ADM001 (the ADT sent today) and read it against `research/rad-132-checklists.md`.
+3. Before any worklist run: issuer OID on the Encounters page (still blank, so Issuer of Accession
+   Number UEI/Type return empty), then per partner: identifier + AE titles, restart em and ups.
+4. Watcher: `python3 -I -u tools/floorwatch.py logs` as a Monitor source (30 min max, re-arm; it
+   resumes from its saved positions).
+5. Friend's Ubuntu laptop: `docs/INSTALL.md` Ubuntu section; their own HOWTO copy via PANEL_HOWTO.
+
 ## 2026-10-13 (Tue, day 2), afternoon: EBIW_POCUS_Simple_Workflow step 10 sent; waiting on step 120
 
 - **Step 10 (ITI-31) done, 13:42 ET:** TOOL_DDx as Result Aggregator sent ADT^A04 (PEREZ / EBIW001 /

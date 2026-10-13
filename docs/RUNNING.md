@@ -144,6 +144,10 @@ Files per request: `<ts>-upsN-<station>.request.txt` and `.response.json` (or `.
 
 ## Senders and probes
 
+- `tools/floorwatch.py [logs]`: prints one line per traffic or trouble event from every
+  `summary.log` (connects, messages, queries, new contexts, warnings, tracebacks) and reports a
+  listener going down, checked passively (never connects). Resumes from `logs/.floorwatch.pos.json`.
+
 - `tools/smoke.sh`: starts the whole kit through `floor.sh` in its own tmux session, on spare ports
   and a temp log folder, and checks every listener and panel page once (22 checks). Safe beside a
   live kit. Run it on any new machine before the floor; CI runs it on Ubuntu 22.04 and 24.04.
