@@ -10,6 +10,23 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-13 (Tue, day 2), 11:25-11:40 ET: panel styling and tablet fit; Ubuntu compatibility
+
+- **Panel styling:** fonts and colors only, light and dark following the device; monospace for
+  HL7 IDs and values. **Tablet fit** (monitor's iPad screenshot): no viewport tag and nowrap
+  code cells made the howto overflow past the header; fixed and checked at 1024 and 768 px.
+- **Bug found while styling:** the live page (`/tail`) never ran in a browser (an unescaped
+  `\n` in its script). Earlier checks were status codes only; now verified in headless Chrome.
+- **Ubuntu:** `tools/smoke.sh` (22 checks, own tmux session, ports and temp logs; safe beside
+  the live kit) passes on macOS beside the live kit and on stock Ubuntu 22.04 and 24.04 in CI
+  (`.github/workflows/ubuntu-smoke.yml`), which also proves the port 80 sysctl. floor.sh:
+  `ss` for port checks on Linux, `FLOOR_SESSION` / `FLOOR_ENV` overrides, LOG_DIR passed into
+  windows. Ubuntu steps in `docs/INSTALL.md`.
+
+**For the friend's Ubuntu laptop:** follow the INSTALL Ubuntu section, run `tools/smoke.sh` at
+home first (uv cache). If it is registered as its own Gazelle system, it needs its own HOWTO
+copy (`PANEL_HOWTO`): the shipped one names ddx0 / 10.242.1.99 / TOOL_DDx.
+
 ## 2026-10-13 (Tue, day 2), 10:30-10:50 ET: review fixes, connection page published
 
 - **Connection page published** (`docs/CONNECTIONS.md`, PR #2 plus a follow-up commit): where to
