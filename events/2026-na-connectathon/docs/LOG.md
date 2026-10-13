@@ -36,6 +36,14 @@ Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket 
   also hit the LICENSE copyright line; fixed by amending the tip and re-pushing.
 - Git author identity left as the repo owner's on every commit, per the plan.
 
+**Also built overnight (your late request):** `tools/panel.py`, a local web panel on
+http://127.0.0.1:8090/ (`tools/floor.sh panel`): service status, start/stop/restart, port and
+name config written to `.floor.env`, log browser by actor and session, each capture rendered as
+an HL7 field table with 2.5.1 names and components, prev/next with `j`/`k`, the paired ACK or
+responses one click away, and "download raw" for the byte-exact Gazelle attachment. Header links
+to the repo and docs. Console twin: `tools/hl7show.py <file>`. Tested end to end through its
+endpoints including a port change plus restart; the panel survives "stop all".
+
 **Still open from yesterday:** proxy channels (issue 005), Read_This_First code set, the TLS
 ticket's GSS permanent link, first real vendor queries.
 
