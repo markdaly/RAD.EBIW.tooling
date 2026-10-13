@@ -17,7 +17,10 @@ cleanup() {
 trap cleanup EXIT
 
 for c in tmux uv python3; do command -v $c >/dev/null || { echo "missing prerequisite: $c (see docs/INSTALL.md)"; exit 2; }; done
-echo "smoke: $(uname -sr), tmux $(tmux -V | cut -d' ' -f2), uv $(uv --version | cut -d' ' -f2), logs in $LOG_DIR"
+os=$( (. /etc/os-release 2>/dev/null && echo "$PRETTY_NAME") || sw_vers -productName 2>/dev/null)
+cu=$(ls --version 2>/dev/null | head -1 | grep -o "(.*)" || echo "BSD userland")
+echo "smoke: $os, $(uname -srm), coreutils $cu, tmux $(tmux -V | cut -d' ' -f2), uv $(uv --version | cut -d' ' -f2), user $(id -un)"
+echo "smoke: logs in $LOG_DIR"
 
 tools/floor.sh start
 up() { python3 -c "import socket,sys; socket.create_connection(('127.0.0.1', int(sys.argv[1])), 1).close()" "$1" 2>/dev/null; }

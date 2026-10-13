@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-26.04, ubuntu-26.04-arm]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -34,3 +34,25 @@ jobs:
           curl -sf http://127.0.0.1/howto | grep -q "Get started" && echo "PASS  panel serves the bare IP on port 80"
           tmux capture-pane -p -t p80-panel | grep "port(s)"
           tmux kill-session -t p80-panel
+
+  # A bare ubuntu:26.04 image (no runner tooling), non-root user, only the apt packages that
+  # docs/INSTALL.md lists plus what a desktop install already has (python3, iproute2).
+  # Catches a missing prerequisite that the full runner images would hide.
+  minimal-26-04:
+    runs-on: ubuntu-latest
+    container: ubuntu:26.04
+    timeout-minutes: 20
+    env:
+      TERM: xterm-256color
+    steps:
+      - name: Packages (INSTALL.md list + desktop baseline)
+        run: |
+          apt-get update -q
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -q git tmux curl ca-certificates python3 iproute2
+      - uses: actions/checkout@v4
+      - name: Non-root user with uv, as a laptop user would have
+        run: |
+          useradd -m kit && chown -R kit "$GITHUB_WORKSPACE"
+          su kit -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
+      - name: Smoke test as that user
+        run: su kit -c "export PATH=/home/kit/.local/bin:\$PATH TERM=$TERM; cd '$GITHUB_WORKSPACE' && tools/smoke.sh"
