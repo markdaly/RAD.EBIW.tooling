@@ -23,6 +23,10 @@ Individual problems live in `../issues/`; this is the record across them.
   `ss` for port checks on Linux, `FLOOR_SESSION` / `FLOOR_ENV` overrides, LOG_DIR passed into
   windows. Ubuntu steps in `docs/INSTALL.md`.
 
+- **Ubuntu 26.04 added** (11:50 ET): native x64 and ARM runners plus a bare `ubuntu:26.04`
+  container as a non-root user with only the INSTALL.md packages. All pass, on uutils (Rust)
+  coreutils too; the port 80 sysctl works on 22.04, 24.04 and 26.04.
+
 **For the friend's Ubuntu laptop:** follow the INSTALL Ubuntu section, run `tools/smoke.sh` at
 home first (uv cache). If it is registered as its own Gazelle system, it needs its own HOWTO
 copy (`PANEL_HOWTO`): the shipped one names ddx0 / 10.242.1.99 / TOOL_DDx.

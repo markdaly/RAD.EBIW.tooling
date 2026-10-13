@@ -1,7 +1,8 @@
 # Install
 
-Tested on macOS (Apple Silicon) and on Ubuntu 22.04 and 24.04: every push runs `tools/smoke.sh`
-on stock Ubuntu runners (`.github/workflows/ubuntu-smoke.yml`). Windows is untested; WSL should be fine.
+Tested on macOS (Apple Silicon) and on Ubuntu 22.04, 24.04 and 26.04 (x64 and ARM; 26.04 with its
+default Rust coreutils, also as a bare container image run by a non-root user): every push runs
+`tools/smoke.sh` there (`.github/workflows/ubuntu-smoke.yml`). Windows is untested; WSL should be fine.
 
 ## Prerequisites
 
@@ -27,7 +28,7 @@ Without uv: Python 3.11+ and `pip install -r requirements.txt` in a venv, then r
 `uv run --with pynetdicom --with pydicom --with fastapi --with uvicorn python tools/<tool>.py`
 pulls them into a cached environment on first run (needs network once).
 
-## Ubuntu (22.04, 24.04)
+## Ubuntu (22.04, 24.04, 26.04)
 
 The same steps the CI runs:
 
