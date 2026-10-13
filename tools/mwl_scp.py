@@ -53,7 +53,7 @@ Config (env):
 Run:  uv run --with pynetdicom --with pydicom python tools/mwl_scp.py
 Test: uv run --with pynetdicom --with pydicom python tools/mwl_find.py 127.0.0.1 11112 ENC_MGR
 """
-import json, os, re, socketserver, sys, threading
+import fcntl, json, os, re, socketserver, sys, threading
 from datetime import datetime
 from pathlib import Path
 
@@ -118,17 +118,28 @@ def context_for(admission_id, modality, station, create=True):
     create=False returns a placeholder for rows that have none yet, so matching can run before
     anything is allocated; only matched rows get a real pair."""
     key = f"{admission_id}|{modality}|{station}"
-    if STATE_FILE.exists():  # ups_rs.py shares this file; re-read so both hand out the same pair
-        state.update(json.loads(STATE_FILE.read_text()))
-    if key not in state and not create:
-        return {"accession": "", "study_uid": ""}
-    if key not in state:
-        n = len(state) + 1
-        state[key] = {"accession": f"{PREFIX}{datetime.now().strftime('%y%m%d')}{n:04d}",
-                      "study_uid": generate_uid(prefix=UID_ROOT)}
-        STATE_FILE.write_text(json.dumps(state, indent=1))
-        log(f"NEW CONTEXT admission={admission_id} modality={modality} station={station} -> {state[key]}")
-    return state[key]
+    # ups_rs.py is a second process on the same file: lock across read-allocate-write so both
+    # hand out the same pair and never the same accession for two keys (issue 008).
+    with open(STATE_FILE.with_name(STATE_FILE.name + ".lock"), "a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if STATE_FILE.exists():
+            state.update(json.loads(STATE_FILE.read_text()))
+        if key not in state and not create:
+            return {"accession": "", "study_uid": ""}
+        if key not in state:
+            n = len(state) + 1
+            state[key] = {"accession": f"{PREFIX}{datetime.now().strftime('%y%m%d')}{n:04d}",
+                          "study_uid": generate_uid(prefix=UID_ROOT)}
+            write_atomic(STATE_FILE, json.dumps(state, indent=1))
+            log(f"NEW CONTEXT admission={admission_id} modality={modality} station={station} -> {state[key]}")
+        return state[key]
+
+
+def write_atomic(path, text):
+    """Readers in the other process see the old file or the new one, never a partial one."""
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(text)
+    os.replace(tmp, path)
 
 
 def code_item(c):
@@ -356,7 +367,7 @@ class ADTHandler(socketserver.StreamRequestHandler):
                 if enc and enc["admission_id"]:
                     existing = json.loads(ADT_FILE.read_text()) if ADT_FILE.exists() else []
                     existing = [e for e in existing if row_key(e) != row_key(enc)] + [enc]
-                    ADT_FILE.write_text(json.dumps(existing, indent=1))
+                    write_atomic(ADT_FILE, json.dumps(existing, indent=1))
                     code = "AA"
                     log(f"ITI-31 {msh[8]} from {peer}: added/updated encounter {enc['admission_id']} "
                         f"{enc['patient_name']} {enc['patient_id']} ({len(encounters())} encounters now) file={stem}.in.hl7")
