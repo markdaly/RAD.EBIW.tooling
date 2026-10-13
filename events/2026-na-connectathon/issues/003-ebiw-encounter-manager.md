@@ -11,7 +11,7 @@ expires: 2026-10-16
 - **Source:** floor request via the monitor, Oct 12 afternoon. A VNA vendor's EBIW test scenario needs
   an Encounter Manager partner. No Zulip thread yet.
 - **Opened:** 2026-10-12 ~15:30 ET
-- **Status:** open (MWL on 10.242.1.184:11112 `ENC_MGR` since 15:41 ET; UPS-RS on http://10.242.1.184:8042/workitems since 16:05 ET; waiting for the first query)
+- **Status:** open (MWL on 10.242.1.99:11112 `ENC_MGR` since 15:41 ET; UPS-RS on http://10.242.1.99:8042/workitems since 16:05 ET; waiting for the first query)
 - **Domain / profile / actor / transaction:** RAD EBIW (TI rev 3.1, 2025-06-19) / Encounter
   Manager, POCUS Option / RAD-130 Get Encounter Imaging Context (MWL semantics); RAD-132
   Notify of Imaging Results as optional Responder
@@ -69,7 +69,7 @@ One VNA vendor's scenario now; any EBIW Acquisition Modality that needs a RAD-13
   the VNA (Image Manager/Image Archive + Lightweight Modality; options MPEG4, JPEG, DICOM
   Instance Storage, POCUS) and a sync/POCUS-manager box (POCUS Manager + Image Manager).
 - **Querying system:** the vendor's POCUS Manager box, 10.242.1.17. It will C-FIND the
-  stand-in at **10.242.1.184:11112, AE `ENC_MGR`**.
+  stand-in at **10.242.1.99:11112, AE `ENC_MGR`**.
 - **VNA:** 10.242.1.11, AE `SYNVNA`, port 4000. Reachable from this Mac (TCP open); a C-ECHO
   with calling AE `ENC_MGR` was rejected at association, which is normal for a VNA that only
   accepts known calling AEs. Not needed for the Encounter Manager role.
@@ -94,7 +94,7 @@ One VNA vendor's scenario now; any EBIW Acquisition Modality that needs a RAD-13
   the RESTful path, FHIR still being worked; POCUS community prefers MWL. So the stand-in now
   serves both: `tools/mwl_scp.py` (DIMSE) for whatever they can test today, `tools/ups_rs.py`
   (REST) for when their client exists.
-- UPS-RS endpoint for the vendor: `GET http://10.242.1.184:8042/workitems?<keys>`; station
+- UPS-RS endpoint for the vendor: `GET http://10.242.1.99:8042/workitems?<keys>`; station
   identity via `ScheduledStationNameCodeSequence.CodeValue=<their id>`, modality via
   `ScheduledStationClassCodeSequence.CodeValue=XC|US`; response is a JSON array of UPS
   instances with Accession / Issuer / Requested Procedure inside Referenced Request Sequence
@@ -128,7 +128,7 @@ to `logs/encounter-manager/<session>/`.
 2. Export EBIW_10_Read_This_First from Gazelle (same "print test as pdf" route) and load its
    patients/encounters/codes into `samples/encounters.json`.
 2b. Query line to hand the modality vendor (matches DOE^JANE / VISIT0001 today):
-    `GET http://10.242.1.184:8042/workitems?PatientID=MRN12345&ScheduledStationNameCodeSequence.CodeValue=<their station id>&ScheduledStationClassCodeSequence.CodeValue=XC`
+    `GET http://10.242.1.99:8042/workitems?PatientID=MRN12345&ScheduledStationNameCodeSequence.CodeValue=<their station id>&ScheduledStationClassCodeSequence.CodeValue=XC`
     or by wristband: `AdmissionID=VISIT0001`. Through the proxy, replace host:port with the
     proxy channel Gazelle assigns.
 3. Give the modality vendor: AE title `ENC_MGR`, this Mac's floor IP, port 11112.

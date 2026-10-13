@@ -15,7 +15,8 @@ expires: 2026-10-16
   TOOL_DDx through the proxy (RAD-132, ITI-31, RAD-130 MWL and UPS-RS)
 
 ## Symptom
-- Four approved configurations for TOOL_DDx (ddx0 / 10.242.1.184) got proxy ports 11064
+- Four approved configurations for TOOL_DDx (ddx0 / 10.242.1.184, the DHCP address at the time;
+  static 10.242.1.99 since Oct 13 ~09:30 ET) got proxy ports 11064
   (2576), 11065 (11112), 11066 (8042), 11067 (2575).
 - From this Mac, `proxy.ihe-europe.net` (192.168.2.5) **accepts TCP on all four ports, then
   closes the connection ~0.1 s later without any data**, before the client sends anything.
@@ -34,6 +35,9 @@ Only our system's channels tested. Unknown whether other systems' proxy channels
   here. The proxy host's own resolver may differ.
 - Proxy host 192.168.2.5 serves 403 on `/`; https://proxy.ihe-europe.net/ is a Drupal redirect;
   no channel UI found anonymously. Message Capture (login) is presumably where channels show.
+
+- Oct 13: the Mac moved to static 10.242.1.99. Re-test only after the Gazelle ddx0 host entry
+  says .99; a proxy channel still aimed at .184 now hits whatever holds that lease.
 
 ## Hypotheses (ranked)
 1. **Proxy forwards to the hostname `ddx0`, which does not resolve on the proxy host**, so its

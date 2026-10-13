@@ -37,6 +37,9 @@ on the state-file lock. Main still has admin bypass on and PR #2 open.
 
 - Services up from 09:04 ET on ddx0 / 10.242.1.184 (ra 2575, adt 2576, em 11112, ups 8042,
   panel 8090 local). No vendor traffic yet.
+- ~09:30 ET the Mac moved to **static 10.242.1.99** (below the .125+ DHCP pool, router .1).
+  CONNECTIONS.md and issues 003/004/005 updated; entries above this line keep the address
+  that was true at the time. The Gazelle ddx0 host entry has to follow.
 - **Issue 006, fixed:** an ITI-31 ADT for an EBIW_10 admission added a third, modality-less row
   beside the US/XC rows, so a PEREZ worklist returned a duplicate item (same accession).
   `encounters()` now overlays ADT fields onto that admission's rows. Reproduced on the old
