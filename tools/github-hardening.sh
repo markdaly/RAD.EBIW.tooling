@@ -15,6 +15,10 @@ echo "secret scanning + push protection"
 gh api -X PATCH "repos/$R" --input - <<'JSON' 2>&1 | python3 -c 'import sys,json; d=json.loads(sys.stdin.read().split("\n")[0]); print("  ", d.get("message") or d.get("security_and_analysis"))'
 {"security_and_analysis": {"secret_scanning": {"status": "enabled"}, "secret_scanning_push_protection": {"status": "enabled"}}}
 JSON
+echo "CodeQL default setup (python); needs Actions enabled on the repo"
+gh api -X PATCH "repos/$R/code-scanning/default-setup" --input - <<'JSON' 2>&1 | python3 -c 'import sys,json; d=json.loads(sys.stdin.read().split("\n")[0] or "{}"); print("  ", d.get("message") or d.get("state") or d)'
+{"state": "configured", "query_suite": "default", "languages": ["python"]}
+JSON
 echo "branch protection on main: PRs for everyone but admins, no force-push, no delete, linear history"
 gh api -X PUT "repos/$R/branches/main/protection" --input - <<'JSON' 2>&1 | python3 -c 'import sys,json; d=json.loads(sys.stdin.read().split("\n")[0]); print("  ", d.get("message") or {k: d[k].get("enabled") for k in ("enforce_admins","required_linear_history","allow_force_pushes","allow_deletions") if k in d})'
 {"required_status_checks": null, "enforce_admins": false, "required_pull_request_reviews": {"required_approving_review_count": 0, "dismiss_stale_reviews": true}, "restrictions": null, "required_linear_history": true, "allow_force_pushes": false, "allow_deletions": false, "required_conversation_resolution": true}
