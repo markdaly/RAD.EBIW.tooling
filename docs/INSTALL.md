@@ -1,7 +1,7 @@
 # Install
 
-Tested on macOS (Apple Silicon) and expected to work on any Linux with Python 3.11 or newer.
-Windows is untested; WSL should be fine.
+Tested on macOS (Apple Silicon) and on Ubuntu 22.04 and 24.04: every push runs `tools/smoke.sh`
+on stock Ubuntu runners (`.github/workflows/ubuntu-smoke.yml`). Windows is untested; WSL should be fine.
 
 ## Prerequisites
 
@@ -27,6 +27,32 @@ Without uv: Python 3.11+ and `pip install -r requirements.txt` in a venv, then r
 `uv run --with pynetdicom --with pydicom --with fastapi --with uvicorn python tools/<tool>.py`
 pulls them into a cached environment on first run (needs network once).
 
+## Ubuntu (22.04, 24.04)
+
+The same steps the CI runs:
+
+```bash
+sudo apt update && sudo apt install -y git tmux curl
+curl -LsSf https://astral.sh/uv/install.sh | sh        # then open a new terminal (adds ~/.local/bin)
+git clone https://github.com/markdaly/RAD.EBIW.tooling.git && cd RAD.EBIW.tooling
+tools/smoke.sh                                           # 22 checks on spare ports, then cleans up
+tools/floor.sh start
+```
+
+- **Run `tools/smoke.sh` before the event, on a network with internet.** The first run downloads
+  Python and the packages into uv's cache; after that the kit needs no internet.
+- **Port 80.** Linux keeps ports below 1024 for root, so the panel serves only 8090 and says so in
+  its tmux window. To serve the bare IP too, until the next reboot:
+  `sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80`, then
+  `tools/floor.sh panel-stop && tools/floor.sh panel`.
+- **Firewall.** Ubuntu ships ufw inactive. If `sudo ufw status` says active:
+  `sudo ufw allow 80,2575,2576,8042,8090,11112/tcp`.
+- **Floor IP:** `hostname -I`.
+- **Event pages.** The panel's `howto` page and `CONNECTIONS.md` describe the event's registered
+  system (host, IP, Gazelle system keyword). A second machine registered as its own Gazelle system
+  needs its own copy: copy `events/<event>/docs/HOWTO.md`, change the IP and system keyword, and
+  start the panel with `PANEL_HOWTO=<path to the copy>`.
+
 ## First run
 
 ```bash
@@ -36,8 +62,8 @@ tools/floor.sh start
 tools/floor.sh status
 ```
 
-`status` should show four ports listening: 2575 (HL7 in), 2576 (ADT in), 8042 (UPS-RS), 11112
-(DICOM MWL). Attach with `tmux attach -t ihe`; the `logs` window has three panes following the
+`status` should show the four servers listening: 2575 (HL7 in), 2576 (ADT in), 8042 (UPS-RS),
+11112 (DICOM MWL), plus the panel on 80 and 8090 (8090 only on Linux without the sysctl in the Ubuntu section). Attach with `tmux attach -t ihe`; the `logs` window has three panes following the
 servers. Stop everything with `tools/floor.sh stop`.
 
 Loopback check before pointing a vendor at it:

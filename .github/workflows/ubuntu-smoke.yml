@@ -26,3 +26,11 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Smoke test
         run: tools/smoke.sh
+      - name: Port 80 with the documented sysctl (docs/INSTALL.md, Ubuntu)
+        run: |
+          sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+          FLOOR_SESSION=p80 FLOOR_ENV=/dev/null PANEL_PORT=80,18091 tools/floor.sh panel
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1/howto && break; sleep 1; done
+          curl -sf http://127.0.0.1/howto | grep -q "Get started" && echo "PASS  panel serves the bare IP on port 80"
+          tmux capture-pane -p -t p80-panel | grep "port(s)"
+          tmux kill-session -t p80-panel

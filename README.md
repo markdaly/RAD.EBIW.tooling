@@ -1,5 +1,7 @@
 # IHE Connectathon kit
 
+[![ubuntu-smoke](https://github.com/markdaly/RAD.EBIW.tooling/actions/workflows/ubuntu-smoke.yml/badge.svg)](https://github.com/markdaly/RAD.EBIW.tooling/actions/workflows/ubuntu-smoke.yml)
+
 Small stand-in IHE actors and monitor notes, written on a Connectathon floor when a vendor's
 test partner did not exist. Python, one file per actor, raw logs of every message, config by
 environment variables. Built for the Radiology **EBIW** profile (Encounter-Based Imaging

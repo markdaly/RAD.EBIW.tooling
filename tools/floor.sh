@@ -28,7 +28,8 @@ panel_start() {  # own tmux session so "stop" (servers) leaves the panel up
   tmux set-option -t "$SP" remain-on-exit on
   ip=$(ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}')
   urls=""; for p in ${PANEL_PORT//,/ }; do [ "$p" = 80 ] && urls="$urls http://${ip:-127.0.0.1}/" || urls="$urls http://${ip:-127.0.0.1}:$p/"; done
-  echo "panel on$urls (read-only from other machines; admin at http://127.0.0.1:${PANEL_PORT##*,}/) (tmux session $SP)"
+  echo "panel starting on$urls (read-only from other machines; admin at http://127.0.0.1:${PANEL_PORT##*,}/)"
+  echo "  a port it cannot bind is skipped (Linux: 80 needs the sysctl in docs/INSTALL.md); check: tools/floor.sh status"
 }
 case "$1" in
   start)
