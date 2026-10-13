@@ -33,11 +33,11 @@ def main():
     try:
         ack = exchange(raw, host, port)
     except Exception as e:
-        log(f"SEND {msh[8]} MSH-10={msh[9]} to {host}:{port} FAILED {type(e).__name__}: {e} file={stem}.out.hl7 (from {path})")
+        log(f"SEND {msh[8]} MSH-10={msh[9]} to {host}:{port} FAILED {type(e).__name__}: {e} file={stem}.out.hl7 (from {path.name})")
         raise
     (folder / f"{stem}.ack.hl7").write_bytes(ack)
     msa = next((seg.split("|") for seg in ack.decode("latin-1").split("\r") if seg.startswith("MSA|")), ["", "(no MSA)"])
-    log(f"SEND {msh[8]} MSH-10={msh[9]} to {host}:{port} -> {'|'.join(msa[1:3])} file={stem}.out.hl7 (from {path})")
+    log(f"SEND {msh[8]} MSH-10={msh[9]} to {host}:{port} -> {'|'.join(msa[1:3])} file={stem}.out.hl7 (from {path.name})")
     print(ack.decode("latin-1").replace("\r", "\n"))
     print(f"logged: {folder / stem}.out.hl7 + .ack.hl7", file=sys.stderr)
 
