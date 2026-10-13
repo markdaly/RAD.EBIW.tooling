@@ -8,6 +8,8 @@ a vendor; it only reads logs/ and runs tools/floor.sh.
   GET  /logs/<actor>/<session> files in a session (pairs: message + ACK, query + responses)
   GET  /view?f=<relpath>      one capture, rendered (HL7 field table, DICOM dump, JSON), prev/next, raw link
   GET  /raw?f=<relpath>       the raw bytes as a download (what a vendor attaches in Gazelle)
+  GET  /tail                  live view: summary lines of every actor merged by time, plus the newest
+                              captures, refreshed every 2 s (follows the bottom unless you scroll up)
   POST /config                writes .floor.env (ports, AE title, issuer, encounters file)
   GET  /encounters            the rows the Encounter Manager serves, plus the pre-run setup form:
                               partner identifier (replaces the name suffix on the EBIW_10 rows),
@@ -100,7 +102,7 @@ def page(title, body, nav=""):
               if admin else
               f"<div class='banner ro'>READ-ONLY VIEW: browse logs and download raw captures. Administration (config, start/stop/restart, encounter edits) is only available on the machine running this panel.</div>")
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>{html.escape(title)}</title><style>{css}</style></head>
-<body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
+<body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> <a href="/tail">live</a> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
 {banner}<main>{body}</main><script>document.addEventListener('keydown',e=>{{const a=document.querySelector(e.key==='j'||e.key==='ArrowRight'?'#next':e.key==='k'||e.key==='ArrowLeft'?'#prev':null);if(a)location=a.href}})</script></body></html>"""
 
 
@@ -256,6 +258,67 @@ def view(f: str):
     nav = f"<a href='/logs/{p.parent.parent.name}/{p.parent.name}'>{html.escape(p.parent.parent.name)}/{html.escape(p.parent.name)}</a> {prev_} {next_} <small>{i+1}/{len(files)}</small>"
     body = f"<h2>{html.escape(p.name)} <small><a href='/raw?f={f}'>download raw</a></small></h2><p>related: {pairs or '<small>none</small>'} &nbsp; <small>keys: j/k or arrows</small></p>{render(p, text)}"
     return page(p.name, body, nav)
+
+
+TS_FILE = re.compile(r"(\d{8})-(\d{6})")  # session folders and capture names carry YYYYMMDD-HHMMSS
+
+
+def tail_data(n=300):
+    """Last n summary lines across actors, merged by date+time; newest 25 captures with mtime."""
+    lines, caps = [], []
+    if LOG_DIR.exists():
+        for actor in (a for a in LOG_DIR.iterdir() if a.is_dir()):
+            sessions = sorted((d for d in actor.iterdir() if d.is_dir()), key=lambda d: d.stat().st_mtime)[-4:]
+            for d in sessions:
+                m = re.search(r"(\d{8})", d.name)
+                day = m.group(1) if m else datetime.fromtimestamp(d.stat().st_mtime).strftime("%Y%m%d")
+                summ = d / "summary.log"
+                if summ.exists():
+                    for i, line in enumerate(summ.read_text("utf-8", "replace").splitlines()[-n:]):
+                        f = re.search(r"file=(\S+)", line)
+                        link = f"{actor.name}/{d.name}/{f.group(1)}" if f and (d / f.group(1)).exists() else ""
+                        lines.append((day, line[:8], i, actor.name, line, link))
+                for c in d.iterdir():
+                    if c.is_file() and c.name != "summary.log":
+                        caps.append((c.stat().st_mtime, actor.name, d.name, c))
+    lines.sort()
+    caps = sorted(caps, reverse=True)[:25]
+    return lines[-n:], caps
+
+
+@app.get("/tail.json")
+def tail_json():
+    lines, caps = tail_data()
+    return {"lines": [{"day": d, "actor": a, "text": t, "link": l} for d, _, _, a, t, l in lines],
+            "captures": [{"time": datetime.fromtimestamp(m).strftime("%H:%M:%S"), "actor": a, "session": s, "name": c.name,
+                          "size": c.stat().st_size, "link": f"{a}/{s}/{c.name}"} for m, a, s, c in caps]}
+
+
+@app.get("/tail", response_class=HTMLResponse)
+def tail_page():
+    body = """<h2>Live <small>summary lines of every actor, merged by time; refreshes every 2 s</small></h2>
+<p><label><input type='checkbox' id='follow' checked> follow the newest line</label> <small id='stamp'></small></p>
+<pre id='lines' style='height:55vh;overflow:auto;white-space:pre-wrap'></pre>
+<h3>Newest captures</h3><table id='caps'><tr><th>time</th><th>actor</th><th>size</th><th>file</th></tr></table>
+<style>.a-result-aggregator{color:#7cc4ff}.a-encounter-manager{color:#d9a6ff}.a-other{color:#ccc}</style>
+<script>
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const cls=a=>a==='result-aggregator'||a==='encounter-manager'?'a-'+a:'a-other';
+async function tick(){
+  try{
+    const r=await fetch('/tail.json',{cache:'no-store'}); const d=await r.json();
+    const box=document.getElementById('lines'); const atBottom=box.scrollTop+box.clientHeight>=box.scrollHeight-20;
+    box.innerHTML=d.lines.map(l=>{const t=esc(l.text);const tag=`<span class='${cls(l.actor)}'>${l.actor.padEnd(18)}</span>`;
+      return tag+' '+(l.link?`<a href='/view?f=${encodeURIComponent(l.link)}'>${t}</a>`:t)}).join('\n');
+    if(document.getElementById('follow').checked&&atBottom||box.dataset.first!=='done'){box.scrollTop=box.scrollHeight;box.dataset.first='done'}
+    document.getElementById('caps').innerHTML='<tr><th>time</th><th>actor</th><th>size</th><th>file</th></tr>'+d.captures.map(c=>
+      `<tr><td>${c.time}</td><td class='${cls(c.actor)}'>${esc(c.actor)}</td><td>${c.size} B</td><td><a href='/view?f=${encodeURIComponent(c.link)}'>${esc(c.name)}</a> <small><a href='/raw?f=${encodeURIComponent(c.link)}'>raw</a></small></td></tr>`).join('');
+    document.getElementById('stamp').textContent='updated '+new Date().toLocaleTimeString();
+  }catch(e){document.getElementById('stamp').textContent='panel unreachable, retrying'}
+}
+tick(); setInterval(tick,2000);
+</script>"""
+    return page("live", body)
 
 
 @app.get("/raw")

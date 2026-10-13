@@ -16,7 +16,7 @@ tmux attach -t ihe              # watch; Ctrl-b d to detach
 Windows keep their output when a server dies (`remain-on-exit`), so a crash stays readable until
 you `restart` it. The `logs` window runs `tools/logwatch.sh result-aggregator`,
 `tools/logwatch.sh encounter-manager` (follows new session folders after a restart) and
-`tools/newfiles.sh` (newest raw captures plus state counts).
+`tools/newfiles.sh` (newest raw captures with the time each was written, actor, kind and size, sized to the pane, plus state counts).
 
 Set `PYTHON` to use a specific interpreter; otherwise `uv run --python '>=3.11'` provisions one.
 Ports and names come from `.floor.env` at the repo root if it exists (gitignored; the panel writes
@@ -36,6 +36,9 @@ and a thin front end to `floor.sh` for control:
   identifier for the EBIW_10 names, one AE title per modality, issuer OID) that rewrites the
   encounters file in place. Restart `em` and `ups` afterwards.
 - Log index by actor and session; per-session file list with `summary.log`.
+- **live** (header link, `/tail`): every actor's `summary.log` merged by time, newest at the
+  bottom, refreshed every 2 s and following the end unless you scroll up; lines that name a
+  capture link to it. Below it, the 25 newest captures with the time each was written.
 - One capture rendered: HL7 as a field table with HL7 2.5.1 names and components split, DICOM
   query/response dumps and UPS-RS JSON as text. Prev/next (keys `j`/`k` or arrows), the related
   file (ACK for a message, responses for a query), and **download raw**, which is the exact bytes
