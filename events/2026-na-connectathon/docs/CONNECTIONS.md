@@ -35,8 +35,16 @@ No TLS on any of these.
 
 ## 2. The panel: see exactly what arrived
 
-Open **http://10.242.1.99:8090/** from any floor laptop. The amber **READ-ONLY VIEW** banner is
-expected: you can browse and download, but only the monitor's machine can change anything.
+Open **http://ddx0.na2026.net:8090/** from any floor laptop (or http://10.242.1.99:8090/ if
+your DNS lags). The amber **READ-ONLY VIEW** banner is expected: you can browse and download,
+but only the monitor's machine can change anything.
+
+- **live** (header): everything arriving, all actors merged by time, refreshed every 2 s.
+  Send your message and watch it land; click the line to open the capture.
+- **encounters** (header): the worklist rows the Encounter Manager serves, with the AE title
+  and procedure per row. Check here that your AE title is set before a worklist run.
+
+To find and attach a capture:
 
 1. Under **Logs**, pick the actor (`result-aggregator` for ORU and ACKs, `encounter-manager` for
    MWL, UPS-RS and ADT) and the newest session folder.
