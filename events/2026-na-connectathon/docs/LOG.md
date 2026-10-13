@@ -9,6 +9,36 @@ expires: 2026-10-16
 One entry per working session, newest first. Each ends with where the next session starts.
 Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket record.
 
+## 2026-10-13 (Tue, overnight): repo made public-safe
+
+**Morning checklist for the monitor (three lines):**
+1. Skim this tree, then flip GitHub visibility to public (Settings → General → Danger zone).
+   Nothing else happens until you do.
+2. Optional: rename the GitHub repo to `ihe-connectathon-kit` (GitHub keeps a redirect) and
+   add the one or two staffers as collaborators, or point them at fork-and-PR (CONTRIBUTING.md).
+3. Check `research/` for the overnight research thread's output and the section below.
+
+**What ran:**
+- Backup first: `../ihe-connectathon-2026-PRIVATE-20261012-234222.bundle` plus a full directory
+  copy next to it. `git clone <bundle>` restores yesterday's history exactly.
+- Tree: new layout (`events/2026-na-connectathon/{docs,issues,artifacts}`, `templates/`),
+  generic `CLAUDE.md` with a gitignored `CLAUDE.local.md` for personal context, new README with
+  the honesty section, CONTRIBUTING, MIT LICENSE, `docs/INSTALL|RUNNING|TROUBLESHOOTING.md`,
+  `requirements.txt`, portable `floor.sh`. People are roles everywhere; hosts, IPs, ports,
+  system keywords, test ids and dates are untouched. Gazelle test PDFs removed. Loopback smoke
+  test of all three servers, both senders, MWL SCU and UPS-RS passed on the rewritten tree;
+  `floor.sh start/status/stop` verified.
+- History: `git filter-repo` over all 21 commits with the same replacement list applied to
+  blobs and commit messages, PDFs dropped from every commit, path renames carried through so
+  `git log --follow` works. Gate: a grep of every blob in every commit for the people/vendor
+  list came back empty (LICENSE excluded; it names the copyright holder on purpose). Force-pushed
+  to the private origin, tagged `public-v1`. One self-inflicted bug caught: the replacement list
+  also hit the LICENSE copyright line; fixed by amending the tip and re-pushing.
+- Git author identity left as the repo owner's on every commit, per the plan.
+
+**Still open from yesterday:** proxy channels (issue 005), Read_This_First code set, the TLS
+ticket's GSS permanent link, first real vendor queries.
+
 ## 2026-10-12 (Mon, day 1), end of day: everything in tmux, proxy blocked
 
 - The monitor is Gazelle admin and SUT **TOOL_DDx** (org DDx, host `ddx0`, 10.242.1.184). Four
