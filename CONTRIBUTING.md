@@ -72,6 +72,11 @@ Add a row to the table in `README.md` and a paragraph to `docs/TOOLS.md` and `do
 Prefer an existing Gazelle or NIST simulator if one exists (`docs/TOOLS.md` lists them); a
 stand-in counts against the event's limit of intermediaries per test run.
 
+## License of contributions
+
+Apache-2.0, same as the repo. By opening a PR you agree your contribution is licensed under it
+(the standard Apache inbound = outbound understanding; no CLA).
+
 ## Where things go
 
 | Thing | Place |

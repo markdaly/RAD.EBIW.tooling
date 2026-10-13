@@ -14,7 +14,9 @@ Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket 
 **Morning checklist for the monitor (three lines):**
 1. Skim this tree, then flip GitHub visibility to public (Settings → General → Danger zone).
    Nothing else happens until you do.
-2. Naming: the IHE GitHub org uses `DOMAIN.Profile` for spec repos (`ITI.MHD`, `PaLM.DPOW`,
+2. Done: repo renamed to `RAD.EBIW.tooling` (IHE org convention; GitHub redirects the old name),
+   description/homepage/topics set, license Apache-2.0. Add staffers as collaborators or point
+   them at fork-and-PR. Background on the convention: the IHE GitHub org uses `DOMAIN.Profile` for spec repos (`ITI.MHD`, `PaLM.DPOW`,
    `DEV.tooling`) and plain kebab-case for cross-domain tooling (`connectathon-artifacts`,
    Apache-2.0). For a personal repo there is no convention to follow; `ihe-connectathon-kit`
    reads fine, `connectathon-kit` if you want it shorter. If it ever moves under the IHE org,
@@ -29,7 +31,7 @@ Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket 
   copy next to it. `git clone <bundle>` restores yesterday's history exactly.
 - Tree: new layout (`events/2026-na-connectathon/{docs,issues,artifacts}`, `templates/`),
   generic `CLAUDE.md` with a gitignored `CLAUDE.local.md` for personal context, new README with
-  the honesty section, CONTRIBUTING, MIT LICENSE, `docs/INSTALL|RUNNING|TROUBLESHOOTING.md`,
+  the honesty section, CONTRIBUTING, LICENSE (MIT overnight, switched to Apache-2.0 in the morning to match IHE's connectathon-artifacts; NOTICE added), `docs/INSTALL|RUNNING|TROUBLESHOOTING.md`,
   `requirements.txt`, portable `floor.sh`. People are roles everywhere; hosts, IPs, ports,
   system keywords, test ids and dates are untouched. Gazelle test PDFs removed. Loopback smoke
   test of all three servers, both senders, MWL SCU and UPS-RS passed on the rewritten tree;

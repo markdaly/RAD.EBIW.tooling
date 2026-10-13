@@ -45,7 +45,14 @@ floor. Read any tool top to bottom before trusting it; each is short on purpose.
   marks of their respective owners. Technical Framework text is quoted briefly under fair use and
   is copyright IHE International; the documents themselves are not redistributed here.
 - Never for clinical use. Test-floor traffic only.
-- MIT licensed, no warranty. See [LICENSE](LICENSE).
+- Apache-2.0 licensed, same license as IHE's own `connectathon-artifacts`, no warranty. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+## Specification
+
+- IHE wiki profile page: https://wiki.ihe.net/index.php/Encounter-Based_Imaging_Workflow
+- IHE Radiology Technical Framework index: https://profiles.ihe.net/RAD/
+- EBIW supplement (Trial Implementation, rev 3.1): https://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_Suppl_EBIW.pdf
+- IHE's own Connectathon artifacts: https://github.com/IHE/connectathon-artifacts
 
 ## Layout
 
