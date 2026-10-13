@@ -13,7 +13,7 @@ Workflow, POCUS Option) and reusable for any HL7 v2 or DICOM worklist partner yo
 | `tools/mllp_send.py` | test sender | send one HL7 file, print the ACK | |
 | `tools/mwl_find.py` | test modality | RAD-130 C-FIND with the EBIW required keys | |
 | `tools/floor.sh` | | run everything in one tmux session; restart one server; status; ports from `.floor.env` | |
-| `tools/panel.py` | | local web panel: service control, port config, log browser with HL7 field view and raw export | 8090 |
+| `tools/panel.py` | | local web panel: service control, port config, log browser with HL7 field view and raw export | 80, 8090 |
 | `tools/hl7show.py` | | console HL7 pretty-printer with field names; prev/next through a session folder | |
 
 ![Where the kit's stand-ins sit in EBIW](docs/images/ebiw-map.svg)
@@ -24,14 +24,14 @@ Quick start (macOS or Linux, needs [uv](https://docs.astral.sh/uv/)):
 git clone <this repo> && cd <this repo>
 tools/floor.sh start      # three servers + a log window in tmux session "ihe"
 tools/floor.sh status     # four ports listening?
-                          # (also starts the panel on :8090; floor laptops read, control is local-only)
+                          # (also starts the panel on :80 and :8090; floor devices read, control is local-only)
 tmux attach -t ihe
 ```
 
 Then read [docs/RUNNING.md](docs/RUNNING.md) for env vars, ports, where logs and state live, and
 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) when something does not arrive.
 
-The panel (started by `tools/floor.sh start`, port 8090 on all interfaces) shows service status, lets you start,
+The panel (started by `tools/floor.sh start`, ports 80 and 8090 on all interfaces) shows service status, lets you start,
 stop and restart the servers, edit ports and the encounter set, and browse every capture with
 HL7 rendered field by field, prev/next, the paired ACK, and a byte-exact raw download for Gazelle:
 

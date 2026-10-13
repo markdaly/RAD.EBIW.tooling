@@ -85,7 +85,9 @@ PV1-18.
 ## Panel
 
 - `tools/floor.sh panel` says "already running": `tools/floor.sh panel-stop` first.
-- Port 8090 busy: `PANEL_PORT=8091 tools/floor.sh panel`.
+- Port 80 or 8090 busy: the panel skips a port it cannot bind and serves the rest (its window says
+  which); pick others with `PANEL_PORT=80,8091 tools/floor.sh panel`. On Linux, port 80 needs
+  privileges; the panel then serves 8090 only.
 - Config saved but ports did not change: the form writes `.floor.env`; it applies on the next
   `restart <win>` or `start`. The status block on the panel shows what is actually listening.
 - A capture renders as plain text instead of a field table: the file name does not end in

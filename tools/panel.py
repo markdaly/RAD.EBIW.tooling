@@ -21,10 +21,11 @@ a vendor; it only reads logs/ and runs tools/floor.sh.
 Config (env): PANEL_HOST default 0.0.0.0 (anyone on the floor can read logs and download raw
 captures; set 127.0.0.1 to keep it on this machine). The POST actions (config, service control,
 encounter edits) answer only clients on this machine unless PANEL_REMOTE_CONTROL=1. No
-authentication either way. PANEL_PORT default 8090, LOG_DIR default logs, REPO_URL default from `git remote get-url origin`.
+authentication either way. PANEL_PORT default 80,8090 (comma list; a port that cannot be bound, e.g.
+80 without privileges on Linux, is skipped with a message and the others still serve), LOG_DIR default logs, REPO_URL default from `git remote get-url origin`.
 Run: uv run --with fastapi --with uvicorn python tools/panel.py   (or tools/floor.sh panel)
 """
-import contextvars, html, json, os, re, subprocess, sys
+import asyncio, contextvars, html, json, os, re, socket, subprocess, sys
 from urllib.parse import parse_qs
 from datetime import datetime
 from pathlib import Path
@@ -48,7 +49,8 @@ def howto_path():
         return (ROOT / os.environ["PANEL_HOWTO"]).resolve()
     found = sorted(ROOT.glob("events/*/docs/HOWTO.md"))
     return found[-1] if found else None
-HOST, PORT = os.environ.get("PANEL_HOST", "0.0.0.0"), int(os.environ.get("PANEL_PORT", "8090"))
+HOST = os.environ.get("PANEL_HOST", "0.0.0.0")
+PORTS = [int(p) for p in os.environ.get("PANEL_PORT", "80,8090").split(",") if p.strip()]  # 80 so a bare IP or hostname works
 REMOTE_CONTROL = os.environ.get("PANEL_REMOTE_CONTROL", "") == "1"
 LOCAL = {"127.0.0.1", "::1", "localhost"}
 IS_ADMIN = contextvars.ContextVar("is_admin", default=False)  # set per request by the middleware, read by page()
@@ -395,6 +397,24 @@ def raw(f: str):
     return Response(p.read_bytes(), media_type="application/octet-stream", headers={"Content-Disposition": f'attachment; filename="{p.name}"'})
 
 
+def bind(port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind((HOST, port))
+    sock.listen(128)
+    sock.setblocking(False)
+    return sock
+
+
 if __name__ == "__main__":
-    print(f"{datetime.now():%H:%M:%S} panel on http://{HOST}:{PORT}/  logs={LOG_DIR}  repo={repo_url()}", flush=True)
-    uvicorn.run(app, host=HOST, port=PORT, log_level="warning")
+    socks = []
+    for port in PORTS:
+        try:
+            socks.append(bind(port))
+        except OSError as e:
+            print(f"{datetime.now():%H:%M:%S} panel: cannot listen on port {port} ({e}); skipping it", flush=True)
+    if not socks:
+        sys.exit("panel: no port could be bound")
+    bound = [s.getsockname()[1] for s in socks]
+    print(f"{datetime.now():%H:%M:%S} panel on {HOST} port(s) {', '.join(map(str, bound))}  logs={LOG_DIR}  repo={repo_url()}", flush=True)
+    asyncio.run(uvicorn.Server(uvicorn.Config(app, log_level="warning")).serve(sockets=socks))

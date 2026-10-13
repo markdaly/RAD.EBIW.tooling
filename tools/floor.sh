@@ -11,7 +11,7 @@ R="$(cd "$(dirname "$0")/.." && pwd)"; cd "$R"
 RA_PORT="${RA_PORT:-2575}"; EM_PORT="${EM_PORT:-11112}"; ADT_PORT="${ADT_PORT:-2576}"; UPS_PORT="${UPS_PORT:-8042}"
 AE_TITLE="${AE_TITLE:-ENC_MGR}"; ACCESSION_ISSUER="${ACCESSION_ISSUER:-ENC_MGR}"; ACCESSION_PREFIX="${ACCESSION_PREFIX:-EM}"
 ENCOUNTERS="${ENCOUNTERS:-samples/encounters.json}"; ACK_APP="${ACK_APP:-SIMULATOR}"; ACK_FACILITY="${ACK_FACILITY:-SIMULATOR}"
-PANEL_PORT="${PANEL_PORT:-8090}"; PANEL_HOST="${PANEL_HOST:-0.0.0.0}"
+PANEL_PORT="${PANEL_PORT:-80,8090}"; PANEL_HOST="${PANEL_HOST:-0.0.0.0}"
 PY="${PYTHON:-uv run --python '>=3.11' --with pynetdicom --with pydicom --with fastapi --with uvicorn python}"
 cmd() {  # macOS ships bash 3.2: no associative arrays
   case "$1" in
@@ -25,7 +25,8 @@ panel_start() {  # own tmux session so "stop" (servers) leaves the panel up
   tmux new-session -d -s ihe-panel -n panel -c "$R" "PANEL_HOST=$PANEL_HOST PANEL_PORT=$PANEL_PORT $PY tools/panel.py"
   tmux set-option -t ihe-panel remain-on-exit on
   ip=$(ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}')
-  echo "panel on http://127.0.0.1:$PANEL_PORT/${ip:+ and http://$ip:$PANEL_PORT/ (read-only from other machines)} (tmux session ihe-panel)"
+  urls=""; for p in ${PANEL_PORT//,/ }; do [ "$p" = 80 ] && urls="$urls http://${ip:-127.0.0.1}/" || urls="$urls http://${ip:-127.0.0.1}:$p/"; done
+  echo "panel on$urls (read-only from other machines; admin at http://127.0.0.1:${PANEL_PORT##*,}/) (tmux session ihe-panel)"
 }
 case "$1" in
   start)
@@ -47,7 +48,9 @@ case "$1" in
     tmux respawn-window -k -t "ihe:$w" -c "$R" "$(cmd "$w")" && echo "restarted $w";;
   status)
     tmux list-windows -t ihe -F '#{window_name}: #{?pane_dead,DEAD (exit #{pane_dead_status}),running} #{pane_current_command}' 2>/dev/null || echo "session ihe not running"
-    for p in "ra $RA_PORT" "adt $ADT_PORT" "ups $UPS_PORT" "em $EM_PORT" "panel $PANEL_PORT"; do set -- $p; printf '%-5s port %-5s ' $1 $2; lsof -nP -iTCP:$2 -sTCP:LISTEN >/dev/null 2>&1 && echo listening || echo "NOT listening"; done;;
+    check() { printf '%-5s port %-5s ' "$1" "$2"; lsof -nP -iTCP:"$2" -sTCP:LISTEN >/dev/null 2>&1 && echo listening || echo "NOT listening"; }
+    check ra "$RA_PORT"; check adt "$ADT_PORT"; check ups "$UPS_PORT"; check em "$EM_PORT"
+    for pp in ${PANEL_PORT//,/ }; do check panel "$pp"; done;;
   stop) tmux kill-session -t ihe && echo "stopped";;
   panel) panel_start;;
   panel-stop) tmux kill-session -t ihe-panel && echo "panel stopped";;

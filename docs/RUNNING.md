@@ -26,7 +26,8 @@ it): `RA_PORT`, `EM_PORT`, `ADT_PORT`, `UPS_PORT`, `AE_TITLE`, `ACCESSION_ISSUER
 ## The panel: `tools/panel.py`
 
 `tools/floor.sh start` also starts the panel; `tools/floor.sh panel` starts it alone. It listens on
-port 8090 on all interfaces (tmux session `ihe-panel`, independent of the servers so "stop all"
+ports 80 and 8090 on all interfaces (`PANEL_PORT`, a comma list; a port that cannot be bound is
+skipped; tmux session `ihe-panel`, independent of the servers so "stop all"
 does not kill it). Read-only on the logs,
 and a thin front end to `floor.sh` for control:
 
@@ -49,7 +50,7 @@ and a thin front end to `floor.sh` for control:
 - Links to the repo and these docs in the header.
 
 Anyone on the floor can read the log browser and download raw captures, every vendor's, at
-http://<floor IP>:8090/. Control actions (config, start/stop/restart, encounter edits) answer only
+http://<floor IP>/ (or :8090). Control actions (config, start/stop/restart, encounter edits) answer only
 requests from the panel's own machine; others get 403. `PANEL_REMOTE_CONTROL=1` lifts that,
 `PANEL_HOST=127.0.0.1` keeps the whole panel local. No authentication either way. The same HL7 rendering in the console:
 `python3 tools/hl7show.py <file.hl7>` (`--raw`, `--next`, `--prev`).

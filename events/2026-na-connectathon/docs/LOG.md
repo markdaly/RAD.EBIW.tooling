@@ -36,6 +36,10 @@ Individual problems live in `../issues/`; this is the record across them.
   `research/adversarial-review-2026-10-13.md`), zip deleted; merged PR branch deleted, GitHub now
   deletes head branches on merge; `github-hardening.sh` matches the live rule (admin bypass, 1
   approval) so re-running it does not re-lock.
+- **Panel on port 80 too** (11:25 ET): a tablet with a stale cached DNS answer could not reach
+  `ddx0.na2026.net:8090`, and a bare IP goes to port 80. The panel now listens on 80 and 8090
+  (`PANEL_PORT` comma list, unbindable ports skipped). The handout URL is http://10.242.1.99/
+  (hostname where floor DNS is used); `/howto` is the vendor get-started page.
 - **Watching tools:** panel `live` page (`/tail`, all actors' summaries merged by time, captures
   linked); tmux files pane shows write times, actor and kind instead of month/day only.
 

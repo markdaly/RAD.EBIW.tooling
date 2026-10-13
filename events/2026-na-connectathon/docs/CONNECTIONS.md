@@ -8,8 +8,8 @@ expires: 2026-10-16
 
 *As of Tue Oct 13, 10:40 ET. All four proxy channels forward; direct connections also work.*
 
-**Short version, one URL:** http://ddx0.na2026.net:8090/howto (the same panel shows your
-captures live). This page is the full reference.
+**Short version, one URL:** http://10.242.1.99/ (or http://ddx0.na2026.net/), then **howto**.
+The same panel shows your captures live. This page is the full reference.
 
 TOOL_DDx is a monitor-run partner substitute, approved by the RAD Technical Project Manager, for
 EBIW tests that have no vendor in one of the roles. It plays the **Result Aggregator** (receives
@@ -38,8 +38,8 @@ No TLS on any of these.
 
 ## 2. The panel: see exactly what arrived
 
-Open **http://ddx0.na2026.net:8090/** from any floor laptop (or http://10.242.1.99:8090/ if
-your DNS lags). The amber **READ-ONLY VIEW** banner is expected: you can browse and download,
+Open **http://10.242.1.99/** from any floor device. `http://ddx0.na2026.net/` works where the
+floor DNS is used (a tablet or phone may hold a stale cached address); port 8090 works too. The amber **READ-ONLY VIEW** banner is expected: you can browse and download,
 but only the monitor's machine can change anything.
 
 - **live** (header): everything arriving, all actors merged by time, refreshed every 2 s.
@@ -124,7 +124,7 @@ Configuration changes are made **on the monitor's Mac** (green **ADMIN** banner 
 From any other machine the panel refuses changes (HTTP 403), so vendors ask the monitor.
 
 1. Vendor asks on Zulip or at the table: new AE title, partner identifier, issuer OID, port.
-2. Monitor opens http://127.0.0.1:8090/ on ddx0:
+2. Monitor opens http://127.0.0.1/ on ddx0:
    - **Encounters** page: partner identifier, AE title per modality, issuer OID. Save.
    - **Config** form on the index page: ports, AE title, ACK MSH-3/4. Save.
 3. **Restart what reads it**, from the index page. A change does nothing until that restart.
