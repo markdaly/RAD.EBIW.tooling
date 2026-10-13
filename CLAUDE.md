@@ -31,8 +31,8 @@ no hand-holding. A gitignored `CLAUDE.local.md` may add personal context; read i
   three-digit number) from `events/<event>/floor-support/ISSUE-TEMPLATE.md`, then code.
 - No vendor, product, or personal names in committed files, logs, samples or commit messages.
   Roles, Gazelle system keywords, AE titles, hosts and IPs are fine.
-- Before ending a session: add an entry to `events/<event>/docs/LOG.md` (what happened, where
-  the next session starts) and update the event README status line.
+- Before ending a session: add an entry to `events/<event>/docs/LOG.md`, the troubleshooting
+  diary (what came up, what was found, what was built, where the next session starts).
 
 ## Where things are
 - `docs/RUNNING.md`: every tool, env var, port, log and state location.

@@ -4,10 +4,11 @@ dates: 2026-10-12 to 2026-10-16
 kind: event-doc
 expires: 2026-10-16
 ---
-# Session log
+# Troubleshooting diary
 
-One entry per working session, newest first. Each ends with where the next session starts.
-Tickets live in `events/2026-na-connectathon/issues/`; this is the cross-ticket record.
+One entry per working session, newest first: the floor problems that came up, what the
+evidence showed, what was answered or built in response, and where the next session starts.
+Individual problems live in `../issues/`; this is the record across them.
 
 ## 2026-10-13 (Tue, overnight): repo made public-safe
 
@@ -138,7 +139,7 @@ data; confirm POCUS_MGR identity for 13884 and TPM acceptance; proxy channels fo
   for the same (admission, station). All pass.
 - Both Encounter Manager halves run in terminal tabs: MWL 11112 `ENC_MGR`, UPS-RS 8042.
 - Tickets renumbered to `NNN-slug` at the monitor's request (autocomplete); convention updated in
-  CLAUDE.md, README, TROUBLESHOOTING-PROTOCOL.
+  CLAUDE.md, README, the floor-support protocol.
 - Result Aggregator still live on 2575; Gazelle proxy access still being chased.
 
 **Next session starts:** capture the 13478 test text and the code set; watch for the first
@@ -204,7 +205,7 @@ finding to the Zulip thread for the Gazelle maintainers.
 ## 2026-10-12 (Mon, day 1)
 
 - Kit set up: CLAUDE.md, docs (RAD, ITI, TLS-CERTS, FLOOR-TOOLS, TOOLS,
-  TROUBLESHOOTING-PROTOCOL), ticket template. Repo hygiene: `.gitignore`, README, this log.
+  floor-support protocol), ticket template. Repo hygiene: `.gitignore`, README, this log.
   First push to GitHub (private).
 - Dry run of the troubleshooting protocol on a live Zulip thread:
   `events/2026-na-connectathon/issues/001-tls-server-verify-crl.md` (mobile POCUS app, TLS handshake error against
