@@ -25,3 +25,7 @@ CLAUDE.local.md
 /COWORK-BRIEF.md
 
 # events/<event>/artifacts/ IS tracked: public PKI material from the test CA, no private keys.
+
+# IHE documents fetched for research; copyright IHE International, never committed.
+/IHE_RAD_Suppl_*
+/*.pdf

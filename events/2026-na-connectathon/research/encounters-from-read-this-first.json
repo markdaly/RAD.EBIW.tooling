@@ -1,0 +1,447 @@
+{
+  "_comment": "Transcribed from Gazelle EBIW_10_Read_This_First (test id 13356), Part 1, for the NA 2026 session. Shape matches samples/encounters.json plus three per-encounter fields the tools do not read yet (modality, scheduled_station_ae_title, procedure): see tool-gaps.md. Replace [Modality] in patient names with the partner's identifier, [MODALITY_AET]/[LIGHTWEIGHT_AET] with the partner AE titles from Gazelle system configuration, [GAZELLE_OID] with the assigning authority from Gazelle 'OIDs for current session' (page was empty at transcription time; any value is acceptable for POCUS per EBIW_20). Patient IDs, Admission IDs, admitting date/time and physician of record are the monitor's own values, not from Gazelle. Per EBIW_10 each patient has one US and one XC procedure under the same Admission ID; the tools key accession on (admission, AET) so the two rows share an admission but get distinct accessions per device. Dates YYYYMMDD, times HHMMSS.",
+  "institution": {
+    "name": "IHE Connectathon Hospital",
+    "address": "20 Place Sainte-Anne, 35000 Rennes, France",
+    "code": {
+      "value": "22232009",
+      "scheme": "SCT",
+      "meaning": "Hospital"
+    }
+  },
+  "procedure": {
+    "description": "Removal of foreign body of pelvis from subcutaneous tissue",
+    "code": {
+      "value": "3517009",
+      "scheme": "SCT",
+      "meaning": "Removal of foreign body of pelvis from subcutaneous tissue"
+    }
+  },
+  "department_types": [
+    {
+      "value": "225728007",
+      "scheme": "SCT",
+      "meaning": "Accident and Emergency"
+    },
+    {
+      "value": "394592004",
+      "scheme": "SCT",
+      "meaning": "Clinical Oncology"
+    },
+    {
+      "value": "394914008",
+      "scheme": "SCT",
+      "meaning": "Radiology"
+    }
+  ],
+  "procedure_codes": [
+    {
+      "value": "3517009",
+      "scheme": "SCT",
+      "meaning": "Removal of foreign body of pelvis from subcutaneous tissue"
+    },
+    {
+      "value": "3787003",
+      "scheme": "SCT",
+      "meaning": "Ultrasonic guidance for needle biopsy"
+    },
+    {
+      "value": "722009",
+      "scheme": "SCT",
+      "meaning": "Fine needle biopsy of thymus"
+    },
+    {
+      "value": "113091000",
+      "scheme": "SCT",
+      "meaning": "Medical photography"
+    }
+  ],
+  "modality_codes": [
+    {
+      "value": "US",
+      "scheme": "DCM",
+      "meaning": "Ultrasound"
+    },
+    {
+      "value": "XC",
+      "scheme": "DCM",
+      "meaning": "External-camera photography"
+    }
+  ],
+  "encounters": [
+    {
+      "patient_name": "PEREZ^[Modality]",
+      "patient_id": "EBIW001",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19550505",
+      "sex": "M",
+      "admission_id": "ADM001",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Emergency Department",
+      "department_type": {
+        "value": "225728007",
+        "scheme": "SCT",
+        "meaning": "Accident and Emergency"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "US",
+      "scheduled_station_ae_title": "[MODALITY_AET]",
+      "procedure": {
+        "description": "Removal of foreign body of pelvis from subcutaneous tissue",
+        "code": {
+          "value": "3517009",
+          "scheme": "SCT",
+          "meaning": "Removal of foreign body of pelvis from subcutaneous tissue"
+        }
+      }
+    },
+    {
+      "patient_name": "PEREZ^[Modality]",
+      "patient_id": "EBIW001",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19550505",
+      "sex": "M",
+      "admission_id": "ADM001",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Emergency Department",
+      "department_type": {
+        "value": "225728007",
+        "scheme": "SCT",
+        "meaning": "Accident and Emergency"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "XC",
+      "scheduled_station_ae_title": "[LIGHTWEIGHT_AET]",
+      "procedure": {
+        "description": "Medical photography",
+        "code": {
+          "value": "113091000",
+          "scheme": "SCT",
+          "meaning": "Medical photography"
+        }
+      }
+    },
+    {
+      "patient_name": "PAGE^[Modality]",
+      "patient_id": "EBIW002",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19660606",
+      "sex": "M",
+      "admission_id": "ADM002",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Clinical Oncology Department",
+      "department_type": {
+        "value": "394592004",
+        "scheme": "SCT",
+        "meaning": "Clinical Oncology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "US",
+      "scheduled_station_ae_title": "[MODALITY_AET]",
+      "procedure": {
+        "description": "Fine needle biopsy of thymus",
+        "code": {
+          "value": "722009",
+          "scheme": "SCT",
+          "meaning": "Fine needle biopsy of thymus"
+        }
+      }
+    },
+    {
+      "patient_name": "PAGE^[Modality]",
+      "patient_id": "EBIW002",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19660606",
+      "sex": "M",
+      "admission_id": "ADM002",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Clinical Oncology Department",
+      "department_type": {
+        "value": "394592004",
+        "scheme": "SCT",
+        "meaning": "Clinical Oncology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "XC",
+      "scheduled_station_ae_title": "[LIGHTWEIGHT_AET]",
+      "procedure": {
+        "description": "Medical photography",
+        "code": {
+          "value": "113091000",
+          "scheme": "SCT",
+          "meaning": "Medical photography"
+        }
+      }
+    },
+    {
+      "patient_name": "WAGNER^[Modality]",
+      "patient_id": "EBIW003",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19770707",
+      "sex": "F",
+      "admission_id": "ADM003",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Clinical Oncology Department",
+      "department_type": {
+        "value": "394592004",
+        "scheme": "SCT",
+        "meaning": "Clinical Oncology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "US",
+      "scheduled_station_ae_title": "[MODALITY_AET]",
+      "procedure": {
+        "description": "Ultrasonic guidance for needle biopsy",
+        "code": {
+          "value": "3787003",
+          "scheme": "SCT",
+          "meaning": "Ultrasonic guidance for needle biopsy"
+        }
+      }
+    },
+    {
+      "patient_name": "WAGNER^[Modality]",
+      "patient_id": "EBIW003",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19770707",
+      "sex": "F",
+      "admission_id": "ADM003",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Clinical Oncology Department",
+      "department_type": {
+        "value": "394592004",
+        "scheme": "SCT",
+        "meaning": "Clinical Oncology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "XC",
+      "scheduled_station_ae_title": "[LIGHTWEIGHT_AET]",
+      "procedure": {
+        "description": "Medical photography",
+        "code": {
+          "value": "113091000",
+          "scheme": "SCT",
+          "meaning": "Medical photography"
+        }
+      }
+    },
+    {
+      "patient_name": "MAHAR^[Modality]",
+      "patient_id": "EBIW004",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19880808",
+      "sex": "F",
+      "admission_id": "ADM004",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Emergency Department",
+      "department_type": {
+        "value": "225728007",
+        "scheme": "SCT",
+        "meaning": "Accident and Emergency"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "US",
+      "scheduled_station_ae_title": "[MODALITY_AET]",
+      "procedure": {
+        "description": "Removal of foreign body of pelvis from subcutaneous tissue",
+        "code": {
+          "value": "3517009",
+          "scheme": "SCT",
+          "meaning": "Removal of foreign body of pelvis from subcutaneous tissue"
+        }
+      }
+    },
+    {
+      "patient_name": "MAHAR^[Modality]",
+      "patient_id": "EBIW004",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19880808",
+      "sex": "F",
+      "admission_id": "ADM004",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Emergency Department",
+      "department_type": {
+        "value": "225728007",
+        "scheme": "SCT",
+        "meaning": "Accident and Emergency"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "XC",
+      "scheduled_station_ae_title": "[LIGHTWEIGHT_AET]",
+      "procedure": {
+        "description": "Medical photography",
+        "code": {
+          "value": "113091000",
+          "scheme": "SCT",
+          "meaning": "Medical photography"
+        }
+      }
+    },
+    {
+      "patient_name": "BERGER^[Modality]",
+      "patient_id": "EBIW005",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19990909",
+      "sex": "M",
+      "admission_id": "ADM005",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Clinical Oncology Department",
+      "department_type": {
+        "value": "394592004",
+        "scheme": "SCT",
+        "meaning": "Clinical Oncology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "US",
+      "scheduled_station_ae_title": "[MODALITY_AET]",
+      "procedure": {
+        "description": "Fine needle biopsy of thymus",
+        "code": {
+          "value": "722009",
+          "scheme": "SCT",
+          "meaning": "Fine needle biopsy of thymus"
+        }
+      }
+    },
+    {
+      "patient_name": "BERGER^[Modality]",
+      "patient_id": "EBIW005",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19990909",
+      "sex": "M",
+      "admission_id": "ADM005",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Clinical Oncology Department",
+      "department_type": {
+        "value": "394592004",
+        "scheme": "SCT",
+        "meaning": "Clinical Oncology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "XC",
+      "scheduled_station_ae_title": "[LIGHTWEIGHT_AET]",
+      "procedure": {
+        "description": "Medical photography",
+        "code": {
+          "value": "113091000",
+          "scheme": "SCT",
+          "meaning": "Medical photography"
+        }
+      }
+    },
+    {
+      "patient_name": "BERGER^[Modality]",
+      "patient_id": "EBIW005",
+      "issuer_of_patient_id": "[GAZELLE_OID]",
+      "birth_date": "19990909",
+      "sex": "M",
+      "admission_id": "ADM005",
+      "issuer_of_admission_id": "[GAZELLE_OID]",
+      "admitting_date": "20261013",
+      "admitting_time": "080000",
+      "department_name": "Connectathon Radiology Department",
+      "department_type": {
+        "value": "394914008",
+        "scheme": "SCT",
+        "meaning": "Radiology"
+      },
+      "reason_for_visit": "",
+      "physician_of_record": {
+        "name": "ATTENDING^ALICE",
+        "id": "1234567890",
+        "scheme": "NPI",
+        "meaning": "ATTENDING^ALICE"
+      },
+      "modality": "[OTHER_MODALITY]",
+      "scheduled_station_ae_title": "[OTHER_AET]",
+      "procedure": {
+        "description": "[Some other radiology procedure]",
+        "code": {
+          "value": "PLACEHOLDER",
+          "scheme": "99IHE",
+          "meaning": "Some other radiology procedure"
+        }
+      }
+    }
+  ]
+}
