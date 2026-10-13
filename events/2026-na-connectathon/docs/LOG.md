@@ -10,6 +10,33 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-13 (Tue, day 2), 10:30-10:50 ET: review fixes, connection page published
+
+- **Connection page published** (`docs/CONNECTIONS.md`, PR #2 plus a follow-up commit): where to
+  send per role (proxy first, direct fallback), how to use the panel, test walkthroughs, and how
+  configuration changes are made. All four proxy channels were probed before publishing
+  (11064 connect held, 11065 C-ECHO 0x0000, 11066 HTTP 204, 11067 ORU AA). A line-by-line check
+  corrected three things before vendors saw them: the UPS-RS modality wording (tested on an
+  isolated instance), TPM approval stated as recorded, and an invented chat sentence removed.
+  The PR merged one commit early; the corrections went to main as `a29c7d4`.
+- **Decision, panel exposure:** the log browser is readable by the whole floor on purpose. With
+  one or two vendors per profile and TOOL_DDx in the middle, each vendor's partner is the other
+  vendor and needs to see the same captures; the proxy's Message Capture shows them anyway.
+  Only control actions are restricted to the panel's own machine. Not a finding for later reviews.
+- **Issue 008, fixed:** the race between `mwl_scp.py` and `ups_rs.py` on `state.json` was real.
+  8 processes x 50 allocations: old code 384 errors, 3 duplicate accessions, corrupt file; new
+  code (flock + atomic replace) none. em and ups restarted onto it at 10:34.
+- **Adversarial corpus**, run only against isolated instances on scratch ports: no crash or
+  traceback across 26 messages, 14 framing modes, 10 MiB and 8 concurrent senders; captures
+  byte-exact. One defect fixed: ACK MSH-9 is now always three components (`ACK^^ACK`); ra
+  restarted at 10:40. Edge-case behaviour documented in RUNNING.md. The DIMSE and
+  concurrency-shell drivers were not run.
+- Two priority errata from the review added to the RAD-132 clarification list (OFI 12-13).
+
+**Open for the monitor:** TPM confirmation for the Encounter Manager stand-in (issues 003/004);
+pre-run setup on the Encounters page per partner (AE titles still blank, partner identifier
+still `TEST`); flush this Mac's DNS cache. The review zip stays untracked in `docs/`.
+
 ## 2026-10-13 (Tue, day 2), late morning: first vendor traffic, proxy fixed, panel on the floor
 
 - **Issue 007, fixed:** a POCUS Manager vendor sent RAD-132 through the proxy and got no ACK.
