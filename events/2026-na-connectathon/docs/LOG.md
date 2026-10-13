@@ -12,23 +12,18 @@ Individual problems live in `../issues/`; this is the record across them.
 
 ## 2026-10-13 (Tue, overnight): repo made public-safe
 
-**Morning checklist for the monitor (three lines):**
-1. Skim this tree, then flip GitHub visibility to public (Settings → General → Danger zone).
-   Nothing else happens until you do.
-2. Done: repo renamed to `RAD.EBIW.tooling` (IHE org convention; GitHub redirects the old name),
-   description/homepage/topics set, license Apache-2.0. Add staffers as collaborators or point
-   them at fork-and-PR. Background on the convention: the IHE GitHub org uses `DOMAIN.Profile` for spec repos (`ITI.MHD`, `PaLM.DPOW`,
-   `DEV.tooling`) and plain kebab-case for cross-domain tooling (`connectathon-artifacts`,
-   Apache-2.0). For a personal repo there is no convention to follow; `ihe-connectathon-kit`
-   reads fine, `connectathon-kit` if you want it shorter. If it ever moves under the IHE org,
-   something like `RAD.EBIW.tooling` would fit their pattern. Ask the TPM only if you want it
-   under their org. Add staffers as collaborators or point them at fork-and-PR.
-2b. After flipping public: `tools/github-hardening.sh` (branch protection on main with admin
-   bypass, secret scanning + push protection, private vulnerability reporting). Dependabot
-   alerts and security updates are already on.
-3. Pre-run setup for EBIW_20/30 is now a form: `tools/floor.sh panel`, open
-   http://127.0.0.1:8090/encounters, enter the partner identifier, the US and XC AE titles and
-   the OID, save, then restart `em` and `ups` from the index page.
+**State at hand-off (Tue 01:45 ET):** repo is PUBLIC at `markdaly/RAD.EBIW.tooling`, Apache-2.0,
+branch protection + Dependabot + secret scanning + private vulnerability reporting + CodeQL all on
+(`tools/github-hardening.sh`). Tree clean, pushed, no servers running, pre-rewrite backups beside
+the repo. Research thread merged and its findings applied.
+
+**Resume here (Tue morning):**
+1. `tools/floor.sh start` and `tools/floor.sh panel`; http://127.0.0.1:8090/encounters for the
+   EBIW_20/30 pre-run setup (partner identifier, US/XC AE titles, OID), then restart em + ups.
+2. Proxy channels still reset on connect (issue 005): check channel target/status in Gazelle as
+   admin, re-test with `tools/mllp_send.py samples/ORU_R01_RAD-132_POCUS.hl7 proxy.ihe-europe.net 11067`.
+3. Issue 001 (TLS): still waiting on the TPM/vendor for the GSS permanent link and host/port.
+4. First real vendor queries have not happened yet; watch the `logs` window or the panel.
 
 **What ran:**
 - Backup first: `../ihe-connectathon-2026-PRIVATE-20261012-234222.bundle` plus a full directory
