@@ -32,6 +32,12 @@ Individual problems live in `../issues/`; this is the record across them.
   restarted at 10:40. Edge-case behaviour documented in RUNNING.md. The DIMSE and
   concurrency-shell drivers were not run.
 - Two priority errata from the review added to the RAD-132 clarification list (OFI 12-13).
+- **Repo cleanup:** review kit folded in (`samples/adversarial/`, `tools/adversarial/adversarial_mllp.py`,
+  `research/adversarial-review-2026-10-13.md`), zip deleted; merged PR branch deleted, GitHub now
+  deletes head branches on merge; `github-hardening.sh` matches the live rule (admin bypass, 1
+  approval) so re-running it does not re-lock.
+- **Watching tools:** panel `live` page (`/tail`, all actors' summaries merged by time, captures
+  linked); tmux files pane shows write times, actor and kind instead of month/day only.
 
 **Open for the monitor:** pre-run setup on the Encounters page per partner (AE titles still blank, partner identifier
 still `TEST`). Since then: the monitor confirmed TPM approval for the Encounter Manager stand-in
