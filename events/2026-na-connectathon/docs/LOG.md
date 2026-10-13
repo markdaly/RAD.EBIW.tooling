@@ -27,6 +27,11 @@ Individual problems live in `../issues/`; this is the record across them.
   container as a non-root user with only the INSTALL.md packages. All pass, on uutils (Rust)
   coreutils too; the port 80 sysctl works on 22.04, 24.04 and 26.04.
 
+- **Decision, one partner at a time:** four Modality systems are registered against EBIW, but
+  tests run one at a time, so the encounter set stays single-partner. Before each run: Encounters
+  page (partner identifier, that partner's AE titles), then restart em and ups. Accessions stay
+  separate per device because state is keyed by admission and AE title. No multi-partner build.
+
 **For the friend's Ubuntu laptop:** follow the INSTALL Ubuntu section, run `tools/smoke.sh` at
 home first (uv cache). If it is registered as its own Gazelle system, it needs its own HOWTO
 copy (`PANEL_HOWTO`): the shipped one names ddx0 / 10.242.1.99 / TOOL_DDx.
