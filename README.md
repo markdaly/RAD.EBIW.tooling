@@ -82,9 +82,7 @@ floor. Read any tool top to bottom before trusting it; each is short on purpose.
 | `docs/TOOLS.md` | Existing Gazelle/NIST simulators to use first; stand-in designs, built and unbuilt. |
 | `docs/RAD.md`, `docs/ITI.md` | Radiology and IT Infrastructure cheat sheets for monitors. |
 | `docs/TLS-CERTS.md` | Cert, CRL and mobile trust triage with the openssl commands. |
-| `docs/TROUBLESHOOTING-PROTOCOL.md` | How a support-chat thread becomes a written issue, then a tool. |
-| `templates/ISSUE.md` | Issue template: symptom, scope, evidence, ranked hypotheses, missing evidence. |
-| `events/<event>/` | Everything specific to one Connectathon: connection tables, issues, session log, artifacts. Each file carries a front-matter header naming the event. Nothing in there outlives the event. |
+| `events/<event>/` | Everything specific to one Connectathon: connection tables, the troubleshooting diary, issues, the floor-support protocol and issue template, artifacts. Each file carries a front-matter header naming the event. Nothing in there outlives the event. |
 | `CLAUDE.md` | Brief for AI-assisted sessions: hard rules for stand-in tools, stack, working style. |
 
 Current event: [events/2026-na-connectathon/](events/2026-na-connectathon/README.md).

@@ -28,7 +28,7 @@ no hand-holding. A gitignored `CLAUDE.local.md` may add personal context; read i
 - Ground answers in the Technical Framework text and cite section and table numbers. If a
   requirement comes from memory, say so in the text.
 - When a floor problem arrives, first write `events/<event>/issues/<NNN>-<slug>.md` (next free
-  three-digit number) from `templates/ISSUE.md`, then code.
+  three-digit number) from `events/<event>/floor-support/ISSUE-TEMPLATE.md`, then code.
 - No vendor, product, or personal names in committed files, logs, samples or commit messages.
   Roles, Gazelle system keywords, AE titles, hosts and IPs are fine.
 - Before ending a session: add an entry to `events/<event>/docs/LOG.md` (what happened, where
@@ -38,8 +38,8 @@ no hand-holding. A gitignored `CLAUDE.local.md` may add personal context; read i
 - `docs/RUNNING.md`: every tool, env var, port, log and state location.
 - `docs/TROUBLESHOOTING.md`: nothing arrives, AR ACKs, empty worklists, TLS.
 - `docs/RAD.md`, `docs/ITI.md`, `docs/TLS-CERTS.md`: profile and transaction cheat sheets.
-- `docs/TROUBLESHOOTING-PROTOCOL.md`: how a support-chat thread becomes an issue, then a tool.
-- `events/<event>/`: the only place event facts live (connection tables, issues, session log,
+- `events/<event>/`: the only place event facts live (connection tables, issues, the
+  troubleshooting diary in `docs/LOG.md`, floor-support protocol and issue template,
   artifacts). Each file carries a front-matter header naming the event.
 
 ## Repo hygiene

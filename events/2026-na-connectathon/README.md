@@ -17,7 +17,8 @@ gone after Oct 16. People are referred to by role only.
 | `docs/CONNECTIONS.md` | Every listener on the monitor's machine, every target, vendor endpoints, Gazelle configurations and proxy ports. Start here. |
 | `docs/FLOOR-TOOLS.md` | Event tool URLs (Gazelle TM, GSS, proxy, Message Capture), subnets, syslog collector ports. |
 | `docs/TLS-NA2026.md` | The event's TLS situation: which CA, the dead CRL path, the simulator cert quirks. |
-| `docs/LOG.md` | Session diary, newest first. Each entry ends with where the next session starts. |
+| `docs/LOG.md` | **Troubleshooting diary**: what came up on the floor each session, what was found, what was built or fixed in response, and where the next session starts. Newest first. |
+| `floor-support/` | How a floor problem becomes a written issue (`PROTOCOL.md`) and the issue template (`ISSUE-TEMPLATE.md`). |
 | `issues/` | One file per floor problem, numbered. 001 TLS/CRL, 002 Result Aggregator, 003 Encounter Manager, 004 POCUS simple workflow, 005 proxy channels. |
 | `artifacts/` | Public PKI material from the event's test CA (CA cert, simulator cert, CRLs). No private keys. |
 | `research/` | Transcribed requirement checklists and verification notes produced overnight; see each file's front matter for source and status. |

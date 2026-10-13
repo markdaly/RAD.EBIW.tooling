@@ -81,7 +81,7 @@ Apache-2.0, same as the repo. By opening a PR you agree your contribution is lic
 
 | Thing | Place |
 |---|---|
-| A new floor problem | `events/<event>/issues/NNN-slug.md` from `templates/ISSUE.md`, next free number |
+| A new floor problem | `events/<event>/issues/NNN-slug.md` from `events/<event>/floor-support/ISSUE-TEMPLATE.md`, next free number |
 | Ports, IPs, proxy ports, who connects to what | `events/<event>/docs/CONNECTIONS.md` |
 | What happened in a session, where the next one starts | `events/<event>/docs/LOG.md` |
 | Certs, CRLs, captures worth keeping | `events/<event>/artifacts/` (never private keys of anything real) |
