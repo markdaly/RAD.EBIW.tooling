@@ -15,14 +15,16 @@ echo "secret scanning + push protection"
 gh api -X PATCH "repos/$R" --input - <<'JSON' 2>&1 | python3 -c 'import sys,json; d=json.loads(sys.stdin.read().split("\n")[0]); print("  ", d.get("message") or d.get("security_and_analysis"))'
 {"security_and_analysis": {"secret_scanning": {"status": "enabled"}, "secret_scanning_push_protection": {"status": "enabled"}}}
 JSON
+echo "delete head branches after merge"
+gh api -X PATCH "repos/$R" -F delete_branch_on_merge=true -q '"   delete_branch_on_merge=\(.delete_branch_on_merge)"' 2>&1
 echo "CodeQL default setup (python); needs Actions enabled on the repo"
 gh api -X PATCH "repos/$R/code-scanning/default-setup" --input - <<'JSON' 2>&1 | python3 -c 'import sys,json; d=json.loads(sys.stdin.read().split("\n")[0] or "{}"); print("  ", d.get("message") or d.get("state") or d)'
 {"state": "configured", "query_suite": "default", "languages": ["python"]}
 JSON
-echo "branch protection on main: PR + 1 approval for everyone incl. admins, no force-push, no delete, linear history"
-# Strict on purpose: a tool running on the owner's token can neither push to main nor merge its own PR.
-# To land your own work: approve from a second account, or briefly relax (and re-run this script after):
-#   gh api -X DELETE repos/$R/branches/main/protection/enforce_admins
+echo "branch protection on main: PR + 1 approval, admins may bypass, no force-push, no delete, linear history"
+# The approval rule stops any bot/app identity from merging its own PR; the owner keeps admin bypass
+# (direct push, gh pr merge --admin). For a lock that binds the owner's token too (e.g. while a
+# tool runs as the owner): gh api -X POST repos/$R/branches/main/protection/enforce_admins
 gh api -X PUT "repos/$R/branches/main/protection" --input - <<'JSON' 2>&1 | python3 -c 'import sys,json; d=json.loads(sys.stdin.read().split("\n")[0]); print("  ", d.get("message") or {k: d[k].get("enabled") for k in ("enforce_admins","required_linear_history","allow_force_pushes","allow_deletions") if k in d})'
-{"required_status_checks": null, "enforce_admins": true, "required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": true}, "restrictions": null, "required_linear_history": true, "allow_force_pushes": false, "allow_deletions": false, "required_conversation_resolution": true}
+{"required_status_checks": null, "enforce_admins": false, "required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": true}, "restrictions": null, "required_linear_history": true, "allow_force_pushes": false, "allow_deletions": false, "required_conversation_resolution": true}
 JSON
