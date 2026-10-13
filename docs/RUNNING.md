@@ -67,7 +67,8 @@ Console line per message: MSH-9/12/10, segment counts, PID-3 (and PID-2 if someo
 uses it), PID-5, PV1-19, OBR-4/16/18/19/25/32/44, TQ1-9, first OBX-2/3/5/11, and the file name:
 the fields the EBIW_90 scrutiny test reads. **AA means received and logged, never
 "conformant"**; the monitor grades from the raw capture. Files: `<ts>-<n>-<MSH-9>.in.hl7` and `.ack.hl7`, plus `summary.log`.
-Edge cases, as tested with the 2026-10-13 adversarial corpus: MSH-9 with no trigger gets
+Edge cases, as tested with the adversarial corpus (`samples/adversarial/`, driver
+`tools/adversarial/adversarial_mllp.py`; isolated instances only): MSH-9 with no trigger gets
 `ACK^^ACK` (always three components); empty MSH-10 gets `MSA|AA|` with MSA-2 empty; an
 unparseable MSH gets `MSA|AR|` + ERR. Bytes outside an MLLP frame (no VT, no FS/CR) get no ACK,
 are saved as-is when the connection closes and show as `WARN ... unframed bytes` in the summary.
