@@ -72,7 +72,7 @@ Not a defect ticket. Deliverables:
    return the new encounter with the same accession. **Done, see Resolution.**
 2. The monitor: confirm the POCUS_MGR system and TPM acceptance; restart the Encounter Manager tab
    so the ADT listener is up (`ADT_PORT=2576`).
-3. Step 10 on the floor: `uv run python tools/mllp_send.py samples/ADT_A04_ITI-31.hl7 10.242.1.184 2576`
+3. Step 10 on the floor: `uv run python tools/mllp_send.py samples/ADT_A04_ITI-31.hl7 10.242.1.99 2576`
    (through the proxy once the channel exists), attach the ACK.
 
 ## Resolution

@@ -4,11 +4,12 @@ dates: 2026-10-12 to 2026-10-16
 kind: event-doc
 expires: 2026-10-16
 ---
-# Floor connections (NA 2026, EBIW), as of Oct 12 16:20 ET
+# Floor connections (NA 2026, EBIW), as of Oct 13 09:35 ET
 
-The monitor's Mac = **10.242.1.184**, Gazelle hostname **ddx0** (`ddx0.na2026.net`), organization DDx, system
+The monitor's Mac = **10.242.1.99** (static from Oct 13 ~09:30 ET; was DHCP 10.242.1.184, now back in the pool and possibly someone else's), Gazelle hostname **ddx0** (`ddx0.na2026.net`), organization DDx, system
 **TOOL_DDx** (Encounter Manager + Result Aggregator). Gazelle configurations approved and proxy
-ports assigned 16:40 ET (Gazelle TM → Configurations, org DDx).
+ports assigned 16:40 ET (Gazelle TM → Configurations, org DDx). The ddx0 host entry in Gazelle must carry
+10.242.1.99 too, or vendors and the proxy keep aiming at .184.
 Tests: 13478 EBIW_35_Full_Workflow-RESTful (ticket 003), 13884 EBIW_POCUS_Simple_Workflow (ticket 004).
 Proxy: `proxy.ihe-europe.net` = 192.168.2.5. **Vendors target the proxy port below, not the Mac.**
 
@@ -16,10 +17,10 @@ Proxy: `proxy.ihe-europe.net` = 192.168.2.5. **Vendors target the proxy port bel
 
 | Gazelle type | Actor | Host / IP | Real port | **Proxy port** | Details (as registered) |
 |---|---|---|---|---|---|
-| HL7 V2 Responder | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 2576 | **11064** | receiving app/facility `SIMULATOR / SIMULATOR` (ITI-31 in) |
-| Dicom SCP | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 11112 | **11065** | AE `ENC_MGR`, MWL |
-| Webservice | ENCOUNTER_MGR | ddx0 / 10.242.1.184 | 8042 | **11066** | RAD-130 (UPS-RS), URL `http://ddx0:8042/studies`, HTTP rewrite disabled |
-| HL7 V2 Responder | RESULT_AGGREGATOR | ddx0 / 10.242.1.184 | 2575 | **11067** | receiving app/facility `SIMULATOR / SIMULATOR` (RAD-132 in) |
+| HL7 V2 Responder | ENCOUNTER_MGR | ddx0 / 10.242.1.99 | 2576 | **11064** | receiving app/facility `SIMULATOR / SIMULATOR` (ITI-31 in) |
+| Dicom SCP | ENCOUNTER_MGR | ddx0 / 10.242.1.99 | 11112 | **11065** | AE `ENC_MGR`, MWL |
+| Webservice | ENCOUNTER_MGR | ddx0 / 10.242.1.99 | 8042 | **11066** | RAD-130 (UPS-RS), URL `http://ddx0:8042/studies`, HTTP rewrite disabled |
+| HL7 V2 Responder | RESULT_AGGREGATOR | ddx0 / 10.242.1.99 | 2575 | **11067** | receiving app/facility `SIMULATOR / SIMULATOR` (RAD-132 in) |
 
 **Status 16:50 ET: the proxy accepts TCP on all four ports but closes immediately and forwards nothing (ticket 005). Until fixed, vendors hit the Mac directly and attach captures.** All four approved, none secured (plain MLLP / DICOM / HTTP). Vendor-side targets once the proxy works:
 - RAD-132 ORU → `proxy.ihe-europe.net:11067`, MSH-5/6 = `SIMULATOR`/`SIMULATOR`
