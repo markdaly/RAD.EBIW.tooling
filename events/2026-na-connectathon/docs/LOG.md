@@ -17,13 +17,13 @@ Tickets live in `tickets/`; this is the cross-ticket record.
 - No vendor traffic today beyond the 15:07 connectivity ORU. First real queries from the VNA
   vendor's POCUS Manager box (10.242.1.17) and Lightweight Modality (10.242.1.11) still pending.
 - Shut down 17:00 ET: `tools/floor.sh stop`; ports 2575/2576/8042/11112 free. `logs/` kept
-  on disk (gitignored): accession state in `logs/encounter-manager/state.json`, ADT-fed
-  encounters in `encounters-from-adt.json`, raw captures per session folder.
+  on disk (gitignored): two raw HL7 captures from the 15:07 ORU; no accession state or
+  ADT-fed encounters yet (all of that only happened in scratch test dirs).
 
 **Next session starts (Tue Oct 13, early):**
-1. `tools/floor.sh start` then `tools/floor.sh status` (four ports listening). Accession state
-   carries over from `state.json`, so yesterday's loopback accessions EM26101200xx persist;
-   delete the file for a clean numbering if the TPM prefers.
+1. `tools/floor.sh start` then `tools/floor.sh status` (four ports listening). No live queries
+   happened, so `logs/encounter-manager/state.json` does not exist yet: accession numbering
+   starts clean at EM2610130001.
 2. Proxy (ticket 005): check channel targets/status as admin, then re-test with
    `tools/mllp_send.py samples/ORU_R01_RAD-132_POCUS.hl7 proxy.ihe-europe.net 11067`.
 3. Export EBIW_10_Read_This_First from Gazelle and load its patients/codes into
