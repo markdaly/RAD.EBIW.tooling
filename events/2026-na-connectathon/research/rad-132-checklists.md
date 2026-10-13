@@ -5,6 +5,8 @@ status: transcribed (EBIW from the extracted PDF text; RD and RAD TF-2 text pull
 ---
 # RAD-132 Notify of Imaging Results: monitor checklists
 
+How to use: the tables say what the text requires and where; the captured message says what was sent. The checklist's job is to make every difference visible with a citation. Whether a difference matters for the test instance is the monitor's and the TPM's call, made in Gazelle, not here.
+
 Sender = Image Manager/Image Archive or POCUS Manager. Receiver = Result Aggregator (required receiver) or Encounter Manager (optional, 47.1.1.3). Table 4.132.2-1.
 Message: HL7 v2.5.1 ORU^R01 over MLLP (RAD TF-2 2.4.1.1), Original Mode ACK (2.4.1.2). Message spec "is based on the Send Imaging Result Message in [RAD-128] with minor changes" (4.132.4.1.2).
 
@@ -39,7 +41,7 @@ Note 1 of the table: POCUS Senders see 4.132.4.1.2.3. Z-segments: prohibited unl
 | MSH-9 | R | `ORU^R01^ORU_R01`, all three components | RD 4.128.4.1.2.2 (verbatim: "shall have three components ... ORU ... R01 ... ORU_R01"); RAD TF-2 2.4.4.2 MSH-9: "All three components are required." |
 | MSH-10 | R | unique Message Control ID; echoed in MSA-2 | |
 | MSH-11 | R | Processing ID | |
-| MSH-12 | R | first component `2.5.1` or higher | 2.4.4.2; 2.4.1.3 permits higher. `2.4` fails. |
+| MSH-12 | R | first component `2.5.1` or higher | 2.4.4.2; 2.4.1.3 permits higher. Example: `MSH|...|P|2.4` does not meet it; `MSH|...|P|2.5.1` or `2.6` does. |
 | MSH-14, MSH-20 | X | not sent | |
 | MSH-15, MSH-16 | O [0..0] | | |
 | MSH-17 | RE | country code ISO 3166 alpha-3 if available | |
@@ -51,7 +53,7 @@ Note 1 of the table: POCUS Senders see 4.132.4.1.2.3. Z-segments: prohibited unl
 
 | SEQ | Field | DT | Usage | Sender must | POCUS source (A.7-1) |
 |---|---|---|---|---|---|
-| 2 | Patient ID | CX | X | not sent (an ID in PID-2 only = defect) | |
+| 2 | Patient ID | CX | X | not sent. Example that does not meet the table: `PID||MRN1||...` with PID-3 empty; the ID belongs in PID-3 as `MRN1^^^HOSP^PI` | |
 | 3 | Patient Identifier List | CX | R | PID-3.1 ID and PID-3.4 Assigning Authority "shall be present"; PID-3.5 type code if known (PI typical) | (0010,0020) + (0010,0021) |
 | 4 | Alternate Patient Identifier List | CX | X | not sent | A.7-1 maps (0010,1002) Other Patient IDs to PID-4: conflict; treat extra IDs as repeats of PID-3 |
 | 5 | Patient Name | XPN | R | valued | (0010,0010) |
@@ -111,11 +113,11 @@ Base = EBIW table (which already differs from RD Table 4.128.4.1.2.6-1; differen
 | 5 | Priority (retired) | ID | X | | not sent | |
 | 6 | Requested Date/time | TS | X | | not sent | |
 | 7 | Observation Date/Time | TS | R (RD: R2) | | date/time of the imaging; from Study Date/Time or Series Date/Time | (0008,0020)+(0008,0030) |
-| 12 | Danger Code | CE | X (RD: R2) | | not sent (4.132.4.1.2.3.3 lists it among omit-able "R2" fields, contradicting the X in the table; don't fail either way) | |
+| 12 | Danger Code | CE | X (RD: R2) | | not sent per the table; 4.132.4.1.2.3.3 lists it among omit-able "R2" fields (OFI #2 below) | |
 | 16 | Ordering Provider | XCN | O (RD: R2) | **R** | Physician of Record incl. NPI (US) | (0008,1049) |
 | 18 | Placer Field 1 | ST | R | | Accession Number (0008,0050) | |
 | 19 | Placer Field 2 | ST | R2 | | Assigning Authority corresponding to (0008,0051); OBR-18 may carry a prefix/suffix hint | |
-| 22 | Results Rpt/Status Chng Date/Time | TS | (absent from EBIW table; RD: R) | | unverified whether required in RAD-132; HL7 base makes it conditional. Do not fail on absence | |
+| 22 | Results Rpt/Status Chng Date/Time | TS | (absent from EBIW table; RD: R) | | unverified whether required in RAD-132; HL7 base makes it conditional (OFI #4 below) | |
 | 24 | Diagnostic Serv Sect ID | ID | R (RD: R2) | | derived from Institutional Department Type Code Sequence (0008,1041), possibly via a mapping table to HL7 Table 0074 (e.g. `US`, `RAD`) | |
 | 25 | Result Status | ID | R | | `R` (stored, not verified), `F` (final), `C` (correction). **Never `P`** (Table 4.132.4.1.2.1-2 note) | |
 | 27 | Quantity/Timing | TQ | R | | backwards compatibility only: OBR-27.6 Priority = TQ1-9.1; all other components empty | |
@@ -161,7 +163,7 @@ Optionality: "shall be sent for POCUS reports". One finding per OBX; repeat per 
 | 5 | Observation Value | CE or TX | R | the finding; LEN 483 (CE) or 99999 (TX) |
 | 11 | Observation Result Status | ID | R | `R`, `F` or `C` |
 
-Not carried over from RD Table 4.128.4.1.2.9-1 into the EBIW table: OBX-8 Abnormal Flag and OBX-15 Producer's Reference (both R in RD). EBIW's table is the constraint for RAD-132; absence of OBX-8/15 is not a RAD-132 defect.
+Not carried over from RD Table 4.128.4.1.2.9-1 into the EBIW table: OBX-8 Abnormal Flag and OBX-15 Producer's Reference (both R in RD). EBIW's table is the constraint for RAD-132, so OBX-8/15 are not RAD-132 requirements; a sender that also populates them is following RD.
 
 ## 10. Expected Actions and ACK
 
@@ -175,12 +177,20 @@ ACK (4.132.4.2 -> RD 4.128.4.2.2, RD p. 52; RAD TF-2 2.4.4.1-.3, rev 23.0 pp. 46
 - RD 4.128.4.2.3: invalid ORU -> error acknowledgement; otherwise valid acknowledgement. "The Receiver is not required to send any attributes within the MSA segment beyond what is specified in the HL7 standard."
 - Gazelle EBIW_25/35 step 55: MSA-1 AA, MSA-2 = MSH-10 ("the monitor does not have to check that these values match").
 
-## 11. Spec inconsistencies worth knowing before arguing with a vendor
-1. OBR-4: 4.132.4.1.2.3.3 says "modified from R2 to R" but Table 4.132.4.1.2.1-1 already lists R. Harmless.
-2. OBR-12: table says X, 4.132.4.1.2.3.3 calls it an R2 field implementers "may omit". Don't fail on presence or absence.
-3. OBR-16: EBIW base O vs RD R2; POCUS makes it R. OBR-32: EBIW base R2 vs RD R; POCUS makes it R. OBR-7, OBR-24: EBIW R vs RD R2. The EBIW table governs RAD-132.
-4. OBR-22 (R in RD) is absent from the EBIW table. Unverified whether EBIW intends to drop it.
-5. A.7-1 maps Issuer of Accession Number to OBR-18; 4.132.4.1.2.1 puts it in OBR-19. Follow 4.132.4.1.2.1.
-6. A.7-1 says "ORC-1 and OBR-32 or OBR-33" for operators; ORC-1 is Order Control (`RE`). Read as ORC-12.
-7. A.7-1 maps Other Patient IDs to PID-4; RD Table 4.128.4.1.2.3-1 marks PID-4 X. Repeating PID-3 is the HL7 v2.5.1 way.
-8. Gazelle EBIW_90 cites "RAD TF-3" for 4.132 sections and "4.132.3.1.2.1"; both are typos for RAD TF-2 4.132.4.1.2.1.
+## 11. Places where the text could be clarified (OFI), with examples
+
+These are spots where a careful reader of the supplement, the RD supplement and the Gazelle test text can arrive at two different answers. They are listed so that a monitor recognises the situation when a participant's message lands in one of them; the call is the monitor's and the TPM's, and the examples are there so the two readings are concrete. They may also be worth feeding back to the RAD committee as change proposals.
+
+| # | Where | What the text says | How it could be read | Example on the wire | Suggested handling |
+|---|---|---|---|---|---|
+| 1 | OBR-4 | Table 4.132.4.1.2.1-1 lists OBR-4 as R; 4.132.4.1.2.3.3 says "modified from R2 to R" | A reader of the POCUS section alone might conclude the base transaction allows an empty OBR-4 | base-profile IM sends `OBR|1|||^^^` (empty OBR-4) | Both texts end at R. Empty OBR-4 does not meet the table in either reading. |
+| 2 | OBR-12 | Table says X (not sent); 4.132.4.1.2.3.3 calls OBR-12 an "R2 (Required if Relevant)" field that "implementers may omit" | Either "must not be sent" or "may be sent if relevant" | `OBR|1|...|Danger^code^L|...` with OBR-12 valued | The two readings only differ on presence. Note it; neither reading makes the message unusable. |
+| 3 | OBR-16, OBR-32, OBR-7, OBR-24 | EBIW table: OBR-16 O, OBR-32 R2, OBR-7 R, OBR-24 R. RD Table 4.128.4.1.2.6-1 (which EBIW says it is "based on"): OBR-16 R2, OBR-32 R, OBR-7 R2, OBR-24 R2 | An implementer who built RAD-128 first will populate OBR-32 and may leave OBR-7/24 empty; one who read EBIW will do the reverse | RD-style: `OBR|1||||...|20261013||...||||^^RAD|F|...|...|^Smith^Jane` (OBR-7 empty, OBR-32 valued); EBIW-style: OBR-7 and OBR-24 valued, OBR-32 empty | For RAD-132 the EBIW table is the constraint. Under the POCUS Option both OBR-16 and OBR-32 are R (4.132.4.1.2.3.3), which removes the OBR-32 ambiguity for POCUS Managers. |
+| 4 | OBR-22 | R in RD Table 4.128.4.1.2.6-1; not listed in EBIW Table 4.132.4.1.2.1-1 | "Not listed" = HL7 base optionality (conditional), or an omission | an ORU without OBR-22 | Treat as not required by RAD-132; record if absent so the committee can confirm the intent. |
+| 5 | Issuer of Accession Number in the ORU | 4.132.4.1.2.1: OBR-19 "shall contain the Assigning Authority that corresponds to" (0008,0051). Table A.7-1: "Copy (OBR-18)" | A POCUS Manager following A.7-1 might pack the issuer into OBR-18 (e.g. as a prefix) and leave OBR-19 empty | `OBR|1|...|ACME-EM26101300001||...` (OBR-19 empty) vs `...|EM26101300001|1.2.3.4.5|...` | 4.132.4.1.2.1 is the transaction text; OBR-19 is where the issuer goes, and OBR-18 may additionally carry a prefix (note under OBR-19). |
+| 6 | Operators in the ORU | Table A.7-1 maps Operators' Name / Operator Identification Sequence to "ORC-1 and OBR-32 or OBR-33" | ORC-1 is Order Control (`RE`); the intended field is almost certainly ORC-12 Ordering Provider, which duplicates OBR-16 (4.132.4.1.2.3.2 note) | `ORC|RE|...|...|...|...|...|...|...|...|...|...|1234567890^Smith^Jane^^^^^^NPI` | Read as ORC-12. A message with the physician in ORC-12/OBR-16/OBR-32 and the learner in OBR-33 satisfies every reading. |
+| 7 | Other Patient IDs in the ORU | Table A.7-1: "Copy (PID-4)". RD Table 4.128.4.1.2.3-1: PID-4 is X (not sent) | Either put secondary IDs in PID-4 or repeat PID-3 | `PID|||MRN1^^^HOSP^PI~MRN2^^^OTHER^PI||...` (repeating PID-3) vs `PID|||MRN1^^^HOSP^PI|MRN2^^^OTHER|...` (PID-4) | HL7 v2.5.1 retired PID-4 in favour of repeating PID-3; RD's X follows that. Repeating PID-3 satisfies both. |
+| 8 | PV1-19 assigning authority | 4.132.4.1.2.3.1 says PV1-19 "shall be valued with the Admission ID (0038,0010)"; it does not mention (0038,0014). Gazelle EBIW_90: PV1-19.4 expected "but it is OK if this is missing" | Whether PV1-19.4 is required | `PV1|1|O|...|...|ADM005` vs `PV1|1|O|...|ADM005^^^1.2.3.4.5` | The receiver can only link the encounter reliably with the issuer; absence is not a stated requirement. Record what was sent. |
+| 9 | Study UID OBX optionality | EBIW Table 4.132.4.1.2-1 shows it unbracketed; RD 4.128.4.1.2.8 "shall be included if the DICOM Study Instance UID(s) is known" | Whether an ORU without it is complete | ORU with only Finding OBXs | In RAD-132 the UID always came from RAD-130, so the condition is always met; treat as required. |
+| 10 | MSH-9 citation | EBIW 4.132.3 cites "RAD TF-2: 2.3.1 Conventions for HL7 v2.5.1 messages" for notation; the three-component MSH-9 rule is in RAD TF-2 2.4.4.2 (and RD 4.128.4.1.2.2) | A reader looking in 2.3.1 for the MSH-9 rule will not find it | `MSH|^~\&|...||ORU^R01|...` (two components) | Cite 2.4.4.2 / RD 4.128.4.1.2.2 when writing this up. |
+| 11 | Gazelle EBIW_90 references | cites "RAD TF-3" and "4.132.3.1.2.1" | Section numbers that do not exist | n/a | Both are RAD TF-2 4.132.4.1.2.1. |

@@ -5,6 +5,8 @@ status: transcribed (tables checked against the rendered PDF pages 94-96; notati
 ---
 # RAD-130 Get Encounter Imaging Context: monitor checklists
 
+How to use: the tables say what the text requires and where; the proxy capture says what was sent and returned. The checklist makes every difference visible with a citation; the monitor and the TPM decide what it means for the test instance. Floor reality this week is DIMSE MWL + HL7 v2.5.1; the UPS-RS section applies only to a registered Lightweight Modality.
+
 Requester = Acquisition Modality (MWL, SCU) or Lightweight Modality (UPS-RS, user-agent).
 Responder = Encounter Manager (MWL SCP; UPS-RS origin-server). Table 4.130.2-1.
 
@@ -117,7 +119,7 @@ Columns: Matching SCU / Matching SCP / Return SCU / Return SCP, verbatim from th
 Footnotes IHE-1..IHE-7 are paraphrased in the notes column; full text at 4.130.4.1.2.1 lines 1825-1841.
 
 ### Minimum C-FIND identifier an SCU must send (base table, SCU column R+*)
-Patient's Name, Patient ID, Issuer of Patient ID, Patient's Birth Date, Patient's Sex, Institution Name, Institution Code Sequence (>Code Value, >Coding Scheme Designator, >Code Meaning), Institution Address, Institutional Department Name, Institutional Department Type Code Sequence (>Code Value, >Coding Scheme Designator, >Code Meaning), Admission ID, Accession Number, Issuer of Accession Number Sequence (>three items), Study Instance UID, SPS Sequence with >Scheduled Station AE Title (valued = own AET), >Modality (valued = own modality). Everything else may be absent. A query missing any of these is non-conformant on the SCU side even if the SCP answers happily.
+Patient's Name, Patient ID, Issuer of Patient ID, Patient's Birth Date, Patient's Sex, Institution Name, Institution Code Sequence (>Code Value, >Coding Scheme Designator, >Code Meaning), Institution Address, Institutional Department Name, Institutional Department Type Code Sequence (>Code Value, >Coding Scheme Designator, >Code Meaning), Admission ID, Accession Number, Issuer of Accession Number Sequence (>three items), Study Instance UID, SPS Sequence with >Scheduled Station AE Title (valued = own AET), >Modality (valued = own modality). Everything else may be absent. If a query omits some of these, record which ones; the SCP may still answer, and the gap is on the SCU side of the table. Example: a C-FIND identifier with Patient's Name, Patient ID and SPS (AET, Modality) but no Accession Number or Study Instance UID return keys will get matches and still leaves the modality without the two values it needs for RAD-131.
 
 ### Minimum the SCP must be able to return (base table, SCP column R or R+)
 Everything above plus: Other Patient IDs Sequence items, Issuer of Admission ID Sequence items, Admitting Date/Time, Reason for Visit (+ code seq), Requested Procedure Description and/or Code Sequence, SPS Start Date/Time, SPS Description. Accession Number must be non-empty (IHE-3).
@@ -133,7 +135,7 @@ Applies to Acquisition Modality + Encounter Manager with the POCUS Option, "in a
 | Patient's Birth Date | (0010,0030) | O | O | R+ | R+ | display now required |
 | Institutional Department Name | (0008,1040) | R+ | R+ | R+ | R+ | display now required |
 | Admission ID | (0038,0010) | R+* | R+ | R+* [IHE-1] | R+ | IHE-1: if multiple Admission IDs come back, modality shall display ALL of them to the operator |
-| Physician(s) of Record Identification Sequence | (0008,1049) | | | | | header; NEW attribute. 47.2.1 says the EM maps PV1-7 Attending Doctor to (0008,009D) [sic]; Table U-1 maps PV1-7 to (0008,1048)/(0008,009D). The return key actually required here is (0008,1049). Treat (0008,1049) as the one to check. |
+| Physician(s) of Record Identification Sequence | (0008,1049) | | | | | header; new attribute. Could be clarified: 47.2.1 says the EM maps PV1-7 Attending Doctor to (0008,009D) and Table U-1 maps PV1-7 to (0008,1048)/(0008,009D), while the return key required here is (0008,1049). Example: an EM that returns only (0008,1048) `Smith^Jane` meets U-1 but not this table; one that returns (0008,1049) with an item `>(0040,1101) 1234567890/99NPI/Smith^Jane` meets both. Check (0008,1049). |
 | > Person Identification Code Sequence | (0040,1101) | | | | | header |
 | >>Code Value | (0008,0100) | O | O | R+* | R+ | physician identifier (NPI in the US per 4.132.4.1.2.3.2/.3) |
 | >>Coding Scheme Version | (0008,0103) | O | O | O | O | |
@@ -186,7 +188,7 @@ Monitor consequences for a UPS-RS search (GET .../workitems?...):
 | 4 | Return the Scheduled Station AE Title (0040,0001) received as matching key, unchanged, as return key | response SPS AET == identifier SPS AET |
 | 5 | Return the Modality (0008,0060) received as matching key, unchanged | response SPS Modality == identifier Modality |
 | 6 | If the entry has no specifically scheduled datetime, populate SPS Start Date/Time (0040,0002)/(0040,0003) with the current date and time | date/time of the query, local to the EM |
-| 7 | When returning SPS Description (0040,0007), Requested Procedure Description (0032,1060) and/or Code Sequence (0032,1064), a generic "Perform Imaging" style value is permitted | not a defect if generic |
+| 7 | When returning SPS Description (0040,0007), Requested Procedure Description (0032,1060) and/or Code Sequence (0032,1064), a generic "Perform Imaging" style value is permitted | generic values are allowed by the TF; the Gazelle tests fix specific values for the event (gazelle-ebiw-tests.md) |
 | 8 | (47.1.1.1, Vol 1) Same accession for the same admission to the same device, unless an additional encounter is determined | repeat the same query twice from the same AET; accession and Study UID stable |
 | 9 | (47.1.1.1) Issuer of Accession Number configurable; accession collision avoidance configurable (prefix/suffix) | ask the operator; look at (0008,0051) |
 | 10 | (47.1.1.1) Can populate required fields for "John Doe" patients | EBIW_50/55 |
@@ -198,3 +200,13 @@ Expected Actions, Requester (4.130.4.2.3): shall accept the responses; no other 
 
 ## 5. Example query patterns (4.130.4.1.2.3, informative)
 Wristband (Patient ID or Admission ID, with issuer); by department (0008,1040)/(0008,1041) with an SPS start date range; by operator (0040,0006); by room (0040,0011). Note: SCUs recommended to append `*` to each component of a structured Patient's Name; date/time single-value matching is "by meaning", range matching recommended when in doubt.
+
+## 6. Places where the text could be clarified (OFI), with examples
+
+| # | Where | What the text says | How it could be read | Example | Suggested handling |
+|---|---|---|---|---|---|
+| 1 | SPS >Scheduled Station AE Title and >Modality as SCP matching keys | Table 4.130.4.1.2.1-1: matching SCP = R for both. 4.130.4.1.3: the values "will be present in the request as a Matching Key. The Responder shall return that same value as a Return Key ... may be helpful for the Responder to tailor the response" | Either the SCP filters on them like any R matching key, or it only echoes them because no encounter is scheduled to a device | EBIW_20 step 110: Clinical Oncology + AET `MOD_A`; an echo-only EM returns every oncology encounter for every partner, a filtering EM returns the three prepared for `MOD_A`. The test expects 3. | Both readings satisfy the TF; the Gazelle data model (AET per procedure) only works with the filtering reading. Record which the EM does. |
+| 2 | Physician of Record mapping | 47.2.1: EM maps PV1-7 to (0008,009D); Table U-1: PV1-7 to (0008,1048)/(0008,009D); Table 4.130.4.1.2.1.1-1 requires (0008,1049) | Three different target attributes for the same HL7 field | (0008,009D) is Consulting Physician Identification Sequence, (0008,1048) is Physician(s) of Record (name only), (0008,1049) is Physician(s) of Record Identification Sequence | The return key that is R+ is (0008,1049); a response carrying it (with (0008,1048) alongside) meets every reading. |
+| 3 | Station Class tag in EBIW_10 | Gazelle EBIW_10 and EBIW_30 write "Scheduled Station Class Code Seq (0040,4025)"; Table 4.130.4.1.2.2-1 maps Modality to (0040,4026) and the AET to (0040,4025) | A Lightweight Modality built from the test text could put `US` into Station Name Code Sequence | `ScheduledStationNameCodeSequence.CodeValue=US` vs `ScheduledStationClassCodeSequence.CodeValue=US` | (0040,4026) is the class, (0040,4025) is the name. Test text typo; raise with the TPM. |
+| 4 | Accession reuse rule | 47.1.1.1: "shall not return different accession numbers for the same admission to the same device unless it can determine that there has been an additional encounter"; EBIW_10: two procedures (US and XC) under one Admission ID | Whether the US and XC procedures of one admission share an accession or each get one | Same device querying twice must get the same accession; a different device (the XC partner) for the same admission may get a different one | Per device is what the text says; per (admission, device) satisfies it. Two devices sharing an accession also satisfies it. |
+| 5 | Display requirement under POCUS | 4.130.4.1.2.1.1 says the option "places display requirements"; the table expresses them only through R+ vs R+* | A reader who skips RAD TF-2 2.2 will not know R+ means "display" | Patient's Name R+ (display), Admission ID R+* (no display, but IHE-1 adds "display all Admission IDs" when several are returned) | Section 0 of this file quotes 2.2. |

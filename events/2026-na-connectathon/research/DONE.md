@@ -5,14 +5,14 @@ status: complete
 ---
 # DONE: overnight research, status
 
-All six deliverables are written. Nothing in Gazelle was changed (read and navigate only); no git commands were run; no tool was edited.
+All six deliverables are written. Positioning: the checklists make differences visible with citations; the monitor and the TPM judge. Floor expectation is DIMSE + HL7 v2.5.1; UPS-RS material applies only to a registered Lightweight Modality. Nothing in Gazelle was changed (read and navigate only); no git commands were run; no tool was edited.
 
 ## Complete
 | File | Status | Notes |
 |---|---|---|
-| `rad-130-checklists.md` | transcribed, tables checked against rendered PDF pp. 94-96 | base + POCUS key tables, UPS-RS mapping, Expected Actions as a checklist, RAD TF-2 2.2 notation legend quoted |
+| `rad-130-checklists.md` | transcribed, tables checked against rendered PDF pp. 94-96 | base + POCUS key tables, UPS-RS mapping, Expected Actions as a checklist, RAD TF-2 2.2 notation legend quoted, 5 OFI items with examples |
 | `rad-131-checklists.md` | transcribed | Table 4.131.4.1.2-1, POCUS modality attributes, POCUS Manager coercion, A.6-1, A.7-1 with coercion-diff guidance, App. O codes |
-| `rad-132-checklists.md` | transcribed | full segment-by-segment incl. the RD 4.128 sections EBIW points to (MSH, PID, PV1, ORC, Study UID OBX) and the ACK; POCUS optionality flips collected at the top; 8 spec inconsistencies listed at the bottom |
+| `rad-132-checklists.md` | transcribed | full segment-by-segment incl. the RD 4.128 sections EBIW points to (MSH, PID, PV1, ORC, Study UID OBX) and the ACK; POCUS optionality flips collected at the top; 11 'could be clarified' items (OFI) with wire examples at the bottom |
 | `from-memory-claims.md` | verified | (a) confirmed, text lives in RD supplement 4.128.4.2 not TF-2 Final Text; (b) confirmed, OBX-2 ST / OBX-11 O; (c) requirement real, section is RAD TF-2 2.4.4.2 not 2.3.1; (d) confirmed, Apple 103769; 398-day rule is public roots only |
 | `gazelle-ebiw-tests.md` | transcribed from the signed-in Chrome session | all 10 EBIW tests: ids, roles, step tables, evaluation text; EBIW_10 code set and patient table; EBIW_90 field list; the two POCUS tests |
 | `encounters-from-read-this-first.json` | transcribed | 11 encounters (5 patients x US+XC, plus BERGER radiology row), EBIW_10 institution/department/procedure/modality codes; placeholders for [Modality], AE titles, Gazelle OID |

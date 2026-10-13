@@ -5,6 +5,8 @@ status: transcribed
 ---
 # RAD-131 Store Encounter Images: monitor checklists
 
+How to use: the tables say what the text requires and where; the stored header (proxy capture or exported instance) says what was sent. The checklist makes differences visible with a citation; the monitor and the TPM decide what they mean for the test instance.
+
 Sender = Acquisition Modality (SCU). Receiver = Image Manager / Image Archive (SCP). Table 4.131.2-1.
 Under the POCUS Option the modality stores to the **POCUS Manager** instead (47.2.1), and the POCUS Manager is in turn the Sender toward the Image Manager (4.131.4.1.2.2.2). Lightweight Modalities use RAD-108 STOW-RS, not this transaction.
 
@@ -188,10 +190,10 @@ Columns: Objects from Modality / Worksheet / Original images sent to IM / Append
 | Reason for Visit Code Sequence | (0032,1067) | Source | Copy (A.7.9) | Copy | Copy | n.a. |
 | Physician(s) of Record Identification Sequence | (0008,1049) | Source | Copy (A.7.2: PM may coerce in the worksheet if absent from MWL) | Copy | Copy | Copy ORC-12 |
 | Accession Number | (0008,0050) | Source | Copy (A.7.3: split -> new accession) | Copy | Copy | Copy OBR-18 (A.7.4: OBR-3 may also carry it) |
-| Issuer of Accession Number Sequence | (0008,0051) | Source | Copy (A.7.5: if PM coerces the accession, issuer = PM's assigning authority) | Copy | Copy | Copy OBR-18 (A.7.4) [sic: OBR-19 per 4.132.4.1.2.1; see rad-132-checklists] |
+| Issuer of Accession Number Sequence | (0008,0051) | Source | Copy (A.7.5: if PM coerces the accession, issuer = PM's assigning authority) | Copy | Copy | Copy OBR-18 (A.7.4) (could be clarified: 4.132.4.1.2.1 puts the issuer in OBR-19; see rad-132-checklists.md OFI #5) |
 | Study Instance UID | (0020,000D) | Source | Copy (A.7.3) | Copy | Copy | Copy OBX-5 |
-| Operators' Name | (0008,1070) | Source | Copy (A.7.8) | Copy | Copy | Copy "ORC-1 and OBR-32 or OBR-33" (A.7.8) [sic: ORC-1 is Order Control; read as ORC-12] |
-| Operator Identification Sequence | (0008,1072) | Source | Copy (A.7.8) | Copy | Copy | Equal "ORC-1 and OBR-32 or OBR-33" (A.7.8) [same sic] |
+| Operators' Name | (0008,1070) | Source | Copy (A.7.8) | Copy | Copy | Copy "ORC-1 and OBR-32 or OBR-33" (A.7.8) (could be clarified: ORC-1 is Order Control; read as ORC-12; rad-132-checklists.md OFI #6) |
+| Operator Identification Sequence | (0008,1072) | Source | Copy (A.7.8) | Copy | Copy | Equal "ORC-1 and OBR-32 or OBR-33" (A.7.8) (same note) |
 | Study Date | (0008,0020) | Source | Copy | Copy | Copy | Copy OBR-7 |
 | Study Time | (0008,0030) | Source | Copy | Copy | Copy | Copy OBR-7 |
 | Study Description | (0008,1030) | Source | Copy (A.7.3) | Copy | Copy | Copy OBR-4 |
