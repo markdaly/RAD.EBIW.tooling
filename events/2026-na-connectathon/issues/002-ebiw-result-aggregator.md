@@ -112,6 +112,18 @@ ACKed, so transport is done. Content read against RAD TF-2 4.132 (POCUS Option),
 `UNICODE UTF-8`; Z-segment is permitted. Verify PV1-19 equals Admission ID (0038,0010) in the
 stored images when the Image Manager side is checked.
 
+### Second delivery, 2026-10-13 10:10:11 ET (file `logs/result-aggregator/20261013-094740/20261013-101011-0001-ORU_R01.in.hl7`, ACKed AA)
+Sent direct to 10.242.1.99:2575 after the proxy path failed (issue 007); probe connect/close at
+10:10:00. **Byte-identical to the 15:07 message above** (same MSH-7 `20261012150756`, same MSH-10
+`1`), so items 1-15 stand unchanged. Two additions from the overnight research checklist
+(`research/rad-132-checklists.md`):
+- **Correction to "Z-segment is permitted" below:** RAD TF-2 2.4.1.5 prohibits Z-segments unless
+  the transaction defines one, and RAD-132 defines none. `ZED` belongs on the should-fix list.
+- **MSH-5/6 = `TextResult` / empty.** Both R (RD 4.128.4.1.2.2); the Gazelle registration for
+  TOOL_DDx says `SIMULATOR`/`SIMULATOR`. The stand-in ACKs regardless.
+- Patient is `BERGER` with IDs `VP0005` / `V0005`; the EBIW_10 set has BERGER as `EBIW005` /
+  `ADM005`. Check which patient set the Gazelle test instance expects.
+
 Suggested validator: paste the capture into Gazelle EVSClient HL7v2 validation if a RAD-132
 profile exists there; otherwise this list is the review.
 

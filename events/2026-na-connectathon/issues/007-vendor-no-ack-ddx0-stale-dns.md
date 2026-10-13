@@ -3,7 +3,7 @@ event: IHE North America Connectathon 2026
 dates: 2026-10-12 to 2026-10-16
 kind: issue
 opened: 2026-10-13 10:10 ET
-status: root-caused
+status: workaround in place
 expires: 2026-10-16
 ---
 # Vendor's message "came through" but got no ACK: ddx0 still resolves to the old IP
@@ -39,15 +39,15 @@ connections to 10.242.1.99 are unaffected.
 - The Gazelle configurations for TOOL_DDx still carry host ddx0 / 10.242.1.184.
 
 ## Hypotheses (ranked)
-1. **The vendor (or the proxy on its behalf) targets ddx0 or .184, which now goes nowhere.**
-   Confirmed for DNS; the vendor's exact target is not yet known.
+1. **The proxy forwards to ddx0 / .184, which now goes nowhere.** Confirmed: DNS, plus the
+   vendor's own report that they sent through the proxy.
 2. The vendor targeted the right address but a different port. Not supported by our logs:
    no listener saw a connect.
 
 ## Missing evidence
-- [ ] The vendor's target host:port and the error text from their sender.
-- [ ] Where "came through" was seen: Gazelle Message Capture, the vendor's own log, or a
-      proxy channel.
+- [x] Path: the vendor sent through the Gazelle proxy (monitor, 10:12 ET), so the proxy took
+      the message and could not forward it to ddx0. The vendor is re-sending direct to .99.
+- [ ] The vendor's sender error text, for the record.
 
 ## Next action
 - Floor team: DNS A record `ddx0.na2026.net` → 10.242.1.99 (in progress, Tue 10:00 ET).
@@ -60,3 +60,6 @@ connections to 10.242.1.99 are unaffected.
   proxy send above returns an ACK and a `CONNECT from 192.168.2.5` appears in the summary.
 
 ## Resolution
+Workaround confirmed 10:10:11 ET: the vendor sent direct to 10.242.1.99:2575 and got
+`MSA|AA|1` (file `logs/result-aggregator/20261013-094740/20261013-101011-0001-ORU_R01.in.hl7`,
+reviewed in issue 002). Closes when DNS says .99 and a proxy send returns an ACK.
