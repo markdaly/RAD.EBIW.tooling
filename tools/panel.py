@@ -20,7 +20,7 @@ encounter edits) answer only clients on this machine unless PANEL_REMOTE_CONTROL
 authentication either way. PANEL_PORT default 8090, LOG_DIR default logs, REPO_URL default from `git remote get-url origin`.
 Run: uv run --with fastapi --with uvicorn python tools/panel.py   (or tools/floor.sh panel)
 """
-import html, json, os, re, subprocess, sys
+import contextvars, html, json, os, re, subprocess, sys
 from urllib.parse import parse_qs
 from datetime import datetime
 from pathlib import Path
@@ -39,6 +39,7 @@ FLOOR = ROOT / "tools" / "floor.sh"
 HOST, PORT = os.environ.get("PANEL_HOST", "0.0.0.0"), int(os.environ.get("PANEL_PORT", "8090"))
 REMOTE_CONTROL = os.environ.get("PANEL_REMOTE_CONTROL", "") == "1"
 LOCAL = {"127.0.0.1", "::1", "localhost"}
+IS_ADMIN = contextvars.ContextVar("is_admin", default=False)  # set per request by the middleware, read by page()
 CONFIG_KEYS = [("RA_PORT", "Result Aggregator MLLP port", "2575"), ("EM_PORT", "Encounter Manager DICOM port", "11112"),
                ("ADT_PORT", "Encounter Manager ITI-31 MLLP port", "2576"), ("UPS_PORT", "UPS-RS HTTP port", "8042"),
                ("AE_TITLE", "Encounter Manager AE title", "ENC_MGR"), ("ACCESSION_ISSUER", "Issuer of Accession Number", "ENC_MGR"),
@@ -91,10 +92,16 @@ def page(title, body, nav=""):
     main{padding:12px 16px;max-width:1400px}table{border-collapse:collapse;width:100%}td,th{padding:3px 8px;border-bottom:1px solid #2a2a2a;vertical-align:top;text-align:left}
     th{color:#999;font-weight:normal}tr.seg td{background:#1f2a36;font-weight:bold;color:#fff}td.n{white-space:nowrap;color:#9cf;width:6em}td.name{color:#aaa;width:22em}
     pre{background:#0b0b0b;padding:8px;overflow:auto;border:1px solid #333}.up{color:#6f6}.down{color:#f66}.btn{background:#2b4a6b;color:#fff;border:0;padding:4px 10px;border-radius:3px;cursor:pointer}
-    .btn.red{background:#6b2b2b}input{background:#222;color:#eee;border:1px solid #444;padding:3px 6px}form.inline{display:inline}small{color:#888}.comp{color:#8d8}"""
+    .btn.red{background:#6b2b2b}input{background:#222;color:#eee;border:1px solid #444;padding:3px 6px}form.inline{display:inline}small{color:#888}.comp{color:#8d8}
+    .banner{padding:6px 16px;font-weight:bold}.banner.admin{background:#1f3a1f;color:#bfb}.banner.ro{background:#4a3a10;color:#fe9}
+    body.ro form{opacity:.4;pointer-events:none}"""
+    admin = IS_ADMIN.get()
+    banner = (f"<div class='banner admin'>ADMIN: you are on the machine running this panel. Config, start/stop/restart and encounter edits work here only; floor laptops get a read-only view.</div>"
+              if admin else
+              f"<div class='banner ro'>READ-ONLY VIEW: browse logs and download raw captures. Administration (config, start/stop/restart, encounter edits) is only available on the machine running this panel.</div>")
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>{html.escape(title)}</title><style>{css}</style></head>
-<body><header><b><a href="/">kit panel</a></b> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
-<main>{body}</main><script>document.addEventListener('keydown',e=>{{const a=document.querySelector(e.key==='j'||e.key==='ArrowRight'?'#next':e.key==='k'||e.key==='ArrowLeft'?'#prev':null);if(a)location=a.href}})</script></body></html>"""
+<body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
+{banner}<main>{body}</main><script>document.addEventListener('keydown',e=>{{const a=document.querySelector(e.key==='j'||e.key==='ArrowRight'?'#next':e.key==='k'||e.key==='ArrowLeft'?'#prev':null);if(a)location=a.href}})</script></body></html>"""
 
 
 app = FastAPI(title="kit panel")
@@ -126,7 +133,9 @@ def index():
 @app.middleware("http")
 async def local_only_writes(request: Request, call_next):
     """Floor laptops may read; only this machine may change config or start/stop servers."""
-    if request.method != "GET" and not REMOTE_CONTROL and (request.client.host if request.client else "") not in LOCAL:
+    admin = REMOTE_CONTROL or (request.client.host if request.client else "") in LOCAL
+    IS_ADMIN.set(admin)
+    if request.method != "GET" and not admin:
         return Response("read-only from other machines: control actions are local to the panel host\n", status_code=403)
     return await call_next(request)
 
