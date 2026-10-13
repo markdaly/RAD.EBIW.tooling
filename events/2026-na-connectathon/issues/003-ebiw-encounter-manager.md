@@ -119,8 +119,8 @@ to `logs/encounter-manager/<session>/`.
       reason-for-visit codes) to replace the placeholders in `samples/encounters.json`.
 - [ ] Whether the VNA will also send RAD-132 to the Encounter Manager (then run
       `ACTOR=encounter-manager tools/mllp_receiver.py` on a second port).
-- [ ] TPM approval for this stand-in (the Result Aggregator one was TPM-requested; this one
-      came in by a different route).
+- [x] TPM approval for this stand-in: confirmed by the monitor Tue Oct 13; the Encounter Manager
+      stand-in serves this and other EBIW tests.
 
 ## Next action
 1. Build and loopback-test `tools/mwl_scp.py`. **Done.** Add UPS-RS (`tools/ups_rs.py`),

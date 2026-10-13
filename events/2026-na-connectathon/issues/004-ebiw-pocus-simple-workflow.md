@@ -62,7 +62,7 @@ Not a defect ticket. Deliverables:
 ## Missing evidence
 - [ ] Which system is POCUS_MGR-EBIW in the instance the monitor is monitoring, and whether it accepts
       ITI-31 (if yes, send the ADT to both it and the Encounter Manager stand-in).
-- [ ] Confirm with the RAD TPM that a monitor-run Encounter Manager inside the POCUS_MGR role
+- [x] (TPM-approved, confirmed by the monitor Tue Oct 13) Confirm with the RAD TPM that a monitor-run Encounter Manager inside the POCUS_MGR role
       is acceptable for grading step 60.
 - [ ] Vendor modality AE title and modality code for step 60.
 - [ ] `EBIW_10_Read_This_First` data (same as ticket 003).

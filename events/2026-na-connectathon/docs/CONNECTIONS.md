@@ -8,11 +8,10 @@ expires: 2026-10-16
 
 *As of Tue Oct 13, 10:40 ET. All four proxy channels forward; direct connections also work.*
 
-TOOL_DDx is a monitor-run partner substitute for EBIW tests that have no vendor in one of the
-roles. It plays the **Result Aggregator** (receives RAD-132 ORU; built at the RAD Technical
-Project Manager's request) and the **Encounter Manager** (worklist over DICOM MWL and UPS-RS,
-plus an ITI-31 ADT intake; whether it may stand in for a given test instance is the TPM's call,
-so check with the monitor before you rely on it). It accepts, logs every byte, and acknowledges. It does not grade, auto-pass, or
+TOOL_DDx is a monitor-run partner substitute, approved by the RAD Technical Project Manager, for
+EBIW tests that have no vendor in one of the roles. It plays the **Result Aggregator** (receives
+RAD-132 ORU) and the **Encounter Manager** (worklist over DICOM MWL and UPS-RS, plus an ITI-31
+ADT intake). It accepts, logs every byte, and acknowledges. It does not grade, auto-pass, or
 change your messages; the monitor reads the captures against the Technical Framework.
 
 Gazelle: organization DDx, system **TOOL_DDx**, host **ddx0** = **10.242.1.99** (static).
@@ -74,8 +73,7 @@ over MWL and UPS-RS alike, across restarts (RAD TF-1 47.1.1.1).
 
 ### EBIW_POCUS_Simple_Workflow (Gazelle 13884)
 Roles: RESULT_AGGREGATOR = TOOL_DDx; POCUS_MGR, MOD, IM = vendors. If your POCUS Manager does
-not serve the worklist itself, TOOL_DDx's Encounter Manager can answer step 60 on its behalf,
-if the TPM accepts that for your instance.
+not serve the worklist itself, TOOL_DDx's Encounter Manager answers step 60 on its behalf.
 
 1. **Step 10, ITI-31 (TOOL_DDx starts it).** Agree a patient with the monitor and give your
    ADT listener host:port and MSH-5/6. The monitor sends ADT^A04 to your POCUS Manager and,

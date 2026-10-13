@@ -33,9 +33,10 @@ Individual problems live in `../issues/`; this is the record across them.
   concurrency-shell drivers were not run.
 - Two priority errata from the review added to the RAD-132 clarification list (OFI 12-13).
 
-**Open for the monitor:** TPM confirmation for the Encounter Manager stand-in (issues 003/004);
-pre-run setup on the Encounters page per partner (AE titles still blank, partner identifier
-still `TEST`); flush this Mac's DNS cache. The review zip stays untracked in `docs/`.
+**Open for the monitor:** pre-run setup on the Encounters page per partner (AE titles still blank, partner identifier
+still `TEST`). Since then: the monitor confirmed TPM approval for the Encounter Manager stand-in
+(it serves other EBIW tests too) and flushed the DNS cache; the review kit was folded into the
+repo (below) and the zip deleted.
 
 ## 2026-10-13 (Tue, day 2), late morning: first vendor traffic, proxy fixed, panel on the floor
 
