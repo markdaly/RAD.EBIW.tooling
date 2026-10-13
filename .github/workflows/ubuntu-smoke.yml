@@ -1,0 +1,28 @@
+# Runs tools/smoke.sh on stock Ubuntu runners: the kit must start with tools/floor.sh and answer
+# every transaction on a machine that is not the author's Mac. Installs only what docs/INSTALL.md
+# tells a new user to install (tmux from apt, uv from its install script).
+name: ubuntu-smoke
+on:
+  push:
+    branches: [main]
+    paths: ["tools/**", "samples/**", "requirements.txt", ".github/workflows/ubuntu-smoke.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prerequisites from docs/INSTALL.md
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q tmux
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Smoke test
+        run: tools/smoke.sh
