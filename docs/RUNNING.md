@@ -19,6 +19,28 @@ you `restart` it. The `logs` window runs `tools/logwatch.sh result-aggregator`,
 `tools/newfiles.sh` (newest raw captures plus state counts).
 
 Set `PYTHON` to use a specific interpreter; otherwise `uv run --python '>=3.11'` provisions one.
+Ports and names come from `.floor.env` at the repo root if it exists (gitignored; the panel writes
+it): `RA_PORT`, `EM_PORT`, `ADT_PORT`, `UPS_PORT`, `AE_TITLE`, `ACCESSION_ISSUER`,
+`ACCESSION_PREFIX`, `ENCOUNTERS`, `ACK_APP`, `ACK_FACILITY`, `PANEL_PORT`.
+
+## The panel: `tools/panel.py`
+
+`tools/floor.sh panel` starts a local web page on http://127.0.0.1:8090/ (tmux session
+`ihe-panel`, independent of the servers so "stop all" does not kill it). Read-only on the logs,
+and a thin front end to `floor.sh` for control:
+
+- Service status (tmux windows + which ports listen), start all / stop all / restart one.
+- Config form that writes `.floor.env`; takes effect on the next start or restart.
+- Log index by actor and session; per-session file list with `summary.log`.
+- One capture rendered: HL7 as a field table with HL7 2.5.1 names and components split, DICOM
+  query/response dumps and UPS-RS JSON as text. Prev/next (keys `j`/`k` or arrows), the related
+  file (ACK for a message, responses for a query), and **download raw**, which is the exact bytes
+  for a Gazelle attachment.
+- Links to the repo and these docs in the header.
+
+`PANEL_HOST=0.0.0.0` lets other laptops on the floor read it; there is no authentication, so
+leave it on 127.0.0.1 unless you mean it. The same HL7 rendering in the console:
+`python3 tools/hl7show.py <file.hl7>` (`--raw`, `--next`, `--prev`).
 
 ## Result Aggregator: `tools/mllp_receiver.py`
 

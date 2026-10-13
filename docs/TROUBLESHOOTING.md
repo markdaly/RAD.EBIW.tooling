@@ -78,6 +78,15 @@ PV1-18.
 - Cert content problems (SAN, validity, CRL distribution point, key size, mobile trust) are in
   `docs/TLS-CERTS.md` with the openssl commands.
 
+## Panel
+
+- `tools/floor.sh panel` says "already running": `tools/floor.sh panel-stop` first.
+- Port 8090 busy: `PANEL_PORT=8091 tools/floor.sh panel`.
+- Config saved but ports did not change: the form writes `.floor.env`; it applies on the next
+  `restart <win>` or `start`. The status block on the panel shows what is actually listening.
+- A capture renders as plain text instead of a field table: the file name does not end in
+  `.hl7`, or the first segment is not `MSH`. The raw download still works.
+
 ## Evidence for Gazelle
 
 Hand the vendor the raw pair from `logs/<actor>/<session>/`: the `.in.hl7` with its `.ack.hl7`,

@@ -14,6 +14,9 @@ __pycache__/
 /.claude/worktrees/
 /.claude/settings.local.json
 
+# Per-machine port/name overrides written by tools/panel.py, read by tools/floor.sh.
+.floor.env
+
 # Personal brief for AI sessions; never committed (the public CLAUDE.md is generic).
 CLAUDE.local.md
 

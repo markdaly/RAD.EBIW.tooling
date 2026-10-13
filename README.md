@@ -12,7 +12,9 @@ Workflow, POCUS Option) and reusable for any HL7 v2 or DICOM worklist partner yo
 | `tools/ups_rs.py` | Encounter Manager, REST side | RAD-130 UPS-RS search (`GET /workitems`, `/studies`), dicom+json | 8042 |
 | `tools/mllp_send.py` | test sender | send one HL7 file, print the ACK | |
 | `tools/mwl_find.py` | test modality | RAD-130 C-FIND with the EBIW required keys | |
-| `tools/floor.sh` | | run everything in one tmux session; restart one server; status | |
+| `tools/floor.sh` | | run everything in one tmux session; restart one server; status; ports from `.floor.env` | |
+| `tools/panel.py` | | local web panel: service control, port config, log browser with HL7 field view and raw export | 8090 |
+| `tools/hl7show.py` | | console HL7 pretty-printer with field names; prev/next through a session folder | |
 
 Quick start (macOS or Linux, needs [uv](https://docs.astral.sh/uv/)):
 
@@ -20,6 +22,7 @@ Quick start (macOS or Linux, needs [uv](https://docs.astral.sh/uv/)):
 git clone <this repo> && cd <this repo>
 tools/floor.sh start      # three servers + a log window in tmux session "ihe"
 tools/floor.sh status     # four ports listening?
+tools/floor.sh panel      # http://127.0.0.1:8090/  logs, HL7 field view, raw export, start/stop, ports
 tmux attach -t ihe
 ```
 
