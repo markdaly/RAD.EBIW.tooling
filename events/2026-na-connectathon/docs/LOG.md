@@ -10,6 +10,28 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-13 (Tue, day 2), afternoon: EBIW_POCUS_Simple_Workflow step 10 sent; waiting on step 120
+
+- **Step 10 (ITI-31) done, 13:42 ET:** TOOL_DDx as Result Aggregator sent ADT^A04 (PEREZ / EBIW001 /
+  ADM001, MSH-5 `SS_VIEWPOINT`) to the POCUS Manager through its proxy channel 11008; AA back.
+  Evidence: Message Capture, plus `logs/result-aggregator/send-20261013/` (`.out.hl7` + `.ack.hl7`).
+  Their ACK's MSH-7 runs six hours ahead (their clock or zone); told the monitor, worth checking in
+  their ORU. This POCUS Manager serves its own worklist (proxy 11005), so our Encounter Manager is
+  not in this run.
+- **Step 120 not yet received** by 16:20 ET. When it arrives: PV1-19 should carry ADM001 (the
+  encounter round trip for step 150), then the RAD-132 checklist.
+- **Watcher:** a scratch-folder monitor follows every summary log and the five listeners
+  (passive check, never connects), re-armed every 30 min, resumes from saved read positions.
+- **Small fix:** sender summary lines name the source file, not its full path (the live page is
+  floor-visible).
+- Other vendor questions today (a sample MWL response, two images, a pcap review) were answered as
+  one-off feedback in chat, not kept in the repo; their files stay untracked and locally excluded.
+- Gazelle test instances still being sorted out on the event side; possibly not today.
+
+**Next session starts:** step 120 ORU from the POCUS Manager on 11067 (review + ADM001 check); set
+the issuer OID on the Encounters page before any worklist run; Encounters page per partner before
+each EBIW_20/30 run.
+
 ## 2026-10-13 (Tue, day 2), 11:25-11:40 ET: panel styling and tablet fit; Ubuntu compatibility
 
 - **Panel styling:** fonts and colors only, light and dark following the device; monospace for
