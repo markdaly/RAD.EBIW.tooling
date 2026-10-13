@@ -23,6 +23,9 @@ Individual problems live in `../issues/`; this is the record across them.
    reads fine, `connectathon-kit` if you want it shorter. If it ever moves under the IHE org,
    something like `RAD.EBIW.tooling` would fit their pattern. Ask the TPM only if you want it
    under their org. Add staffers as collaborators or point them at fork-and-PR.
+2b. After flipping public: `tools/github-hardening.sh` (branch protection on main with admin
+   bypass, secret scanning + push protection, private vulnerability reporting). Dependabot
+   alerts and security updates are already on.
 3. Pre-run setup for EBIW_20/30 is now a form: `tools/floor.sh panel`, open
    http://127.0.0.1:8090/encounters, enter the partner identifier, the US and XC AE titles and
    the OID, save, then restart `em` and `ups` from the index page.

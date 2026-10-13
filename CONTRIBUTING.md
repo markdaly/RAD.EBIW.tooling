@@ -12,7 +12,10 @@ Thanks for picking this up mid-event. The bar is low and the rules are few.
 5. Someone with write access merges. If nobody is around and you are on the floor with a vendor
    waiting, run from your branch; merge later.
 
-Commits go straight to `main` once merged; no release process, no tags beyond the odd marker.
+`main` is protected once the repo is public: pull requests for everyone except admins, no
+force-pushes, no deletions, linear history (`tools/github-hardening.sh` applies it, plus
+Dependabot, secret scanning with push protection, and private vulnerability reporting).
+No release process, no tags beyond the odd marker.
 Small commits, one concern each. Mention the issue file if there is one
 (`events/<event>/issues/NNN-slug.md`).
 
