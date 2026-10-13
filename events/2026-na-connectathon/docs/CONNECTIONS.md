@@ -8,10 +8,11 @@ expires: 2026-10-16
 
 *As of Tue Oct 13, 10:40 ET. All four proxy channels forward; direct connections also work.*
 
-TOOL_DDx is a monitor-run partner substitute, approved by the RAD Technical Project Manager, for
-EBIW tests that have no vendor in one of the roles. It plays the **Encounter Manager** (worklist
-over DICOM MWL and UPS-RS, plus an ITI-31 ADT intake) and the **Result Aggregator** (receives
-RAD-132 ORU). It accepts, logs every byte, and acknowledges. It does not grade, auto-pass, or
+TOOL_DDx is a monitor-run partner substitute for EBIW tests that have no vendor in one of the
+roles. It plays the **Result Aggregator** (receives RAD-132 ORU; built at the RAD Technical
+Project Manager's request) and the **Encounter Manager** (worklist over DICOM MWL and UPS-RS,
+plus an ITI-31 ADT intake; whether it may stand in for a given test instance is the TPM's call,
+so check with the monitor before you rely on it). It accepts, logs every byte, and acknowledges. It does not grade, auto-pass, or
 change your messages; the monitor reads the captures against the Technical Framework.
 
 Gazelle: organization DDx, system **TOOL_DDx**, host **ddx0** = **10.242.1.99** (static).
@@ -27,7 +28,7 @@ No TLS on any of these.
 | You are | Transaction | Send to (proxy) | Direct fallback | What to put in the message / association |
 |---|---|---|---|---|
 | Acquisition Modality, POCUS app | RAD-130 MWL C-FIND | `proxy.ihe-europe.net:11065` | `10.242.1.99:11112` | Called AE `ENC_MGR`; calling AE = your registered AE title (tell the monitor) |
-| Lightweight Modality | RAD-130 UPS-RS `GET` | `http://proxy.ihe-europe.net:11066/workitems?...` | `http://10.242.1.99:8042/workitems?...` | Also served at `/studies` (as registered). **Send `ScheduledStationNameCodeSequence.CodeValue=<your AE title>`**: through the proxy we cannot see your IP |
+| Lightweight Modality | RAD-130 UPS-RS `GET` | `http://proxy.ihe-europe.net:11066/workitems?...` | `http://10.242.1.99:8042/workitems?...` | Also served at `/studies` (as registered). **Send your AE title** as `ScheduledStationNameCodeSequence.CodeValue` or `.CodeMeaning`: through the proxy we cannot see your IP. **Send your modality** as `ScheduledStationClassCodeSequence.CodeValue=XC` to get only your procedures; without it every modality's rows for the patient come back |
 | POCUS Manager, Image Manager | RAD-132 ORU^R01 | `proxy.ihe-europe.net:11067` | `10.242.1.99:2575` | MSH-5/6 `SIMULATOR`/`SIMULATOR`; HL7 v2.5.1, original-mode ACK |
 | Anyone feeding our Encounter Manager | ITI-31 ADT | `proxy.ihe-europe.net:11064` | `10.242.1.99:2576` | MSH-5/6 `SIMULATOR`/`SIMULATOR`; PID-3 and PV1-19 (Admission ID) required |
 
@@ -56,7 +57,8 @@ The partner on the other side of a test sees the same files; that is the point.
    worklist tests; for ITI-31 you receive, your **ADT listener host:port and MSH-5/6**.
 3. The monitor loads that into the Encounter Manager (section 4) and confirms on Zulip.
 4. Patients are the **EBIW_10_Read_This_First** set. Names carry a partner identifier in the given
-   name, `PEREZ^<id>`; the monitor tells you the `<id>`. Issuer of Patient ID `ENC_MGR`.
+   name, `PEREZ^<id>`; the monitor tells you the `<id>`. Issuer of Patient ID `ENC_MGR`
+   (`SITE_A` for the unidentified patient).
 
 | Patient | Patient ID | Admission ID | Department | Procedures (one per modality) |
 |---|---|---|---|---|
@@ -72,7 +74,8 @@ over MWL and UPS-RS alike, across restarts (RAD TF-1 47.1.1.1).
 
 ### EBIW_POCUS_Simple_Workflow (Gazelle 13884)
 Roles: RESULT_AGGREGATOR = TOOL_DDx; POCUS_MGR, MOD, IM = vendors. If your POCUS Manager does
-not serve the worklist itself, TOOL_DDx's Encounter Manager answers step 60 on its behalf.
+not serve the worklist itself, TOOL_DDx's Encounter Manager can answer step 60 on its behalf,
+if the TPM accepts that for your instance.
 
 1. **Step 10, ITI-31 (TOOL_DDx starts it).** Agree a patient with the monitor and give your
    ADT listener host:port and MSH-5/6. The monitor sends ADT^A04 to your POCUS Manager and,
@@ -89,7 +92,8 @@ not serve the worklist itself, TOOL_DDx's Encounter Manager answers step 60 on i
    instance.
 
 ### EBIW_20 MWL (13480) and EBIW_30 UPS-RS (13479): your Modality, our Encounter Manager
-1. Before the run, the monitor sets your partner identifier and AE title.
+1. Before the run, the monitor sets your partner identifier and AE title. The match counts
+   below hold only after that: until your AE title is set, rows match any device.
 2. Run the Gazelle queries. Expected matches per Gazelle:
    step 100 Patient ID + Issuer; step 110 Clinical Oncology + your AE title (PAGE, WAGNER,
    BERGER); step 120 MAHAR + ADM004 (2: US and XC); step 200 `PEREZ^<id>` + modality
@@ -101,9 +105,9 @@ The Modality queries our Encounter Manager (MWL 11065, or UPS-RS 11066 for EBIW_
 the Image Manager, and the Image Manager sends RAD-132 to our Result Aggregator (proxy 11067).
 
 ### EBIW_50 / EBIW_55, unidentified patient
-Query for `UNIDENTIFIED^PATIENT`, Patient ID `0`. That entry is pre-loaded; the Encounter
-Manager's handling sentence for the chat window is "pre-registered unidentified encounter,
-matched by name or Patient ID 0".
+TOOL_DDx serves one pre-registered unidentified encounter: `UNIDENTIFIED^PATIENT`, Patient ID
+`0`, Admission ID `VISIT0002`. Query by name or Patient ID. The monitor posts the Encounter
+Manager's step-20 description in the test instance chat.
 
 ## 4. Changing the configuration (monitor only, on ddx0)
 
@@ -114,8 +118,15 @@ From any other machine the panel refuses changes (HTTP 403), so vendors ask the 
 2. Monitor opens http://127.0.0.1:8090/ on ddx0:
    - **Encounters** page: partner identifier, AE title per modality, issuer OID. Save.
    - **Config** form on the index page: ports, AE title, ACK MSH-3/4. Save.
-3. **Restart what reads it**, from the index page: `em` and `ups` after an Encounters change;
-   the affected service after a Config change. A change does nothing until that restart.
+3. **Restart what reads it**, from the index page. A change does nothing until that restart.
+
+   | Changed | Restart |
+   |---|---|
+   | Encounters page (partner identifier, AE titles, issuer OID) | `em` and `ups` |
+   | Result Aggregator port, ACK MSH-3/4 | `ra` |
+   | Encounter Manager DICOM or ITI-31 port, its AE title | `em` |
+   | UPS-RS port | `ups` |
+   | Issuer of Accession Number, accession prefix, encounters file | `em` and `ups` |
 4. Monitor confirms on Zulip; vendor re-queries.
 
 Restarts keep accessions already handed out: the per-admission state lives in a file. Proxy
@@ -126,10 +137,10 @@ needs the Gazelle configuration updated and the proxy channel re-checked.
 
 | Port | Proto | Transaction | Role here | Who connects | Tool / tab | Status |
 |---|---|---|---|---|---|---|
-| 2575 | HL7 v2 MLLP | RAD-132 ORU^R01 in, ACK out | Result Aggregator | POCUS Manager 10.242.1.9 (test 13884 step 120); Image Manager (13478 step 50) | `tools/mllp_receiver.py`, the monitor's shell | live; direct ORU 10:10 Tue (connectivity), proxy ORU 10:25 Tue |
-| 2576 | HL7 v2 MLLP | ITI-31 ADT in, ACK out | Encounter Manager (grouped in POCUS_MGR, 13884 step 10) | the monitor's own `mllp_send.py`; vendor ADT feeds if any | `tools/mwl_scp.py` (ADT thread), tab "MWL 11112 + ADT 2576" | live |
-| 11112 | DICOM MWL C-FIND, AE `ENC_MGR` | RAD-130 MWL semantics (POCUS Option keys) | Encounter Manager | POCUS Manager box 10.242.1.17 (13884 step 60); any Acquisition Modality | `tools/mwl_scp.py`, same tab | live; proxy C-ECHO 10:36 Tue |
-| 8042 | HTTP, `GET /workitems` | RAD-130 UPS-RS semantics, dicom+json | Encounter Manager | Lightweight Modality = VNA 10.242.1.11 (13478 step 20), once their UPS-RS client exists | `tools/ups_rs.py`, tab "UPS-RS 8042" | live; proxy probe 10:36 Tue |
+| 2575 | HL7 v2 MLLP | RAD-132 ORU^R01 in, ACK out | Result Aggregator | POCUS Manager 10.242.1.9 (test 13884 step 120); Image Manager (13478 step 50) | `tools/mllp_receiver.py`, tmux window `ra` | live; direct ORU 10:10 Tue (connectivity), proxy ORU 10:25 Tue |
+| 2576 | HL7 v2 MLLP | ITI-31 ADT in, ACK out | Encounter Manager (grouped in POCUS_MGR, 13884 step 10) | the monitor's own `mllp_send.py`; vendor ADT feeds if any | `tools/mwl_scp.py` (ADT thread), tmux window `em` | live |
+| 11112 | DICOM MWL C-FIND, AE `ENC_MGR` | RAD-130 MWL semantics (POCUS Option keys) | Encounter Manager | POCUS Manager box 10.242.1.17 (13884 step 60); any Acquisition Modality | `tools/mwl_scp.py`, tmux window `em` | live; proxy C-ECHO 10:36 Tue |
+| 8042 | HTTP, `GET /workitems` | RAD-130 UPS-RS semantics, dicom+json | Encounter Manager | Lightweight Modality = VNA 10.242.1.11 (13478 step 20), once their UPS-RS client exists | `tools/ups_rs.py`, tmux window `ups` | live; proxy probe 10:36 Tue |
 
 ## Outbound from the Mac
 
