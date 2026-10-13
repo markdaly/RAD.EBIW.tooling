@@ -101,20 +101,37 @@ def session_files(folder: Path):
 
 
 def page(title, body, nav=""):
-    css = """body{font:14px/1.4 -apple-system,Helvetica,Arial,sans-serif;margin:0;background:#111;color:#ddd}
-    a{color:#7cc4ff;text-decoration:none}a:hover{text-decoration:underline}header{background:#1c1c1c;padding:8px 16px;border-bottom:1px solid #333;display:flex;gap:16px;align-items:center}
-    main{padding:12px 16px;max-width:1400px}table{border-collapse:collapse;width:100%}td,th{padding:3px 8px;border-bottom:1px solid #2a2a2a;vertical-align:top;text-align:left}
-    th{color:#999;font-weight:normal}tr.seg td{background:#1f2a36;font-weight:bold;color:#fff}td.n{white-space:nowrap;color:#9cf;width:6em}td.name{color:#aaa;width:22em}
-    pre{background:#0b0b0b;padding:8px;overflow:auto;border:1px solid #333}.up{color:#6f6}.down{color:#f66}.btn{background:#2b4a6b;color:#fff;border:0;padding:4px 10px;border-radius:3px;cursor:pointer}
-    .btn.red{background:#6b2b2b}input{background:#222;color:#eee;border:1px solid #444;padding:3px 6px}form.inline{display:inline}small{color:#888}.comp{color:#8d8}
-    .banner{padding:6px 16px;font-weight:bold}.banner.admin{background:#1f3a1f;color:#bfb}.banner.ro{background:#4a3a10;color:#fe9}
-    body.ro form{opacity:.4;pointer-events:none}.callout{background:#16304a;border:1px solid #2b5a85;padding:8px 12px;border-radius:4px;font-size:15px}
-    .md{max-width:1000px}.md h1{font-size:22px}.md h2{font-size:17px;margin-top:22px;border-bottom:1px solid #333}.md code{background:#222;padding:1px 4px;border-radius:3px}.md td code{white-space:nowrap}"""
+    css = """:root{--bg:#0f1318;--surface:#161b22;--surface2:#1c232c;--border:#2a323d;--text:#e6e9ef;--muted:#97a3b3;--link:#6cb6ff;
+      --accent:#58a6ff;--seg:#1a2b40;--segtext:#cfe3ff;--id:#8ab4f8;--comp:#5f6b7a;--sep:#3fb950;--code:#1f2630;--btn:#2563a8;--btnred:#a33a3a;
+      --admin-bg:#12301c;--admin-fg:#9be9a8;--ro-bg:#3b2f0c;--ro-fg:#f2cc60;--callout-bg:#13263d;--callout-bd:#2f5d8f;
+      --ra:#6cb6ff;--em:#d2a8ff;--mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,"DejaVu Sans Mono","Liberation Mono",Consolas,monospace;
+      --sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,sans-serif}
+    @media (prefers-color-scheme: light){:root{--bg:#f6f8fa;--surface:#ffffff;--surface2:#eef2f6;--border:#d8dee4;--text:#1f2328;--muted:#59636e;
+      --link:#0b62c4;--accent:#0969da;--seg:#e3eefb;--segtext:#0b3a6e;--id:#1557b0;--comp:#8c959f;--sep:#1a7f37;--code:#eef1f4;--btn:#0969da;--btnred:#c62f2f;
+      --admin-bg:#dff5e3;--admin-fg:#11612b;--ro-bg:#fff4d1;--ro-fg:#7a5300;--callout-bg:#e7f1fd;--callout-bd:#9cc3ef;--ra:#0b62c4;--em:#8250df}}
+    body{font:15px/1.5 var(--sans);margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+    header{background:var(--surface);padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:center}header b a{color:var(--text)}
+    h1,h2,h3{font-weight:600;letter-spacing:-.01em}h2 small,h3 small{font-weight:400}
+    main{padding:12px 16px;max-width:1400px}table{border-collapse:collapse;width:100%}td,th{padding:3px 8px;border-bottom:1px solid var(--border);vertical-align:top;text-align:left}
+    th{color:var(--muted);font-weight:500}tr.seg td{background:var(--seg);font-weight:700;color:var(--segtext);font-family:var(--mono);border-left:3px solid var(--accent)}
+    td.n{white-space:nowrap;color:var(--id);width:6em;font-family:var(--mono);font-size:13.5px}td.name{color:var(--muted);width:22em}td.v{font-family:var(--mono);font-size:13.5px}
+    td.v small{color:var(--comp)}
+    pre{background:var(--surface);padding:8px;overflow:auto;border:1px solid var(--border);font:13px/1.45 var(--mono);color:var(--text)}
+    code{font-family:var(--mono);font-size:.92em}.up{color:var(--sep)}.down{color:var(--btnred)}
+    .btn{background:var(--btn);color:#fff;border:0;padding:4px 10px;border-radius:4px;cursor:pointer;font:500 14px var(--sans)}.btn:hover{filter:brightness(1.1)}
+    .btn.red{background:var(--btnred)}input{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:3px 6px;border-radius:3px;font:14px var(--mono)}
+    form.inline{display:inline}small{color:var(--muted)}.comp{color:var(--sep);font-weight:700}
+    .banner{padding:6px 16px;font-weight:600}.banner.admin{background:var(--admin-bg);color:var(--admin-fg)}.banner.ro{background:var(--ro-bg);color:var(--ro-fg)}
+    body.ro form{opacity:.4;pointer-events:none}.callout{background:var(--callout-bg);border:1px solid var(--callout-bd);padding:8px 12px;border-radius:4px;font-size:15px}
+    .md{max-width:1000px}.md h1{font-size:24px}.md h2{font-size:18px;margin-top:22px;border-bottom:1px solid var(--border);padding-bottom:2px}
+    .md code{background:var(--code);padding:1px 4px;border-radius:3px}.md td code{white-space:nowrap}.md b{font-weight:600}
+    .a-result-aggregator{color:var(--ra)}.a-encounter-manager{color:var(--em)}.a-other{color:var(--muted)}"""
     admin = IS_ADMIN.get()
     banner = (f"<div class='banner admin'>ADMIN: you are on the machine running this panel. Config, start/stop/restart and encounter edits work here only; floor laptops get a read-only view.</div>"
               if admin else
               f"<div class='banner ro'>READ-ONLY VIEW: browse logs and download raw captures. Administration (config, start/stop/restart, encounter edits) is only available on the machine running this panel.</div>")
-    return f"""<!doctype html><html><head><meta charset="utf-8"><title>{html.escape(title)}</title><style>{css}</style></head>
+    return f"""<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="dark light"><title>{html.escape(title)}</title><style>{css}</style></head>
 <body class="{'' if admin else 'ro'}"><header><b><a href="/">kit panel</a></b> <a href="/howto">howto</a> <a href="/tail">live</a> <a href="/encounters">encounters</a> {nav} <span style="margin-left:auto"><a href="{html.escape(repo_url())}" target="_blank">repo</a> · <a href="{html.escape(repo_url())}/blob/main/docs/RUNNING.md" target="_blank">docs</a></span></header>
 {banner}<main>{body}</main><script>document.addEventListener('keydown',e=>{{const a=document.querySelector(e.key==='j'||e.key==='ArrowRight'?'#next':e.key==='k'||e.key==='ArrowLeft'?'#prev':null);if(a)location=a.href}})</script></body></html>"""
 
@@ -244,7 +261,7 @@ def render(p: Path, text: str) -> str:
             for n, v in fields:
                 comps = [v] if seg == "MSH" and n <= 2 else v.split("^")
                 shown = html.escape(v) if len(comps) == 1 else " <span class='comp'>^</span> ".join(f"<small>{i+1}:</small>{html.escape(c)}" for i, c in enumerate(comps))
-                rows.append(f"<tr><td class='n'>{seg}-{n}</td><td class='name'>{html.escape(name_of(seg, n))}</td><td>{shown}</td></tr>")
+                rows.append(f"<tr><td class='n'>{seg}-{n}</td><td class='name'>{html.escape(name_of(seg, n))}</td><td class='v'>{shown}</td></tr>")
         return f"<table>{''.join(rows)}</table><h3>raw</h3><pre>{html.escape(text.replace(chr(13), chr(10)))}</pre>"
     if p.suffix == ".json":
         try:
@@ -367,7 +384,6 @@ def tail_page():
 <p><label><input type='checkbox' id='follow' checked> follow the newest line</label> <small id='stamp'></small></p>
 <pre id='lines' style='height:55vh;overflow:auto;white-space:pre-wrap'></pre>
 <h3>Newest captures</h3><table id='caps'><tr><th>time</th><th>actor</th><th>size</th><th>file</th></tr></table>
-<style>.a-result-aggregator{color:#7cc4ff}.a-encounter-manager{color:#d9a6ff}.a-other{color:#ccc}</style>
 <script>
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const cls=a=>a==='result-aggregator'||a==='encounter-manager'?'a-'+a:'a-other';
@@ -376,7 +392,7 @@ async function tick(){
     const r=await fetch('/tail.json',{cache:'no-store'}); const d=await r.json();
     const box=document.getElementById('lines'); const atBottom=box.scrollTop+box.clientHeight>=box.scrollHeight-20;
     box.innerHTML=d.lines.map(l=>{const t=esc(l.text);const tag=`<span class='${cls(l.actor)}'>${l.actor.padEnd(18)}</span>`;
-      return tag+' '+(l.link?`<a href='/view?f=${encodeURIComponent(l.link)}'>${t}</a>`:t)}).join('\n');
+      return tag+' '+(l.link?`<a href='/view?f=${encodeURIComponent(l.link)}'>${t}</a>`:t)}).join('\\n');
     if(document.getElementById('follow').checked&&atBottom||box.dataset.first!=='done'){box.scrollTop=box.scrollHeight;box.dataset.first='done'}
     document.getElementById('caps').innerHTML='<tr><th>time</th><th>actor</th><th>size</th><th>file</th></tr>'+d.captures.map(c=>
       `<tr><td>${c.time}</td><td class='${cls(c.actor)}'>${esc(c.actor)}</td><td>${c.size} B</td><td><a href='/view?f=${encodeURIComponent(c.link)}'>${esc(c.name)}</a> <small><a href='/raw?f=${encodeURIComponent(c.link)}'>raw</a></small></td></tr>`).join('');
