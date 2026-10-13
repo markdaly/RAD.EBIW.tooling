@@ -14,8 +14,10 @@ a vendor; it only reads logs/ and runs tools/floor.sh.
                               one AE title per modality, issuer OID. POST /encounters writes the file.
   POST /service/<start|stop|restart>[/<ra|em|ups>]   runs tools/floor.sh
 
-Config (env): PANEL_HOST default 127.0.0.1 (set 0.0.0.0 to let others on the floor read it),
-PANEL_PORT default 8090, LOG_DIR default logs, REPO_URL default from `git remote get-url origin`.
+Config (env): PANEL_HOST default 0.0.0.0 (anyone on the floor can read logs and download raw
+captures; set 127.0.0.1 to keep it on this machine). The POST actions (config, service control,
+encounter edits) answer only clients on this machine unless PANEL_REMOTE_CONTROL=1. No
+authentication either way. PANEL_PORT default 8090, LOG_DIR default logs, REPO_URL default from `git remote get-url origin`.
 Run: uv run --with fastapi --with uvicorn python tools/panel.py   (or tools/floor.sh panel)
 """
 import html, json, os, re, subprocess, sys
@@ -34,7 +36,9 @@ ROOT = Path(__file__).resolve().parent.parent
 LOG_DIR = (ROOT / os.environ.get("LOG_DIR", "logs")).resolve()
 ENV_FILE = ROOT / ".floor.env"
 FLOOR = ROOT / "tools" / "floor.sh"
-HOST, PORT = os.environ.get("PANEL_HOST", "127.0.0.1"), int(os.environ.get("PANEL_PORT", "8090"))
+HOST, PORT = os.environ.get("PANEL_HOST", "0.0.0.0"), int(os.environ.get("PANEL_PORT", "8090"))
+REMOTE_CONTROL = os.environ.get("PANEL_REMOTE_CONTROL", "") == "1"
+LOCAL = {"127.0.0.1", "::1", "localhost"}
 CONFIG_KEYS = [("RA_PORT", "Result Aggregator MLLP port", "2575"), ("EM_PORT", "Encounter Manager DICOM port", "11112"),
                ("ADT_PORT", "Encounter Manager ITI-31 MLLP port", "2576"), ("UPS_PORT", "UPS-RS HTTP port", "8042"),
                ("AE_TITLE", "Encounter Manager AE title", "ENC_MGR"), ("ACCESSION_ISSUER", "Issuer of Accession Number", "ENC_MGR"),
@@ -117,6 +121,14 @@ def index():
 <h2>Encounters</h2><p><a href='/encounters'>rows served by the Encounter Manager, pre-run setup (partner identifier, AE titles, OID)</a></p>
 <h2>Logs <small>{html.escape(str(LOG_DIR))}</small></h2>{actors or '<small>no logs yet</small>'}"""
     return page("kit panel", body)
+
+
+@app.middleware("http")
+async def local_only_writes(request: Request, call_next):
+    """Floor laptops may read; only this machine may change config or start/stop servers."""
+    if request.method != "GET" and not REMOTE_CONTROL and (request.client.host if request.client else "") not in LOCAL:
+        return Response("read-only from other machines: control actions are local to the panel host\n", status_code=403)
+    return await call_next(request)
 
 
 @app.post("/config")

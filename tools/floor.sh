@@ -4,13 +4,14 @@
 # ups (UPS-RS 8042), logs (three panes). remain-on-exit is on, so a crashed server leaves its
 # output on screen; restart one with `tools/floor.sh restart <ra|em|ups>`.
 # Ports and names come from .floor.env at the repo root if present (tools/panel.py writes it).
+# `start` also brings up the panel (tools/panel.py, PANEL_HOST default 0.0.0.0, writes local-only).
 # Usage: tools/floor.sh start | restart <win> | status | stop | panel | panel-stop
 R="$(cd "$(dirname "$0")/.." && pwd)"; cd "$R"
 [ -f .floor.env ] && . ./.floor.env
 RA_PORT="${RA_PORT:-2575}"; EM_PORT="${EM_PORT:-11112}"; ADT_PORT="${ADT_PORT:-2576}"; UPS_PORT="${UPS_PORT:-8042}"
 AE_TITLE="${AE_TITLE:-ENC_MGR}"; ACCESSION_ISSUER="${ACCESSION_ISSUER:-ENC_MGR}"; ACCESSION_PREFIX="${ACCESSION_PREFIX:-EM}"
 ENCOUNTERS="${ENCOUNTERS:-samples/encounters.json}"; ACK_APP="${ACK_APP:-SIMULATOR}"; ACK_FACILITY="${ACK_FACILITY:-SIMULATOR}"
-PANEL_PORT="${PANEL_PORT:-8090}"
+PANEL_PORT="${PANEL_PORT:-8090}"; PANEL_HOST="${PANEL_HOST:-0.0.0.0}"
 PY="${PYTHON:-uv run --python '>=3.11' --with pynetdicom --with pydicom --with fastapi --with uvicorn python}"
 cmd() {  # macOS ships bash 3.2: no associative arrays
   case "$1" in
@@ -18,6 +19,13 @@ cmd() {  # macOS ships bash 3.2: no associative arrays
     em)  echo "LISTEN_PORT=$EM_PORT ADT_PORT=$ADT_PORT AE_TITLE=$AE_TITLE ACCESSION_ISSUER=$ACCESSION_ISSUER ACCESSION_PREFIX=$ACCESSION_PREFIX ENCOUNTERS=$ENCOUNTERS $PY tools/mwl_scp.py";;
     ups) echo "LISTEN_PORT=$UPS_PORT ENCOUNTERS=$ENCOUNTERS ACCESSION_ISSUER=$ACCESSION_ISSUER ACCESSION_PREFIX=$ACCESSION_PREFIX $PY tools/ups_rs.py";;
   esac
+}
+panel_start() {  # own tmux session so "stop" (servers) leaves the panel up
+  tmux has-session -t ihe-panel 2>/dev/null && { echo "panel already running on port $PANEL_PORT"; return 0; }
+  tmux new-session -d -s ihe-panel -n panel -c "$R" "PANEL_HOST=$PANEL_HOST PANEL_PORT=$PANEL_PORT $PY tools/panel.py"
+  tmux set-option -t ihe-panel remain-on-exit on
+  ip=$(ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}')
+  echo "panel on http://127.0.0.1:$PANEL_PORT/${ip:+ and http://$ip:$PANEL_PORT/ (read-only from other machines)} (tmux session ihe-panel)"
 }
 case "$1" in
   start)
@@ -32,7 +40,8 @@ case "$1" in
     tmux select-layout -t ihe:logs tiled
     tmux set-option -t ihe pane-border-status top 2>/dev/null
     tmux select-window -t ihe:logs
-    echo "started; attach with: tmux attach -t ihe";;
+    echo "started; attach with: tmux attach -t ihe"
+    panel_start;;
   restart)
     w="$2"; [ -n "$(cmd "$w")" ] || { echo "restart <ra|em|ups>"; exit 1; }
     tmux respawn-window -k -t "ihe:$w" -c "$R" "$(cmd "$w")" && echo "restarted $w";;
@@ -40,10 +49,7 @@ case "$1" in
     tmux list-windows -t ihe -F '#{window_name}: #{?pane_dead,DEAD (exit #{pane_dead_status}),running} #{pane_current_command}' 2>/dev/null || echo "session ihe not running"
     for p in "ra $RA_PORT" "adt $ADT_PORT" "ups $UPS_PORT" "em $EM_PORT" "panel $PANEL_PORT"; do set -- $p; printf '%-5s port %-5s ' $1 $2; lsof -nP -iTCP:$2 -sTCP:LISTEN >/dev/null 2>&1 && echo listening || echo "NOT listening"; done;;
   stop) tmux kill-session -t ihe && echo "stopped";;
-  panel)
-    tmux has-session -t ihe-panel 2>/dev/null && { echo "panel already running on http://127.0.0.1:$PANEL_PORT/"; exit 0; }
-    tmux new-session -d -s ihe-panel -n panel -c "$R" "PANEL_PORT=$PANEL_PORT $PY tools/panel.py"
-    tmux set-option -t ihe-panel remain-on-exit on; echo "panel on http://127.0.0.1:$PANEL_PORT/ (tmux session ihe-panel)";;
+  panel) panel_start;;
   panel-stop) tmux kill-session -t ihe-panel && echo "panel stopped";;
   *) echo "usage: tools/floor.sh start | restart <ra|em|ups> | status | stop | panel | panel-stop";;
 esac
