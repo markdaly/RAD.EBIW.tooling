@@ -10,6 +10,26 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-13 (Tue, day 2), morning: services live, worklist pre-run fixes, main locked
+
+- Services up from 09:04 ET on ddx0 / 10.242.1.184 (ra 2575, adt 2576, em 11112, ups 8042,
+  panel 8090 local). No vendor traffic yet.
+- **Issue 006, fixed:** an ITI-31 ADT for an EBIW_10 admission added a third, modality-less row
+  beside the US/XC rows, so a PEREZ worklist returned a duplicate item (same accession).
+  `encounters()` now overlays ADT fields onto that admission's rows. Reproduced on the old
+  code and verified on scratch ports.
+- **Loopback residue cleared before the first graded run:** `encounters-from-adt.json` and
+  `state.json` (three contexts on test stations MOD_TEST/SCREENSHOT, EM2610130001-0003) moved
+  to `*.loopback-20261013` under `logs/encounter-manager/`; state reset to `{}`; em and ups
+  restarted at 09:18 with 0 remembered contexts. Accession numbering restarts at EM2610130001.
+- **main locked for an adversarial review:** `enforce_admins` on and one approving review
+  required, so nothing on the owner's token can push to main or merge its own PR.
+  `tools/github-hardening.sh` now applies that as the default. Commits after this point sit
+  local (or on a branch) until the monitor relaxes the rule.
+
+**Next session starts:** Encounters page (US/XC AE titles, issuer OID), then the proxy
+channels (issue 005). Unlock main after the review to resume push-after-commit.
+
 ## 2026-10-13 (Tue, overnight): repo made public-safe
 
 **State at hand-off (Tue 01:45 ET):** repo is PUBLIC at `markdaly/RAD.EBIW.tooling`, Apache-2.0,
