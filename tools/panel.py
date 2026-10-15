@@ -38,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from hl7show import parse as hl7_parse, name_of  # field-name table shared with the console tool
 
 ROOT = Path(__file__).resolve().parent.parent
+PY_CMD = (os.environ.get("PYTHON") or "uv run --quiet --python >=3.11 python").split()   # how to run a sibling tool
 LOG_DIR = (ROOT / os.environ.get("LOG_DIR", "logs")).resolve()
 ENV_FILE = ROOT / ".floor.env"
 FLOOR = ROOT / "tools" / "floor.sh"
@@ -58,7 +59,9 @@ CONFIG_KEYS = [("RA_PORT", "Result Aggregator MLLP port", "2575"), ("EM_PORT", "
                ("ADT_PORT", "Encounter Manager ITI-31 MLLP port", "2576"), ("UPS_PORT", "UPS-RS HTTP port", "8042"),
                ("AE_TITLE", "Encounter Manager AE title", "ENC_MGR"), ("ACCESSION_ISSUER", "Issuer of Accession Number", "ENC_MGR"),
                ("ACCESSION_PREFIX", "Accession prefix", "EM"), ("ENCOUNTERS", "Encounters file", "samples/encounters.json"),
-               ("ACK_APP", "ACK MSH-3", "SIMULATOR"), ("ACK_FACILITY", "ACK MSH-4", "SIMULATOR")]
+               ("ACK_APP", "ACK MSH-3", "SIMULATOR"), ("ACK_FACILITY", "ACK MSH-4", "SIMULATOR"),
+               ("ADT_TARGET_HOST", "ITI-31 send: receiver host (proxy)", "proxy.ihe-europe.net"), ("ADT_TARGET_PORT", "ITI-31 send: receiver port", ""),
+               ("ADT_TARGET_APP", "ITI-31 send: receiver MSH-5", "SIMULATOR"), ("ADT_TARGET_FAC", "ITI-31 send: receiver MSH-6", "SIMULATOR")]
 
 
 def repo_url():
@@ -215,7 +218,21 @@ def encounters_page(msg: str = ""):
     table = "".join(f"<tr><td>{html.escape(r.get('patient_name',''))}</td><td>{html.escape(r.get('patient_id',''))}</td><td>{html.escape(r.get('admission_id',''))}</td>"
                     f"<td>{html.escape(r.get('modality','') or 'any')}</td><td>{html.escape(r.get('scheduled_station_ae_title','') or 'any')}</td>"
                     f"<td>{html.escape(((r.get('procedure') or {}).get('code') or {}).get('value', '') or 'generic')}</td><td>{html.escape(r.get('department_name',''))}</td></tr>" for r in rows)
-    body = f"<h2>Encounters <small>{html.escape(str(path))}</small></h2>{('<p class=up>' + html.escape(msg) + '</p>') if msg else ''}<h3>Pre-run setup</h3>{form}<h3>Rows served</h3><table><tr><th>name</th><th>patient id</th><th>admission</th><th>modality</th><th>AE title</th><th>procedure</th><th>department</th></tr>{table}</table>"
+    cfg = read_env()
+    adms = []
+    for r in rows:
+        if r.get("admission_id") and r["admission_id"] not in [a for a, _ in adms]:
+            adms.append((r["admission_id"], f"{r['admission_id']}: {r.get('patient_name','')} ({r.get('patient_id','')})"))
+    opts = "".join(f"<option value='{html.escape(a)}'>{html.escape(l)}</option>" for a, l in adms)
+    send = f"""<h3>Send ITI-31 ADT^A04 for an encounter (EBIW_POCUS step 10, the Result Aggregator starts it)</h3>
+<form method='post' action='/send-adt'><table>
+<tr><td>Encounter</td><td><select name='admission_id'>{opts}</select></td></tr>
+<tr><td>Receiver host</td><td><input name='host' value='{html.escape(cfg.get("ADT_TARGET_HOST",""))}' size='30'> <small>the POCUS Manager's proxy host, or its IP</small></td></tr>
+<tr><td>Receiver port</td><td><input name='port' value='{html.escape(cfg.get("ADT_TARGET_PORT",""))}' size='8'> <small>their proxy port for the ADT listener</small></td></tr>
+<tr><td>Receiver MSH-5 / MSH-6</td><td><input name='app' value='{html.escape(cfg.get("ADT_TARGET_APP",""))}' size='16'> / <input name='fac' value='{html.escape(cfg.get("ADT_TARGET_FAC",""))}' size='16'> <small>what they registered in Gazelle</small></td></tr>
+<tr><td>Also to our Encounter Manager</td><td><input type='checkbox' name='also_em' value='1' checked> <small>127.0.0.1:{html.escape(cfg.get("ADT_PORT","2576"))}, so step 60's worklist carries the encounter</small></td></tr>
+</table><button class='btn'>send ADT</button> <small>message and ACK are logged under logs/result-aggregator/send-&lt;date&gt;/</small></form>"""
+    body = f"<h2>Encounters <small>{html.escape(str(path))}</small></h2>{('<p class=up>' + html.escape(msg) + '</p>') if msg else ''}<h3>Pre-run setup</h3>{form}{send}<h3>Rows served</h3><table><tr><th>name</th><th>patient id</th><th>admission</th><th>modality</th><th>AE title</th><th>procedure</th><th>department</th></tr>{table}</table>"
     return page("encounters", body, "<a href='/'>index</a>")
 
 
@@ -238,6 +255,65 @@ async def encounters_save(request: Request):
         changed += form["issuer_oid"] != d.get("issuer_oid", ""); d["issuer_oid"] = form["issuer_oid"]
     path.write_text(json.dumps(d, indent=2) + "\n")
     return RedirectResponse(f"/encounters?msg=saved+({changed}+field+changes)", status_code=303)
+
+
+def adt_from_encounter(d, enc, app, fac):
+    """ADT^A04^ADT_A01 (ITI-31 admit) from an encounter row: PID-3/5/7/8/18, PV1-2/3/7/19/44, DG1.
+    Same mapping as the Encounter Manager's intake (RAD TF-2x Appendix U), run backwards."""
+    def seg(name, fields):
+        n = max(fields); out = [name] + [""] * n
+        for k, v in fields.items(): out[k] = v
+        return "|".join(out)
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    iss = enc.get("issuer_of_patient_id", "") or "ENC_MGR"
+    adm_iss = enc.get("issuer_of_admission_id", "") or iss
+    dept = enc.get("department_name", "")
+    poc = next((k for k, v in d.get("department_codes", {}).items() if v.get("value") == (enc.get("department_type") or {}).get("value")), dept)
+    por = enc.get("physician_of_record") or {}
+    phys = f"{por.get('id','')}^{por.get('name','')}^^^^^^NPI&2.16.840.1.113883.4.6&ISO^L^^^NPI" if por.get("id") else (por.get("name", "") and f"^{por['name']}")
+    lines = [
+        f"MSH|^~\\&|SIMULATOR|SIMULATOR|{app}|{fac}|{now}||ADT^A04^ADT_A01|ADT{now[-8:]}|P|2.5|||AL|NE",
+        seg("EVN", {1: "A04", 2: now}),
+        seg("PID", {1: "1", 3: f"{enc.get('patient_id','')}^^^{iss}^MR", 5: enc.get("patient_name", ""), 7: enc.get("birth_date", ""),
+                    8: enc.get("sex", ""), 18: f"{enc['admission_id']}^^^{adm_iss}^AN"}),
+        seg("PV1", {1: "1", 2: "E" if "mergency" in dept else "O", 3: f"{poc}^^^{d.get('institution', {}).get('name','')}^^^^^{dept}",
+                    7: phys, 19: f"{enc['admission_id']}^^^{adm_iss}^VN", 44: (enc.get("admitting_date", "") + enc.get("admitting_time", ""))}),
+    ]
+    if enc.get("reason_for_visit"):
+        lines.append(seg("DG1", {1: "1", 4: enc["reason_for_visit"], 6: "A"}))
+    return "\r".join(lines) + "\r"
+
+
+@app.post("/send-adt")
+async def send_adt(request: Request):
+    form = {k: v[0].strip() for k, v in parse_qs((await request.body()).decode("utf-8", "replace")).items()}
+    d = json.loads(enc_path().read_text())
+    enc = next((r for r in d.get("encounters", []) if r.get("admission_id") == form.get("admission_id")), None)
+    if not enc:
+        return page("send", "<p>unknown encounter</p><a href='/encounters'>back</a>")
+    cfg = read_env()
+    for k, f in (("ADT_TARGET_HOST", "host"), ("ADT_TARGET_PORT", "port"), ("ADT_TARGET_APP", "app"), ("ADT_TARGET_FAC", "fac")):
+        cfg[k] = form.get(f, cfg.get(k, ""))
+    ENV_FILE.write_text("# written by tools/panel.py; read by tools/floor.sh\n" + "".join(f"{k}={cfg.get(k, dflt)}\n" for k, _, dflt in CONFIG_KEYS))
+    msg = adt_from_encounter(d, enc, form.get("app", ""), form.get("fac", ""))
+    folder = LOG_DIR / "result-aggregator" / f"send-{datetime.now():%Y%m%d}"; folder.mkdir(parents=True, exist_ok=True)
+    src = folder / f"{datetime.now():%Y%m%d-%H%M%S}-panel-{enc['admission_id']}-ADT_A04.hl7"
+    src.write_bytes(msg.encode("latin-1"))
+    targets = []
+    if form.get("host") and form.get("port"):
+        targets.append((form["host"], form["port"], "the receiver"))
+    if form.get("also_em"):
+        targets.append(("127.0.0.1", cfg.get("ADT_PORT", "2576"), "our Encounter Manager"))
+    out = []
+    for host, port, who in targets:
+        r = subprocess.run([*PY_CMD, str(ROOT / "tools" / "mllp_send.py"), str(src), host, str(port)],
+                           capture_output=True, text=True, timeout=40, cwd=ROOT, env={**os.environ, "LOG_DIR": str(LOG_DIR), "SEND_ACTOR": "result-aggregator"})
+        out.append(f"<h3>{html.escape(who)}: {html.escape(host)}:{html.escape(str(port))}</h3><pre>{html.escape((r.stdout + r.stderr).strip() or 'no output')}</pre>")
+    if not targets:
+        out.append("<p>nothing sent: no receiver host/port and the Encounter Manager box was unchecked</p>")
+    body = f"<h2>ITI-31 sent for {html.escape(enc['admission_id'])} ({html.escape(enc.get('patient_name',''))})</h2>{''.join(out)}" \
+           f"<h3>message</h3><pre>{html.escape(msg.replace(chr(13), chr(10)))}</pre><p><a href='/encounters'>back to encounters</a> · <a href='/logs/result-aggregator/{folder.name}'>send log</a></p>"
+    return page("ITI-31 sent", body, "<a href='/encounters'>encounters</a>")
 
 
 @app.get("/logs/{actor}/{session}", response_class=HTMLResponse)

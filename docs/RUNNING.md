@@ -36,6 +36,11 @@ and a thin front end to `floor.sh` for control:
 - Encounters page: the rows the Encounter Manager serves, and the pre-run setup form (partner
   identifier for the EBIW_10 names, one AE title per modality, issuer OID) that rewrites the
   encounters file in place. Restart `em` and `ups` afterwards.
+- Same page, **Send ITI-31 ADT^A04**: pick an encounter, give the receiver's host, port and
+  MSH-5/6 (remembered in `.floor.env`), optionally also deliver it to our own Encounter Manager,
+  and the panel builds the admit message from the encounter row and sends it through
+  `tools/mllp_send.py`, so the message and ACK land in `logs/result-aggregator/send-<date>/`
+  like a manual send. This is EBIW_POCUS_Simple_Workflow step 10.
 - Log index by actor and session; per-session file list with `summary.log`.
 - **howto** (header link, `/howto`; the index has a "New here?" callout): vendor get-started page
   rendered from `events/<event>/docs/HOWTO.md` (newest event, or `PANEL_HOWTO=<path>`). Edit that
