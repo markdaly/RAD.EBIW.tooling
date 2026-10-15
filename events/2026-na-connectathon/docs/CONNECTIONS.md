@@ -36,8 +36,9 @@ endpoints now; the monitor's TOOL_DDx registration below stays as a backup.
 
 Vendor-facing: RAD-132 ORU → `proxy.ihe-europe.net:11059` (or 11070); RAD-130 MWL → `:11076`,
 called AE `ENC_MGR`; ITI-31 ADT → `:11078`. The same system also hosts the ARR syslog collector
-(3102 TCP → 11074, 3202 TLS → 11075, 3001 UDP → 11077 on 192.168.2.4). No UPS-RS (8042)
-configuration is registered on the IHE hosts yet; use the DDx one (proxy 11066) for EBIW_30/35.
+(3102 TCP → 11074, 3202 TLS → 11075, 3001 UDP → 11077 on 192.168.2.4). UPS-RS is not
+registered there on purpose: this event is HL7 v2 and DIMSE only, nobody is testing the
+Lightweight Modality path.
 
 ## 1. Where to send
 

@@ -17,7 +17,7 @@ Individual problems live in `../issues/`; this is the record across them.
   and on the TPM's laptop (10.242.1.123:2575, proxy 11070); Encounter Manager MWL
   (10.242.1.123:11112, proxy 11076, AE `ENC_MGR`) and ITI-31 intake (10.242.1.123:2576, proxy
   11078). All approved, `SIMULATOR / SIMULATOR`. Recorded in `CONNECTIONS.md`; the monitor's
-  TOOL_DDx registration is the backup. No UPS-RS config on the IHE hosts yet.
+  TOOL_DDx registration is the backup. UPS-RS deliberately not registered: v2 and DIMSE only this week.
 - Nothing in the tools changed for this; it is the same `floor.sh start` on their machines.
 
 ## 2026-10-13 (Tue, day 2), end of day: hand-off
