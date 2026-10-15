@@ -10,6 +10,16 @@ One entry per working session, newest first: the floor problems that came up, wh
 evidence showed, what was answered or built in response, and where the next session starts.
 Individual problems live in `../issues/`; this is the record across them.
 
+## 2026-10-15 (Thu, day 4): the kit is an IHE Gazelle tool now
+
+- The Gazelle maintainers and the RAD TPM registered the kit's actors under IHE's own tool
+  system **TOOL_IHE-EU_Gazelle**: Result Aggregator on ihe-eu101 (10.242.1.99:2575, proxy 11059)
+  and on the TPM's laptop (10.242.1.123:2575, proxy 11070); Encounter Manager MWL
+  (10.242.1.123:11112, proxy 11076, AE `ENC_MGR`) and ITI-31 intake (10.242.1.123:2576, proxy
+  11078). All approved, `SIMULATOR / SIMULATOR`. Recorded in `CONNECTIONS.md`; the monitor's
+  TOOL_DDx registration is the backup. No UPS-RS config on the IHE hosts yet.
+- Nothing in the tools changed for this; it is the same `floor.sh start` on their machines.
+
 ## 2026-10-13 (Tue, day 2), end of day: hand-off
 
 **Late news (16:30 ET):** an EHR vendor that had declined is now registered for ENCOUNTER_MGR-EBIW and

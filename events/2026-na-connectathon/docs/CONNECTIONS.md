@@ -21,6 +21,24 @@ Gazelle: organization DDx, system **TOOL_DDx**, host **ddx0** = **10.242.1.99** 
 Gazelle Proxy: `proxy.ihe-europe.net` = 192.168.2.5. Support: ask the monitor on Zulip
 (ihe-catalyst.zulipchat.com) or at the table.
 
+## IHE-hosted instances (Thu Oct 15): the kit is now a Gazelle tool
+
+IHE's own Gazelle tool system **TOOL_IHE-EU_Gazelle** (table C11) carries the kit's actors on two
+IHE hosts, registered and approved by the Gazelle maintainers / RAD TPM. These are the official
+endpoints now; the monitor's TOOL_DDx registration below stays as a backup.
+
+| Gazelle type | Actor | Host (IP) | Real port | **Proxy port** | Details |
+|---|---|---|---|---|---|
+| HL7 V2 Responder | RESULT_AGGREGATOR | ihe-eu101 (10.242.1.99) | 2575 | **11059** | `SIMULATOR / SIMULATOR` |
+| HL7 V2 Responder | RESULT_AGGREGATOR | the RAD TPM's laptop (10.242.1.123) | 2575 | **11070** | `SIMULATOR / SIMULATOR` |
+| Dicom SCP | ENCOUNTER_MGR | the RAD TPM's laptop (10.242.1.123) | 11112 | **11076** | AE `ENC_MGR` |
+| HL7 V2 Responder | ENCOUNTER_MGR | the RAD TPM's laptop (10.242.1.123) | 2576 | **11078** | `SIMULATOR / SIMULATOR` (ITI-31 in) |
+
+Vendor-facing: RAD-132 ORU → `proxy.ihe-europe.net:11059` (or 11070); RAD-130 MWL → `:11076`,
+called AE `ENC_MGR`; ITI-31 ADT → `:11078`. The same system also hosts the ARR syslog collector
+(3102 TCP → 11074, 3202 TLS → 11075, 3001 UDP → 11077 on 192.168.2.4). No UPS-RS (8042)
+configuration is registered on the IHE hosts yet; use the DDx one (proxy 11066) for EBIW_30/35.
+
 ## 1. Where to send
 
 **Use the proxy port.** Gazelle Message Capture then holds the evidence for your test steps.
