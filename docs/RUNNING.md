@@ -41,6 +41,11 @@ and a thin front end to `floor.sh` for control:
   and the panel builds the admit message from the encounter row and sends it through
   `tools/mllp_send.py`, so the message and ACK land in `logs/result-aggregator/send-<date>/`
   like a manual send. This is EBIW_POCUS_Simple_Workflow step 10.
+- Encounter record (`/encounter?adm=<Admission ID>`, linked from each row): read-only join of the
+  worklist rows, the ITI-31 we sent and every RAD-132 received whose PV1-19 names that admission,
+  with OBR-4 procedure and CPT components, accession and status. The visible form of RAD TF-2
+  4.132.4.1.3.1 (link the report to the encounter in PV1-19) and the screenshot evidence for the
+  non-transactional steps 20/30/150/160 of EBIW_POCUS_Simple_Workflow.
 - Log index by actor and session; per-session file list with `summary.log`.
 - **howto** (header link, `/howto`; the index has a "New here?" callout): vendor get-started page
   rendered from `events/<event>/docs/HOWTO.md` (newest event, or `PANEL_HOWTO=<path>`). Edit that

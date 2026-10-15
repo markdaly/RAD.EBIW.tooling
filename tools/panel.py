@@ -218,7 +218,7 @@ def encounters_page(msg: str = ""):
 <tr><td>Issuer OID (Universal Entity ID on issuer sequences)</td><td><input name='issuer_oid' value='{html.escape(d.get("issuer_oid", ""))}' size='40'> <small>blank = Local Namespace only</small></td></tr>
 <tr><td>Issuer (Local Namespace) on EBIW rows</td><td><input name='issuer_local' value='{html.escape(ebiw[0].get("issuer_of_patient_id", "") if ebiw else "")}'></td></tr>
 </table><button class='btn'>save to {html.escape(path.name)}</button> <small>then restart em and ups from the index page</small></form>"""
-    table = "".join(f"<tr><td>{html.escape(r.get('patient_name',''))}</td><td>{html.escape(r.get('patient_id',''))}</td><td>{html.escape(r.get('admission_id',''))}</td>"
+    table = "".join(f"<tr><td>{html.escape(r.get('patient_name',''))}</td><td>{html.escape(r.get('patient_id',''))}</td><td><a href='/encounter?adm={html.escape(r.get('admission_id',''))}'>{html.escape(r.get('admission_id',''))}</a></td>"
                     f"<td>{html.escape(r.get('modality','') or 'any')}</td><td>{html.escape(r.get('scheduled_station_ae_title','') or 'any')}</td>"
                     f"<td>{html.escape(((r.get('procedure') or {}).get('code') or {}).get('value', '') or 'generic')}</td><td>{html.escape(r.get('department_name',''))}</td></tr>" for r in rows)
     cfg = read_env()
@@ -323,6 +323,72 @@ async def send_adt(request: Request):
     body = f"<h2>ITI-31 sent for {html.escape(enc['admission_id'])} ({html.escape(enc.get('patient_name',''))})</h2>{''.join(out)}" \
            f"<h3>message</h3><pre>{html.escape(msg.replace(chr(13), chr(10)))}</pre><p><a href='/encounters'>back to encounters</a> · <a href='/logs/result-aggregator/{folder.name}'>send log</a></p>"
     return page("ITI-31 sent", body, "<a href='/encounters'>encounters</a>")
+
+
+def hl7_fields(text):
+    """{'PID': [...], 'PV1': [...], 'OBR': [...], ...} first segment of each type, HL7 field numbering."""
+    out = {}
+    for seg, fields in hl7_parse(text):
+        if seg not in out:
+            out[seg] = dict(fields)
+    return out
+
+
+def msg_admission(f):
+    pv1 = f.get("PV1", {}).get(19, ""); pid18 = f.get("PID", {}).get(18, "")
+    return (pv1 or pid18).split("^")[0]
+
+
+@app.get("/encounter", response_class=HTMLResponse)
+def encounter_record(adm: str):
+    """Read-only encounter record for one Admission ID: the worklist row, the ITI-31 we sent, every
+    RAD-132 ORU received whose PV1-19 names it. The visible form of RAD TF-2 4.132.4.1.3.1 ("link the
+    report ... to the Encounter identified in PV1-19") and the evidence for the non-transactional
+    steps of EBIW_POCUS_Simple_Workflow (20/30 arrival and encounter, 150 integration, 160 billing codes)."""
+    try:
+        rows = [r for r in json.loads(enc_path().read_text()).get("encounters", []) if r.get("admission_id") == adm]
+    except Exception:
+        rows = []
+    sent, received = [], []
+    for f in sorted(LOG_DIR.glob("*/*/*.hl7")):
+        if f.name.endswith(".ack.hl7") or "-panel-" in f.name:   # ACKs and the panel's pre-send copy (same bytes as .out.hl7)
+            continue
+        try:
+            text = f.read_bytes().decode("utf-8", "replace")
+        except OSError:
+            continue
+        fl = hl7_fields(text)
+        if msg_admission(fl) != adm:
+            continue
+        rel = f"{f.parent.parent.name}/{f.parent.name}/{f.name}"
+        msh = fl.get("MSH", {})
+        entry = {"rel": rel, "name": f.name, "type": msh.get(9, ""), "ts": msh.get(7, ""), "from": f"{msh.get(3,'')}/{msh.get(4,'')}", "to": f"{msh.get(5,'')}/{msh.get(6,'')}", "f": fl}
+        (sent if ".out.hl7" in f.name else received).append(entry)
+    def table(entries, extra=None):
+        if not entries:
+            return "<p><small>none yet</small></p>"
+        head = "<tr><th>file</th><th>MSH-9</th><th>MSH-7</th><th>from</th><th>to</th>" + ("<th>" + "</th><th>".join(extra) + "</th>" if extra else "") + "</tr>"
+        body = ""
+        for e in entries:
+            cells = ""
+            if extra:
+                obr, obx = e["f"].get("OBR", {}), e["f"].get("OBX", {})
+                code = obr.get(4, "").split("^") + [""] * 6
+                cells = (f"<td>{html.escape(e['f'].get('PV1', {}).get(19, ''))}</td><td>{html.escape(code[0])} {html.escape(code[1])}</td>"
+                         f"<td>{html.escape(code[3])} {html.escape(code[4])}</td><td>{html.escape(obr.get(18, ''))}</td><td>{html.escape(obr.get(25, ''))}</td>"
+                         f"<td>{html.escape(obx.get(5, '')[:48])}</td>")
+            body += f"<tr><td><a href='/view?f={e['rel']}'>{html.escape(e['name'])}</a></td><td>{html.escape(e['type'])}</td><td>{html.escape(e['ts'])}</td><td>{html.escape(e['from'])}</td><td>{html.escape(e['to'])}</td>{cells}</tr>"
+        return f"<table>{head}{body}</table>"
+    row_tbl = "".join(f"<tr><td>{html.escape(r.get('patient_name',''))}</td><td>{html.escape(r.get('patient_id',''))}</td><td>{html.escape(r.get('modality','') or 'any')}</td>"
+                      f"<td>{html.escape(((r.get('procedure') or {}).get('code') or {}).get('value','') or 'generic')}</td><td>{html.escape(r.get('department_name',''))}</td><td>{html.escape(r.get('admitting_date',''))} {html.escape(r.get('admitting_time',''))}</td></tr>" for r in rows)
+    body = f"""<h2>Encounter record: {html.escape(adm)}</h2>
+<p class='callout'>Read-only join of everything this kit holds for one Admission ID. Steps 20/30 of EBIW_POCUS_Simple_Workflow: the
+encounter below exists and the admit was sent. Step 150: each received ORU is linked here by its PV1-19 (RAD TF-2 4.132.4.1.3.1).
+Step 160: the procedure and CPT components of OBR-4 are shown as sent. Screenshot this page for the test instance.</p>
+<h3>Encounter (worklist rows)</h3>{('<table><tr><th>name</th><th>patient id</th><th>modality</th><th>procedure</th><th>department</th><th>admitted</th></tr>' + row_tbl + '</table>') if rows else '<p><small>no row with this Admission ID in the encounters file</small></p>'}
+<h3>Sent by the Result Aggregator (ITI-31)</h3>{table(sent)}
+<h3>Received by the Result Aggregator (RAD-132), linked by PV1-19</h3>{table(received, ["PV1-19", "OBR-4 procedure", "OBR-4.4-6 (CPT if any)", "OBR-18 accession", "OBR-25", "first OBX-5"])}"""
+    return page(f"encounter {adm}", body)
 
 
 @app.get("/logs/{actor}/{session}", response_class=HTMLResponse)
