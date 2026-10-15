@@ -230,7 +230,7 @@ def encounters_page(msg: str = ""):
 <tr><td>Receiver host</td><td><input name='host' value='{html.escape(cfg.get("ADT_TARGET_HOST",""))}' size='30'> <small>the POCUS Manager's proxy host, or its IP</small></td></tr>
 <tr><td>Receiver port</td><td><input name='port' value='{html.escape(cfg.get("ADT_TARGET_PORT",""))}' size='8'> <small>their proxy port for the ADT listener</small></td></tr>
 <tr><td>Receiver MSH-5 / MSH-6</td><td><input name='app' value='{html.escape(cfg.get("ADT_TARGET_APP",""))}' size='16'> / <input name='fac' value='{html.escape(cfg.get("ADT_TARGET_FAC",""))}' size='16'> <small>what they registered in Gazelle</small></td></tr>
-<tr><td>Also to our Encounter Manager</td><td><input type='checkbox' name='also_em' value='1' checked> <small>127.0.0.1:{html.escape(cfg.get("ADT_PORT","2576"))}, so step 60's worklist carries the encounter</small></td></tr>
+<tr><td>Also to our Encounter Manager</td><td><input type='checkbox' name='also_em' value='1'> <small>only when our Encounter Manager serves step 60's worklist; leave off when a vendor is the Encounter Manager (127.0.0.1:{html.escape(cfg.get("ADT_PORT","2576"))})</small></td></tr>
 </table><button class='btn'>send ADT</button> <small>message and ACK are logged under logs/result-aggregator/send-&lt;date&gt;/</small></form>"""
     body = f"<h2>Encounters <small>{html.escape(str(path))}</small></h2>{('<p class=up>' + html.escape(msg) + '</p>') if msg else ''}<h3>Pre-run setup</h3>{form}{send}<h3>Rows served</h3><table><tr><th>name</th><th>patient id</th><th>admission</th><th>modality</th><th>AE title</th><th>procedure</th><th>department</th></tr>{table}</table>"
     return page("encounters", body, "<a href='/'>index</a>")
