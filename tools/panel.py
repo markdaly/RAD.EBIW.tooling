@@ -54,6 +54,7 @@ HOST = os.environ.get("PANEL_HOST", "0.0.0.0")
 PORTS = [int(p) for p in os.environ.get("PANEL_PORT", "80,8090").split(",") if p.strip()]  # 80 so a bare IP or hostname works
 REMOTE_CONTROL = os.environ.get("PANEL_REMOTE_CONTROL", "") == "1"
 LOCAL = {"127.0.0.1", "::1", "localhost"}
+TESTER_WRITES = {"/encounters", "/send-adt"}   # POSTs any floor laptop may make
 IS_ADMIN = contextvars.ContextVar("is_admin", default=False)  # set per request by the middleware, read by page()
 CONFIG_KEYS = [("RA_PORT", "Result Aggregator MLLP port", "2575"), ("EM_PORT", "Encounter Manager DICOM port", "11112"),
                ("ADT_PORT", "Encounter Manager ITI-31 MLLP port", "2576"), ("UPS_PORT", "UPS-RS HTTP port", "8042"),
@@ -126,7 +127,7 @@ def page(title, body, nav=""):
     .btn.red{background:var(--btnred)}input{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:3px 6px;border-radius:3px;font:14px var(--mono)}
     form.inline{display:inline}small{color:var(--muted)}.comp{color:var(--sep);font-weight:700}
     .banner{padding:6px 16px;font-weight:600}.banner.admin{background:var(--admin-bg);color:var(--admin-fg)}.banner.ro{background:var(--ro-bg);color:var(--ro-fg)}
-    body.ro form{opacity:.4;pointer-events:none}.callout{background:var(--callout-bg);border:1px solid var(--callout-bd);padding:8px 12px;border-radius:4px;font-size:15px}
+    body.ro form{opacity:.4;pointer-events:none}body.ro form.tester{opacity:1;pointer-events:auto}.callout{background:var(--callout-bg);border:1px solid var(--callout-bd);padding:8px 12px;border-radius:4px;font-size:15px}
     .md{max-width:1000px}.md h1{font-size:24px}.md h2{font-size:18px;margin-top:22px;border-bottom:1px solid var(--border);padding-bottom:2px}
     .md code{background:var(--code);padding:1px 4px;border-radius:3px}.md td code{overflow-wrap:anywhere}.md b{font-weight:600}
     .a-result-aggregator{color:var(--ra)}.a-encounter-manager{color:var(--em)}.a-other{color:var(--muted)}"""
@@ -168,11 +169,13 @@ def index():
 
 @app.middleware("http")
 async def local_only_writes(request: Request, call_next):
-    """Floor laptops may read; only this machine may change config or start/stop servers."""
+    """Floor laptops may read, edit the encounter set and send the step-10 ADT; only this machine
+    (or PANEL_REMOTE_CONTROL=1) may change ports or start/stop servers."""
     admin = REMOTE_CONTROL or (request.client.host if request.client else "") in LOCAL
     IS_ADMIN.set(admin)
-    if request.method != "GET" and not admin:
-        return Response("read-only from other machines: control actions are local to the panel host\n", status_code=403)
+    if request.method != "GET" and not admin and request.url.path not in TESTER_WRITES:
+        return Response("read-only from other machines: ports and start/stop are local to the panel host; "
+                        "encounter setup and the ITI-31 send are open to everyone\n", status_code=403)
     return await call_next(request)
 
 
@@ -209,7 +212,7 @@ def encounters_page(msg: str = ""):
     ebiw = [r for r in rows if "^" in r.get("patient_name", "") and str(r.get("patient_id", "")).startswith("EBIW")]
     suffix = ebiw[0]["patient_name"].split("^", 1)[1] if ebiw else ""
     aet_now = {m: next((r.get("scheduled_station_ae_title", "") for r in rows if r.get("modality") == m), "") for m in mods}
-    form = f"""<form method='post' action='/encounters'><table>
+    form = f"""<form class='tester' method='post' action='/encounters'><table>
 <tr><td>Partner identifier (name suffix on the {len(ebiw)} EBIW_10 rows, e.g. PEREZ^&lt;this&gt;)</td><td><input name='suffix' value='{html.escape(suffix)}'></td></tr>
 {''.join(f"<tr><td>AE title for modality {html.escape(m)} rows</td><td><input name='aet_{m}' value='{html.escape(aet_now[m])}'> <small>blank = any device</small></td></tr>" for m in mods)}
 <tr><td>Issuer OID (Universal Entity ID on issuer sequences)</td><td><input name='issuer_oid' value='{html.escape(d.get("issuer_oid", ""))}' size='40'> <small>blank = Local Namespace only</small></td></tr>
@@ -225,14 +228,20 @@ def encounters_page(msg: str = ""):
             adms.append((r["admission_id"], f"{r['admission_id']}: {r.get('patient_name','')} ({r.get('patient_id','')})"))
     opts = "".join(f"<option value='{html.escape(a)}'>{html.escape(l)}</option>" for a, l in adms)
     send = f"""<h3>Send ITI-31 ADT^A04 for an encounter (EBIW_POCUS step 10, the Result Aggregator starts it)</h3>
-<form method='post' action='/send-adt'><table>
+<p class='callout'><b>For testers.</b> In EBIW_POCUS_Simple_Workflow the <b>Result Aggregator sends</b> the admit (step 10)
+to the POCUS / Encounter Manager, which then serves the worklist for step 60. Pick the encounter you agreed with the monitor,
+enter <b>your</b> ADT listener's proxy host and port and the MSH-5/6 you registered in Gazelle, and send. Your ACK comes back
+here and both sides land in the send log. <b>Leave "Also to our Encounter Manager" off</b> when your system (or another
+vendor's) is the Encounter Manager; tick it only when this kit's Encounter Manager serves the worklist for your run.
+Anyone on the floor network can do this from their own laptop; no need for the panel host.</p>
+<form class='tester' method='post' action='/send-adt'><table>
 <tr><td>Encounter</td><td><select name='admission_id'>{opts}</select></td></tr>
 <tr><td>Receiver host</td><td><input name='host' value='{html.escape(cfg.get("ADT_TARGET_HOST",""))}' size='30'> <small>the POCUS Manager's proxy host, or its IP</small></td></tr>
 <tr><td>Receiver port</td><td><input name='port' value='{html.escape(cfg.get("ADT_TARGET_PORT",""))}' size='8'> <small>their proxy port for the ADT listener</small></td></tr>
 <tr><td>Receiver MSH-5 / MSH-6</td><td><input name='app' value='{html.escape(cfg.get("ADT_TARGET_APP",""))}' size='16'> / <input name='fac' value='{html.escape(cfg.get("ADT_TARGET_FAC",""))}' size='16'> <small>what they registered in Gazelle</small></td></tr>
 <tr><td>Also to our Encounter Manager</td><td><input type='checkbox' name='also_em' value='1'> <small>only when our Encounter Manager serves step 60's worklist; leave off when a vendor is the Encounter Manager (127.0.0.1:{html.escape(cfg.get("ADT_PORT","2576"))})</small></td></tr>
 </table><button class='btn'>send ADT</button> <small>message and ACK are logged under logs/result-aggregator/send-&lt;date&gt;/</small></form>"""
-    body = f"<h2>Encounters <small>{html.escape(str(path))}</small></h2>{('<p class=up>' + html.escape(msg) + '</p>') if msg else ''}<h3>Pre-run setup</h3>{form}{send}<h3>Rows served</h3><table><tr><th>name</th><th>patient id</th><th>admission</th><th>modality</th><th>AE title</th><th>procedure</th><th>department</th></tr>{table}</table>"
+    body = f"<h2>Encounters <small>{html.escape(str(path))}</small></h2>{('<p class=up>' + html.escape(msg) + '</p>') if msg else ''}<h3>Pre-run setup</h3> <p class='callout'><b>For testers.</b> These rows are the worklist this kit's Encounter Manager serves (the Gazelle EBIW_10 patient set). Before an EBIW_20 / EBIW_30 run, put your partner identifier on the names, your modality's AE title on its rows, and the OID if you use one, then save. The panel host restarts <code>em</code> (ask the monitor, or use the index page from that machine). If a vendor is the Encounter Manager for your run, nothing here matters except the ITI-31 send below.</p>{form}{send}<h3>Rows served</h3><table><tr><th>name</th><th>patient id</th><th>admission</th><th>modality</th><th>AE title</th><th>procedure</th><th>department</th></tr>{table}</table>"
     return page("encounters", body, "<a href='/'>index</a>")
 
 

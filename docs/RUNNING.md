@@ -55,8 +55,10 @@ and a thin front end to `floor.sh` for control:
 - Links to the repo and these docs in the header.
 
 Anyone on the floor can read the log browser and download raw captures, every vendor's, at
-http://<floor IP>/ (or :8090). Control actions (config, start/stop/restart, encounter edits) answer only
-requests from the panel's own machine; others get 403. `PANEL_REMOTE_CONTROL=1` lifts that,
+http://<floor IP>/ (or :8090). Encounter setup and the ITI-31 send on the encounters page are open
+to every laptop on the floor, with tester callouts explaining when to use what. Ports and
+start/stop/restart answer only requests from the panel's own machine; others get 403.
+`PANEL_REMOTE_CONTROL=1` lifts that,
 `PANEL_HOST=127.0.0.1` keeps the whole panel local. No authentication either way. The same HL7 rendering in the console:
 `python3 tools/hl7show.py <file.hl7>` (`--raw`, `--next`, `--prev`).
 
