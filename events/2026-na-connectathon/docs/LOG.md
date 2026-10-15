@@ -12,6 +12,15 @@ Individual problems live in `../issues/`; this is the record across them.
 
 ## 2026-10-15 (Thu, day 4): the kit is an IHE Gazelle tool now
 
+- **Afternoon:** the VNA vendor's team (waiting for a partner since Monday) ran
+  EBIW_POCUS_Simple_Workflow against the kit as Result Aggregator; first test instances are being
+  marked passed and failed on the captures. Panel gained the ITI-31 send button, tester callouts,
+  floor-wide access to encounter setup and the send, and the encounter-record page that joins
+  the sent admit and received ORUs by PV1-19 (steps 20/30/150/160 evidence).
+- IHE has offered GitHub access, i.e. the repo may move under the IHE org. Name
+  (`RAD.EBIW.tooling`), license (Apache-2.0 like `connectathon-artifacts`) and the hardening
+  script already match their conventions; a GitHub transfer keeps the redirect from the current URL.
+
 - The Gazelle maintainers and the RAD TPM registered the kit's actors under IHE's own tool
   system **TOOL_IHE-EU_Gazelle**: Result Aggregator on ihe-eu101 (10.242.1.99:2575, proxy 11059)
   and on the TPM's laptop (10.242.1.123:2575, proxy 11070); Encounter Manager MWL
